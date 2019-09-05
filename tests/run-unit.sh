@@ -1,10 +1,10 @@
 unit-tests()
 {
-    unitTestsDir=$(echo "$(pwd)/unit")
+    unitTestsDir=$(echo "$(dirname $0)/unit")
     
-    bootstrap=$(echo "$(pwd)/../includes/bootstrap.php")
+    bootstrap=$(echo "$(dirname $0)/../includes/bootstrap.php")
 
-    phpunitFile=$(echo "$(pwd)/../vendor/bin/phpunit")
+    phpunitFile=$(echo "$(dirname $0)/../vendor/bin/phpunit")
 
     php7.2 $phpunitFile --bootstrap $bootstrap --colors=always --testdox $unitTestsDir
 }
