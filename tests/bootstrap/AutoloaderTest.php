@@ -6,7 +6,7 @@ class AutoloaderTest extends TestCase
 {
     protected function setUp() : void
     {
-        require_once(dirname(__FILE__) . '/TestStub.php');
+        require_once(dirname(__FILE__) . '/../TestStub.php');
         $this->autoloaderStub = new class extends \BeAmado\OjsMigrator\Util\Autoloader {
             use \BeAmado\OjsMigrator\TestStub;
         };

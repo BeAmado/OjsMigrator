@@ -7,7 +7,7 @@ class FileSystemManagerTest extends TestCase
 {
     protected function setUp() : void
     {
-        require_once(dirname(__FILE__) . '/TestStub.php');
+        require_once(dirname(__FILE__) . '/../TestStub.php');
         $this->fsmTestStub = new class extends FileSystemManager {
             use BeAmado\OjsMigrator\TestStub;
         };

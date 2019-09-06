@@ -8,6 +8,7 @@ class GrammarHandlerTest extends TestCase
     protected function setUp() : void
     {
         require_once(BeAmado\OjsMigrator\LIB_DIR . '/classes/util/GrammarHandler.php');
+	require_once(dirname(__FILE__) . '/../TestStub.php');
         $this->ghStub = new class extends GrammarHandler {
             use BeAmado\OjsMigrator\TestStub;
         };

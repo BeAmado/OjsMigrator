@@ -7,7 +7,7 @@ class DbHandlerTest extends TestCase
 {
     protected function setUp(): void
     {
-        require_once(dirname(__FILE__) . '/TestStub.php');
+        require_once(dirname(__FILE__) . '/../TestStub.php');
         $this->dbHandlerStub = new class extends DbHandler {
             use \BeAmado\OjsMigrator\TestStub;
         };
