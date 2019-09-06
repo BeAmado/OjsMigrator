@@ -1,6 +1,11 @@
 my-run()
 {
-    php7.2 $(echo "$(dirname $0)/../vendor/bin/phpunit") --bootstrap=$(echo "$(dirname $0)/../includes/bootstrap.php") --colors=always --testdox $1
+    php7.2 \
+        $(echo "$(dirname $0)/../vendor/bin/phpunit") \
+        --bootstrap=$(echo "$(dirname $0)/../includes/bootstrap.php") \
+        --colors=always \
+        --testdox \
+        $1
 }
 
 unit-tests()
