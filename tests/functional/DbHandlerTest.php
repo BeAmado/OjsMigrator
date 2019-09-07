@@ -5,11 +5,11 @@ use BeAmado\OjsMigrator\DbHandler;
 
 class DbHandlerTest extends TestCase
 {
-    protected function setUp(): void
+    private function getStub()
     {
         require_once(dirname(__FILE__) . '/../TestStub.php');
-        $this->dbHandlerStub = new class extends DbHandler {
-            use \BeAmado\OjsMigrator\TestStub;
+        return new class extends DbHandler {
+            use BeAmado\OjsMigrator\TestStub;
         };
     }
 
@@ -25,7 +25,7 @@ class DbHandlerTest extends TestCase
     {
         $this->assertInstanceOf(
             \PDO::class,
-            $this->dbHandlerStub->callMethod(
+            $this->getStub()->callMethod(
                 'createMySqlConnection',
                 array(
                     'args' => array(

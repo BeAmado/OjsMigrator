@@ -1,31 +1,51 @@
-my-run()
+phpunit-begin()
 {
+    echo
+    echo "========== PHPUnit $1 tests =========="
+    echo
+    echo
+}
+
+phpunit-end()
+{
+    echo
+    echo 
+    echo "========= End of $1 tests ========="
+    echo
+}
+
+phpunit-run()
+{
+    phpunit-begin $(basename $1)
+
     php7.2 \
         $(echo "$(dirname $0)/../vendor/bin/phpunit") \
         --bootstrap=$(echo "$(dirname $0)/../includes/bootstrap.php") \
         --colors=always \
         --testdox \
         $1
+
+    phpunit-end $(basename $1)
 }
 
 unit-tests()
 {
-    my-run $(echo "$(dirname $0)/unit")
+    phpunit-run $(echo "$(dirname $0)/unit")
 }
 
 integration-tests()
 {
-    my-run $(echo "$(dirname $0)/integration")
+    phpunit-run $(echo "$(dirname $0)/integration")
 }
 
 bootstrap-tests()
 {
-    my-run $(echo "$(dirname $0)/bootstrap")
+    phpunit-run  $(echo "$(dirname $0)/bootstrap")
 }
 
 functional-tests()
 {
-    my-run $(echo "$(dirname $0)/functional")
+    phpunit-run $(echo "$(dirname $0)/functional")
 }
 
 run-tests()

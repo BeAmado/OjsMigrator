@@ -1,14 +1,15 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use BeAmado\OjsMigrator\Util\Autoloader;
 
 class AutoloaderTest extends TestCase
 {
-    protected function setUp() : void
+    private function getStub()
     {
         require_once(dirname(__FILE__) . '/../TestStub.php');
-        $this->autoloaderStub = new class extends \BeAmado\OjsMigrator\Util\Autoloader {
-            use \BeAmado\OjsMigrator\TestStub;
+        return new class extends Autoloader {
+            use BeAmado\OjsMigrator\TestStub;
         };
     }
 
@@ -16,7 +17,7 @@ class AutoloaderTest extends TestCase
     {
         $this->assertEquals(
             \BeAmado\OjsMigrator\LIB_DIR . '/lalala/lelele/Lilili.php',
-            $this->autoloaderStub->callMethod(
+            $this->getStub()->callMethod(
                 'formFullpath', 
                 array(
                     'classname' => 'Lilili',
@@ -29,7 +30,7 @@ class AutoloaderTest extends TestCase
     public function testNameIsAnInterface()
     {
         $this->assertTrue(
-            $this->autoloaderStub->callMethod(
+            $this->getStub()->callMethod(
                 'nameIsInterface', 
                 'labareda/do/bpde/Interfaces/chaparres'
             )
@@ -39,7 +40,7 @@ class AutoloaderTest extends TestCase
     public function testNameIsNotAnInterface()
     {
         $this->assertFalse(
-            $this->autoloaderStub->callMethod(
+            $this->getStub()->callMethod(
                 'nameIsInterface', 
                 'labareda/do/bpde/Interes/chaparres'
             )
@@ -49,7 +50,7 @@ class AutoloaderTest extends TestCase
     public function testNameIsATrait()
     {
         $this->assertTrue(
-            $this->autoloaderStub->callMethod(
+            $this->getStub()->callMethod(
                 'nameIsTrait', 
                 'labareda/do/bpde/Traits/chaparres'
             )
@@ -59,7 +60,7 @@ class AutoloaderTest extends TestCase
     public function testNameIsNotATrait()
     {
         $this->assertFalse(
-            $this->autoloaderStub->callMethod(
+            $this->getStub()->callMethod(
                 'nameIsTrait', 
                 'labareda/do/bps/chaparres'
             )
@@ -76,9 +77,9 @@ class AutoloaderTest extends TestCase
     public function testCanIncludeMongoose()
     {
         $this->assertTrue(
-            $this->autoloaderStub->callMethod(
+            $this->getStub()->callMethod(
                 'includeElement', 
-                $this->autoloaderStub->callMethod(
+                $this->getStub()->callMethod(
                     'formFullpath', 
                     array(
                         'classname' => 'Mongoose', 
@@ -92,7 +93,7 @@ class AutoloaderTest extends TestCase
     public function testCanLoadClassMongoose()
     {
         $this->assertTrue(
-            $this->autoloaderStub->callMethod(
+            $this->getStub()->callMethod(
                 'loadClass',
                 'Mongoose'
             )

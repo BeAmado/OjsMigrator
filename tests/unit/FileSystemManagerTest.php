@@ -5,10 +5,10 @@ use BeAmado\OjsMigrator\Util\FileSystemManager;
 
 class FileSystemManagerTest extends TestCase
 {
-    protected function setUp() : void
+    private function getStub()
     {
         require_once(dirname(__FILE__) . '/../TestStub.php');
-        $this->fsmTestStub = new class extends FileSystemManager {
+        return new class extends FileSystemManager {
             use BeAmado\OjsMigrator\TestStub;
         };
     }
@@ -17,7 +17,7 @@ class FileSystemManagerTest extends TestCase
     {
         $this->assertSame(
             array(1, 2, 3),
-            $this->fsmTestStub->callMethod(
+            $this->getStub()->callMethod(
                 'removeDots',
                 array('list' => array(1, '.', '..', '.', '..', 2, '.', '.', '..', 3, '..', '.', '..'))
             )
@@ -73,7 +73,7 @@ class FileSystemManagerTest extends TestCase
     {
         $this->assertEquals(
             '/home/feynman/lectures',
-            $this->fsmTestStub->callMethod('removeTrailingSlashes', '/home/feynman/lectures/')
+            $this->getStub()->callMethod('removeTrailingSlashes', '/home/feynman/lectures/')
         );
     }
 
@@ -81,7 +81,7 @@ class FileSystemManagerTest extends TestCase
     {
         $this->assertEquals(
             '/home/feynman/lectures',
-            $this->fsmTestStub->callMethod('removeTrailingSlashes', '/home/feynman/lectures')
+            $this->getStub()->callMethod('removeTrailingSlashes', '/home/feynman/lectures')
         );
     }
 
@@ -89,7 +89,7 @@ class FileSystemManagerTest extends TestCase
     {
         $this->assertEquals(
             '/home/feynman/lectures',
-            $this->fsmTestStub->callMethod('removeTrailingSlashes', '/home/feynman/lectures//////')
+            $this->getStub()->callMethod('removeTrailingSlashes', '/home/feynman/lectures//////')
         );
     }
 }

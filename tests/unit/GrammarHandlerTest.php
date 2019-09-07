@@ -5,11 +5,10 @@ use BeAmado\OjsMigrator\Util\GrammarHandler;
 
 class GrammarHandlerTest extends TestCase
 {
-    protected function setUp() : void
+    private function getStub()
     {
-        require_once(BeAmado\OjsMigrator\LIB_DIR . '/classes/util/GrammarHandler.php');
-	require_once(dirname(__FILE__) . '/../TestStub.php');
-        $this->ghStub = new class extends GrammarHandler {
+        require_once(dirname(__FILE__) . '/../TestStub.php');
+        return new class extends GrammarHandler {
             use BeAmado\OjsMigrator\TestStub;
         };
     }
