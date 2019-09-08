@@ -21,19 +21,19 @@ class MemoryManagerTest extends TestCase
         );
     }
 
-    public function testCreateSingleton()
+    public function testCreate()
     {
         $this->assertSame(
             13,
-            (new MemoryManager())->createSingleton(13)->getValue()
+            (new MemoryManager())->create(13)->getValue()
         );
     }
 
-    public function testUnsetObject()
+    /*public function testDestroy()
     {
         $a = 13;
-        (new MemoryManager())->destroyVar($a);
+        (new MemoryManager())->destroy($a);
         $this->assertFalse(isset($a));
-    }
+    }*/
 
 }
