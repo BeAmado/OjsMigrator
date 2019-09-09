@@ -2,7 +2,20 @@
 
 namespace BeAmado\OjsMigrator;
 
-require_once(dirname(__FILE__) . '/../lib/classes/util/FileSystemManager.php');
+if (!defined(__namespace__ . '\DIR_SEPARATOR')) {
+    define(
+        __namespace__ . '\DIR_SEPARATOR',
+        '/'
+    );
+}
+
+//require_once(dirname(__FILE__) . '/../lib/classes/util/FileSystemManager.php');
+require_once(dirname(__FILE__) . DIR_SEPARATOR
+    . '..' . DIR_SEPARATOR
+    . 'lib' . DIR_SEPARATOR
+    . 'classes' . DIR_SEPARATOR
+    . 'util' . DIR_SEPARATOR
+    . 'FileSystemManager.php');
 
 if (!defined(__namespace__ . '\BASE_DIR')) {
     define(

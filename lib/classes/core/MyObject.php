@@ -3,7 +3,7 @@
 namespace BeAmado\OjsMigrator;
 
 
-class MyObject extends AbstractObject
+class MyObject extends AbstractObject implements MyIterable
 {
     /**
      * @var array
@@ -17,8 +17,8 @@ class MyObject extends AbstractObject
      */
     public function __construct($vals = null)
     {
-	    $this->values = array();
         if (\is_array($vals)) {
+            $this->values = array();
             foreach ($vals as $key => $value) {
                 $this->set($key, $value);
             }
@@ -57,6 +57,10 @@ class MyObject extends AbstractObject
      */
     public function set($key, $value)
     {
+        if (!\is_array($this->values)) {
+            $this->values = array();
+        }
+
         if (\is_a($value, MyObject::class)) {
             $this->values[$key] = $value;
         } else {
@@ -85,6 +89,37 @@ class MyObject extends AbstractObject
             }
         }
         unset($this->values);
+    }
+
+    /**
+     * Returns the values array
+     *
+     * @return array
+     */
+    public function listValues()
+    {
+        return $this->values;
+    }
+
+    /**
+     * Iterates over the values
+     *
+     * @param callable $callback
+     * @return void
+     */
+    public function forEachValue($callback)
+    {
+        if (!\is_array($this->values)) {
+            unset($callback);
+            return;
+        }
+
+        foreach ($this->values as $value) {
+            $callback($value);
+        }
+
+        unset($value);
+        unset($callback);
     }
 }
 
