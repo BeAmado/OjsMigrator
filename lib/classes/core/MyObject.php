@@ -111,5 +111,43 @@ class MyObject extends AbstractObject implements MyIterable
 
         unset($value);
     }
+
+    protected function getInnerValue($obj)
+    {
+        if ($obj->getValue() === null) {
+            return $obj->toArray();
+        } else {
+            return $obj->getValue();
+        }
+    }
+
+    /**
+     * Translates the object into an associative array
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $arr = array();
+
+        /** @var $myObj \BeAmado\OjsMigrator\MyObject */
+        foreach ($this->values as $key => $myObj) {
+            if ($myObj->getValue() === null) {
+                $arr[$key] = $myObj->toArray();
+            } else if (\is_a(
+                $myObj->getValue(),
+                self::class
+            )) {
+                $arr[$key] = $this->getInnerValue($myObj);
+            } else {
+                $arr[$key] = $myObj->getValue();
+            }
+        }
+
+        unset($key);
+        unset($myObj);
+
+        return $arr;
+    }
 }
 

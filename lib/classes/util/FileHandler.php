@@ -4,11 +4,24 @@ namespace BeAmado\OjsMigrator\Util;
 
 class FileHandler
 {
+    /**
+     * Reads the whole content of the file into a string.
+     *
+     * @param $filename string - The file to be read
+     * @return string
+     */
     public function read($filename)
     {
         return \file_get_contents($filename);
     }
 
+    /**
+     * Creates the file and writes the content into it.
+     *
+     * @param $filename string
+     * @param $content string
+     * @return boolean
+     */
     public function write($filename, $content)
     {
         if ((new FileSystemManager())->fileExists($filename)) {

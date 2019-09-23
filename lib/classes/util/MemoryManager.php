@@ -43,7 +43,7 @@ class MemoryManager
      * @param mixed $value
      * @return StdClass
      */
-    public function create($value)
+    public function create($value = null)
     {
         return new \BeAmado\OjsMigrator\MyObject($value);
     }

@@ -2,20 +2,25 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\JsonHandler;
+use BeAmado\OjsMigrator\Util\MemoryManager;
+use BeAmado\OjsMigrator\Util\FileSystemManager;
+use BeAmado\OjsMigrator\Util\FileHandler;
 
 class JsonHandlerTest extends TestCase
 {
     private function getStub()
     {
         require_once(dirname(__FILE__) . '/../TestStub.php');
+        require_once(dirname(__FILE__) . '/../WorkWithFiles.php');
         return new class extends JsonHandler {
             use BeAmado\OjsMigrator\TestStub;
+            use BeAmado\OjsMigrator\WorkWithFiles;
         };
     }
 
     private function getBandsFilename()
     {
-        return dirname(__FILE__) . '/../_data/bands.json';
+        return $this->getStub()->getDataDir() . '/bands.json';
     }
 
     public function testCanReadTheBandsJsonFile()
@@ -38,5 +43,33 @@ class JsonHandlerTest extends TestCase
                   ->get(0)->getValue(),
             'Prowler'
         );
+    }
+
+    public function testObjectToJsonFile()
+    {
+        $obj = (new MemoryManager())->create();
+        $obj->set(
+            'singers',
+            array(
+                'Bruce Dickinson',
+                'Paul Dianno',
+                'Blaze Bailey',
+            )
+        );
+
+        $maidenFile = $this->getStub()->getDataDir() . '/maiden.json';
+
+        $obj->set('band', 'Iron Maiden');
+
+        (new JsonHandler())->dumpToFile($maidenFile, $obj);
+
+        $json = json_decode((new FileHandler())->read($maidenFile), true);
+
+        $this->assertTrue(
+            $json['band'] === 'Iron Maiden' &&
+            count($json['singers']) === 3
+        );
+
+        (new FileSystemManager())->removeFile($maidenFile);
     }
 }

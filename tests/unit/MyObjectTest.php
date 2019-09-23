@@ -58,6 +58,18 @@ class MyObjectTest extends TestCase
         );
     }
 
+    public function testCreateEmptyAndSetSomeAttributes()
+    {
+        $obj = (new \BeAmado\OjsMigrator\Util\MemoryManager())->create();
+        $obj->set('name', 'Bruce Dickinson');
+        $obj->set('quality', 'Best singer ever');
+
+        $this->assertSame(
+            $obj->get('name')->getValue(),
+            'Bruce Dickinson'
+        );
+    }
+
     public function testTwoLevelsArray()
     {
         $arr = array(

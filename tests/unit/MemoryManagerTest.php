@@ -29,6 +29,14 @@ class MemoryManagerTest extends TestCase
         );
     }
 
+    public function testCreateEmptyObject()
+    {
+        $this->assertInstanceOf(
+            \BeAmado\OjsMigrator\MyObject::class,
+            (new MemoryManager())->create()
+        );
+    }
+
     /*public function testDestroy()
     {
         $a = 13;

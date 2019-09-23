@@ -157,6 +157,17 @@ class FileSystemManager
         );
     }
 
+    /**
+     * Tests if the resource exists and if is of the specified type.
+     * This method might be used to test if the following resources exist:
+     * - directory -> passing the type as "dir"
+     * - file -> passing the type as "file"
+     * - link -> passing the type as "link"
+     *
+     * @param $thing string
+     * @param $type string
+     * @return boolean
+     */
     protected function itExists($thing, $type)
     {
         if (\is_array($thing)) {
