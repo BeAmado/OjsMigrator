@@ -47,4 +47,39 @@ class FileHandlerTest extends TestCase
 
         (new FileSystemManager())->removeFile($shrekFile);
     }
+
+    public function testAppendFileWithNewLine()
+    {
+        $donkeyFile = $this->getDataDir() . '/donkey.txt';
+        $donkeyContent = 'Are we there yet?';
+
+        (new FileHandler())->write($donkeyFile, $donkeyContent);
+
+        (new FileHandler())->appendToFile($donkeyFile, $donkeyContent, true);
+
+        $this->assertEquals(
+            count(file($donkeyFile)),
+            2
+        );
+
+        (new FileSystemManager())->removeFile($donkeyFile);
+    }
+
+    public function testAppendFileWithoutNewLine()
+    {
+        $donkeyFile = $this->getDataDir() . '/donkey.txt';
+        $donkeyContent = 'Are we there yet?';
+
+        (new FileHandler())->write($donkeyFile, $donkeyContent);
+
+        (new FileHandler())->appendToFile($donkeyFile, $donkeyContent);
+
+        $this->assertEquals(
+            count(file($donkeyFile)),
+            1
+        );
+
+        (new FileSystemManager())->removeFile($donkeyFile);
+    }
+
 }
