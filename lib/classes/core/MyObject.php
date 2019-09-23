@@ -27,8 +27,6 @@ class MyObject extends AbstractObject implements MyIterable
         } else {
             parent::__construct($vals);
         }
-
-        unset($vals);
     }
 
     /**
@@ -43,9 +41,6 @@ class MyObject extends AbstractObject implements MyIterable
         {
             return $this->values[$key];
         }
-        unset($key);
-
-        return 'bla';
     }
     
     /**
@@ -66,9 +61,6 @@ class MyObject extends AbstractObject implements MyIterable
         } else {
             $this->values[$key] = new MyObject($value);
         }
-
-        unset($key);
-        unset($value);
     }
 
     /**
@@ -110,7 +102,6 @@ class MyObject extends AbstractObject implements MyIterable
     public function forEachValue($callback)
     {
         if (!\is_array($this->values)) {
-            unset($callback);
             return;
         }
 
@@ -119,7 +110,6 @@ class MyObject extends AbstractObject implements MyIterable
         }
 
         unset($value);
-        unset($callback);
     }
 }
 

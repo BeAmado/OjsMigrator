@@ -157,6 +157,24 @@ class FileSystemManager
         );
     }
 
+    protected function itExists($thing, $type)
+    {
+        if (\is_array($thing)) {
+            $thing = $this->formPath($thing);
+        }
+
+        switch($type) {
+            case 'dir':
+                return \is_dir($thing);
+
+            case 'file':
+                return \is_file($thing);
+
+            case 'link':
+                return \is_link($thing);
+        }
+    }
+
     /**
      * Tests if adirectory exists
      *
@@ -165,11 +183,12 @@ class FileSystemManager
      */
     public function dirExists($dir)
     {
-        if (\is_array($dir)) {
-            $dir = $this->formPath($dir);
-        }
-        
-        return \is_dir($dir);
+        return $this->itExists($dir, 'dir');
+    }
+
+    public function fileExists($filename)
+    {
+        return $this->itExists($filename, 'file');
     }
 
     /**
