@@ -252,17 +252,25 @@ class FileSystemManager
      */
     public function removeWholeDir($dir)
     {
-        if (!\is_array($vars->get('dir')->getValues()) {
+        $vars = (new MemoryManager())->create(array(
+            'dir' => $dir,
+            'ls' => $this->listdir($dir),
+        ));
+
+        unset($dir);
+        
+        if (!\is_array($vars->get('ls')->listValues())) {
             (new MemoryManager())->destroy($vars);
             unset($vars);
             return false;
         }
 
+        /** @var $item MyObject */
         $vars->get('ls')->forEachValue(function($item) {
-            if (\is_file($item) || \is_link($item)) {
-                (new FileSystemManager())->removeFile($item);
-            } else if (\is_dir($item)) {
-                (new FileSystemManager())->removeWholeDir($item);
+            if (\is_file($item->getValue()) || \is_link($item->getValue())) {
+                (new FileSystemManager())->removeFile($item->getValue());
+            } else if (\is_dir($item->getValue())) {
+                (new FileSystemManager())->removeWholeDir($item->getValue());
             }
 
             unset($item);
@@ -274,14 +282,16 @@ class FileSystemManager
         );
 
         if (
-            !empty($vars->get('ls')->getValues()) ||
-            !$this->removeDir($vars)
+            !empty($vars->get('ls')->listValues()) ||
+            !$this->removeDir($vars->get('dir')->getValue())
         ) {
             (new MemoryManager())->destroy($vars);
             unset($vars);
             return false;
         }
 
-        return 
+        (new MemoryManager())->destroy($vars);
+        unset($vars);
+        return true;
     }
 }

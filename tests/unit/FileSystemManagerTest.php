@@ -223,8 +223,9 @@ class FileSystemManagerTest extends TestCase
         (new FileSystemManager())->createFile($parentDir . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'file2.txt');
         
         $this->assertTrue(
+            \is_dir($parentDir) &&
             (new FileSystemManager())->removeWholeDir($parentDir) &&
-            is_dir($parentDir)
+            !\is_dir($parentDir)
         );
     }
 }

@@ -99,4 +99,14 @@ class AutoloaderTest extends TestCase
             )
         );
     }
+
+    public function testCanLoadInterfaceMyIterable()
+    {
+        $this->assertTrue(
+            $this->getStub()->callMethod(
+                'loadInterface',
+                'MyIterable'
+            )
+        );
+    }
 }

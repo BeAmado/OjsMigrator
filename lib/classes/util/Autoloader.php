@@ -151,9 +151,9 @@ class Autoloader
         //the last part must be the name of the class
         $classname = $parts[\count($parts) - 1];
 
-        if ($this->nameIsInterface($str) && $this->loadInterface($classname)) return true;
+        if ($this->loadInterface($classname)) return true;
 
-        if ($this->nameIsTrait($str) && $this->loadTrait($classname)) return true;
+        if ($this->loadTrait($classname)) return true;
 
          // the array without the first 2 elements and the last one   
          \array_splice($parts, 0, 2);
