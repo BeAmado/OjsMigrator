@@ -57,6 +57,17 @@ class MyObjectTest extends TestCase
             )
         );
     }
+    
+    public function testGetLastElement()
+    {
+        $obj = new MyObject([1, 2, 3, 4, 5]);
+
+        $this->assertTrue(
+            $obj->get(-5)->getValue() === 1 &&
+            $obj->get(-2)->getValue() === 4 &&
+            $obj->get(-1)->getValue() === 5
+        );
+    }
 
     public function testCreateEmptyAndSetSomeAttributes()
     {

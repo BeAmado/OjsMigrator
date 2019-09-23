@@ -37,6 +37,10 @@ class MyObject extends AbstractObject implements MyIterable
      */
     public function get($key)
     {
+        if (\is_numeric($key) && $key < 0) {
+            $key += count($this->values);
+        }
+
         if (\array_key_exists($key, $this->values))
         {
             return $this->values[$key];
