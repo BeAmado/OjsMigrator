@@ -1,8 +1,9 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Util;
+use \BeAmado\OjsMigrator\FiletypeHandler;
 
-class JsonHandler
+class JsonHandler implements FiletypeHandler
 {
     /**
      * Creates an object from a json file
