@@ -204,9 +204,6 @@ class XmlHandlerTest extends TestCase
             'Iron Maiden',
         );
 
-        //var_dump($songsNodes);
-        //var_dump($songsNodes->item(0));
-
         $arr = $this->getStub()->callMethod(
             'xmlIntoIndexArray',
             $songsNodes->item(0)
@@ -218,12 +215,42 @@ class XmlHandlerTest extends TestCase
         );
     }
 
-    public function getIronMaidenAlbumIntoArray()
+    public function testGetIronMaidenAlbumIntoArray()
     {
+        $xml = $this->readBandsIntoXml();
+
+        $album = $xml->getElementsByTagName('album')->item(0);
+
+        $expected = $this->bandsXmlAsArray()['bands'][0]['albums'][0];
+
+        $arr = $this->getStub()->callMethod(
+            'xmlIntoAssocArray',
+            $album
+        );
+
+        $this->assertEquals(
+            $expected,
+            $arr
+        );
+    }
+
+    public function testGetIronMaidensAlbumsIntoArray()
+    {
+        $xml = $this->readBandsIntoXml();
+        
+        $arr = $this->getStub()->callMethod(
+            'xmlIntoArray',
+            $xml->getElementsByTagName('albums')->item(0)
+        );
+
+        $this->assertEquals(
+            $this->bandsXmlAsArray()['bands'][0]['albums'],
+            $arr
+        );
 
     }
 
-    /*public function testTransformsXmlIntoArray()
+    public function testReadXmlIntoArray()
     {
         $xml = $this->readBandsIntoXml();
         
@@ -233,9 +260,8 @@ class XmlHandlerTest extends TestCase
         );
 
         $this->assertEquals(
-            $this->bandsXmlAsArray(),
+            $this->bandsXmlAsArray()['bands'],
             $arr
         );
-
-    }*/
+    }
 }

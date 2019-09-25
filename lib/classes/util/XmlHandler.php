@@ -17,6 +17,7 @@ class XmlHandler implements FiletypeHandler
     protected function isTextNode($node)
     {
         return $node->hasChildNodes() &&
+            \count($this->getChildNodes($node)) === 0 &&
             $node->childNodes->item(0)->nodeType == XML_TEXT_NODE;
     }
 
@@ -44,7 +45,10 @@ class XmlHandler implements FiletypeHandler
 
     protected function arrayType($node)
     {
-        if (!$node->hasChildNodes()) {
+        if (
+            !$node->hasChildNodes() ||
+            $this->isTextNode($node)
+        ) {
             return 'none';
         }
 
@@ -90,6 +94,10 @@ class XmlHandler implements FiletypeHandler
 
         if ($this->isTextNode($xml)) {
             return $this->getTextContent($xml);
+        }
+
+        if ($this->arrayType($xml) === 'indexed') {
+            return $this->xmlIntoIndexArray($xml);
         }
 
         foreach ($this->getChildNodes($xml) as $node) {
