@@ -9,20 +9,48 @@ class XmlHandler implements FiletypeHandler
     {
         $xml = new \DOMDocument('1.0', 'utf-8');
 
-        $xml->loadHTMLFile($filename);
+        $xml->loadXML(\html_entity_decode(\file_get_contents($filename)));
 
         return $xml;
     }
 
+    protected function isTextNode($node)
+    {
+        return $node->hasChildNodes() &&
+            $node->childNodes->item(0)->nodeType == XML_TEXT_NODE;
+    }
+
+    protected function getTextContent($node)
+    {
+        return $node->childNodes->item(0)->textContent;
+    }
+
+    protected function getChildNodes($node)
+    {
+        if (!$node->hasChildNodes()) {
+            return [];
+        }
+
+        $childNodes = array();
+
+        foreach ($node->childNodes as $childNode) {
+            if (\substr($childNode->nodeName, 0, 1) !== '#') {
+                $childNodes[] = $childNode;
+            }
+        }
+
+        return $childNodes;
+    }
+
     protected function arrayType($node)
     {
-        if (!$node->hasChildNodes) {
+        if (!$node->hasChildNodes()) {
             return 'none';
         }
 
         $tagName = null;
 
-        foreach ($node->childNodes as $childNode) {
+        foreach ($this->getChildNodes($node) as $childNode) {
             if ($tagName === null) {
                 $tagName = $childNode->nodeName;
             }
@@ -38,7 +66,7 @@ class XmlHandler implements FiletypeHandler
     protected function xmlIntoAssocArray($xml)
     {
         $arr = array();
-        foreach ($xml->childNodes as $node) {
+        foreach ($this->getChildNodes($xml) as $node) {
             $arr[$node->nodeName] = $this->xmlIntoArray($node);
         }
 
@@ -49,24 +77,26 @@ class XmlHandler implements FiletypeHandler
     {
         $arr = array();
 
-        foreach ($xml->childNodes as $node) {
+        foreach ($this->getChildNodes($xml) as $node) {
             $arr[] = $this->xmlIntoArray($node);
         }
+
+        return $arr;
     }
 
     protected function xmlIntoArray($xml)
     {
         $arr = array();
 
-        if (!$xml->hasChildNodes) {
-            return $xml->nodeValue;
+        if ($this->isTextNode($xml)) {
+            return $this->getTextContent($xml);
         }
 
-        foreach ($xml->childNodes as $node) {
+        foreach ($this->getChildNodes($xml) as $node) {
 
             switch($this->arrayType($node)) {
                 case 'none':
-                    $arr[$node->nodeName] = $node->nodeValue;
+                    $arr[$node->nodeName] = $this->xmlIntoArray($node);
                     break;
                 case 'associative':
                     $arr[$node->nodeName] = $this->xmlIntoAssocArray($node);

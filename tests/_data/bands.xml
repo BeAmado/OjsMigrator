@@ -11,7 +11,7 @@
                 <song>Sanctuary</song>
                 <song>Remember Tomorrow</song>
                 <song>Running Free</song>
-                <song>The Phantom of the opera</song>
+                <song>The Phantom of the Opera</song>
                 <song>Transylvania</song>
                 <song>Strange World</song>
                 <song>Charlotte the Harlot</song>
@@ -31,6 +31,20 @@
                 <song>Gangland</song>
                 <song>Total Eclipse</song>
                 <song>Hallowed Be Thy Name</song>
+            </songs>
+        </album>
+        <album>
+            <title>Somewhere in time</title>
+            <year>1986</year>
+            <songs>
+                <song>Caught somewhere in time</song>
+                <song>Wasted years</song>
+                <song>Sea of madness</song>
+                <song>Heaven can wait</song>
+                <song>The loneliness of the long distance runner</song>
+                <song>Stranger in a strange land</song>
+                <song>D&eacute;j&agrave; vu</song>
+                <song>Alexander the great</song>
             </songs>
         </album>
     </albums>
