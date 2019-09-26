@@ -2,12 +2,12 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
+use BeAmado\OjsMigrator\StubInterface;
 
-class FileSystemManagerTest extends TestCase
+class FileSystemManagerTest extends TestCase implements StubInterface
 {
-    private function getStub()
+    public function getStub()
     {
-        require_once(dirname(__FILE__) . '/../TestStub.php');
         return new class extends FileSystemManager {
             use BeAmado\OjsMigrator\TestStub;
         };
@@ -19,7 +19,7 @@ class FileSystemManagerTest extends TestCase
             [1, 2, 3],
             $this->getStub()->callMethod(
                 'removeDots',
-                ['list' => array(1, '.', '..', '.', '..', 2, '.', '.', '..', 3, '..', '.', '..')]
+                ['list' => [1, '.', '..', '.', '..', 2, '.',  3, '..', '.']]
             )
         );
     }

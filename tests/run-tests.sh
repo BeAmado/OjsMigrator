@@ -20,7 +20,7 @@ phpunit-run()
 
     php7.2 \
         $(echo "$(dirname $0)/../vendor/bin/phpunit") \
-        --bootstrap=$(echo "$(dirname $0)/../includes/bootstrap.php") \
+        --bootstrap=$(echo "$(dirname $0)/includes/bootstrap.php") \
         --colors=always \
         --testdox \
         $1

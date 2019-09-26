@@ -5,13 +5,12 @@ use BeAmado\OjsMigrator\Util\JsonHandler;
 use BeAmado\OjsMigrator\Util\MemoryManager;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
 use BeAmado\OjsMigrator\Util\FileHandler;
+use BeAmado\OjsMigrator\StubInterface;
 
-class JsonHandlerTest extends TestCase
+class JsonHandlerTest extends TestCase implements StubInterface
 {
-    private function getStub()
+    public function getStub()
     {
-        require_once(dirname(__FILE__) . '/../TestStub.php');
-        require_once(dirname(__FILE__) . '/../WorkWithFiles.php');
         return new class extends JsonHandler {
             use BeAmado\OjsMigrator\TestStub;
             use BeAmado\OjsMigrator\WorkWithFiles;

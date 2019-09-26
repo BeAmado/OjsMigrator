@@ -2,13 +2,13 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\IoManager;
+use BeAmado\OjsMigrator\StubInterface;
 
-class IoManagerTest extends TestCase
+class IoManagerTest extends TestCase implements StubInterface
 {
 
-    private function getStub()
+    public function getStub()
     {
-        require_once(dirname(__FILE__) . '/../TestStub.php');
         return new class extends IoManager {
             use BeAmado\OjsMigrator\TestStub;
         };

@@ -2,12 +2,12 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\GrammarHandler;
+use BeAmado\OjsMigrator\StubInterface;
 
-class GrammarHandlerTest extends TestCase
+class GrammarHandlerTest extends TestCase implements StubInterface
 {
-    private function getStub()
+    public function getStub()
     {
-        require_once(dirname(__FILE__) . '/../TestStub.php');
         return new class extends GrammarHandler {
             use BeAmado\OjsMigrator\TestStub;
         };

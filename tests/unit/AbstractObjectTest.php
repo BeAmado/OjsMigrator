@@ -2,12 +2,12 @@
 
 use \PHPUnit\Framework\TestCase;
 use \BeAmado\OjsMigrator\AbstractObject;
+use \BeAmado\OjsMigrator\StubInterface;
 
-class AbstractObjectTest extends TestCase
+class AbstractObjectTest extends TestCase implements StubInterface
 {
-    private function getStub($val = null)
+    public function getStub($val = null)
     {
-        require_once(dirname(__FILE__) . '/../TestStub.php');
         return new class($val) extends AbstractObject {
             use BeAmado\OjsMigrator\TestStub;
 
