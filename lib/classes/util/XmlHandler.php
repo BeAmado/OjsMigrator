@@ -9,7 +9,9 @@ class XmlHandler implements FiletypeHandler
     {
         $xml = new \DOMDocument('1.0', 'utf-8');
 
-        $xml->loadXML(\html_entity_decode(\file_get_contents($filename)));
+        $xml->loadXML(\html_entity_decode(
+            (new FileHandler())->read($filename)
+        ));
 
         return $xml;
     }
@@ -41,6 +43,11 @@ class XmlHandler implements FiletypeHandler
         }
 
         return $childNodes;
+    }
+
+    protected function isRootNode($node)
+    {
+        return $node->parentNode === null;
     }
 
     protected function arrayType($node)
@@ -96,7 +103,10 @@ class XmlHandler implements FiletypeHandler
             return $this->getTextContent($xml);
         }
 
-        if ($this->arrayType($xml) === 'indexed') {
+        if (
+            !$this->isRootNode($xml) &&
+            $this->arrayType($xml) === 'indexed'
+        ) {
             return $this->xmlIntoIndexArray($xml);
         }
 

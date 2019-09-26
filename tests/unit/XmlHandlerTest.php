@@ -73,6 +73,7 @@ class XmlHandlerTest extends TestCase
                     'albums' => [
                         [
                             'title' => 'Keeper of the seven keys - Part I',
+                            'year' => '1987',
                             'songs' => [
                                 'Initiation',
                                 'I\'m alive',
@@ -250,18 +251,51 @@ class XmlHandlerTest extends TestCase
 
     }
 
-    public function testReadXmlIntoArray()
+    public function testBandsNodeIsTheRootNode()
     {
         $xml = $this->readBandsIntoXml();
-        
-        $arr = $this->getStub()->callMethod(
-            'xmlIntoArray',
-            $xml
+
+        $this->assertTrue(
+            $this->getStub()->callMethod(
+                'isRootNode',
+                $xml
+            )
+        );
+    }
+
+    public function testReadXmlIntoArray()
+    {
+        $this->assertEquals(
+            $this->bandsXmlAsArray(),
+            $this->getStub()->callMethod(
+                'readIntoArray',
+                $this->getBandsXmlFilename()
+            )
+        );
+    }
+
+    public function testCreateObjectFromXmlFile()
+    {
+        $obj = (new XmlHandler())->createFromFile(
+            $this->getBandsXmlFilename()
         );
 
+        $this->assertSame(
+            'Helloween',
+            $obj->get('bands')->get(1)->get('name')->getValue()
+        );
+
+        $obj->destroy();
+        unset($obj);
+    }
+
+    public function testCreateFromFileAndTurnIntoArray()
+    {
         $this->assertEquals(
-            $this->bandsXmlAsArray()['bands'],
-            $arr
+            $this->bandsXmlAsArray(),
+            (new XmlHandler())->createFromFile(
+                $this->getBandsXmlFilename()
+            )->toArray()
         );
     }
 }
