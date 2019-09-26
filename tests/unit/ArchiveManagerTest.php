@@ -27,9 +27,70 @@ class ArchiveManagerTest extends TestCase implements StubInterface
         (new FileSystemManager())->removeWholeDir($this->sandbox);
     }
 
-    public function testCanTarSomeDirectory()
+    protected function getTempDirName()
     {
-        $temp1 = $this->sandbox . '/temp1';
+        return $this->sandbox . '/temp1';
+    }
+
+    protected function listTempDirContent()
+    {
+        return array(
+            'files' => array(
+                'evil-that-men-do.txt',
+                'rime-of-the-ancient-mariner.txt',
+             ),
+             'dirs' => array(
+                array(
+                    'name' => 'inner',
+                    'files' => array(
+                        'inner/the-deeper-the-love.txt',
+                    ),
+                ),
+             ),
+        );
+    }
+
+    protected function prependPathToDirContent($dirlist, $path)
+    {
+        $files = array();
+        $dirs = array();
+
+        if (array_key_exists('files', $dirlist)) {
+            $files = $dirlist['files'];
+        }
+
+        if (array_key_exists('dirs', $dirlist)) {
+            $dirs = $dirlist['dirs'];
+        }
+
+        for ($i = 0; $i < count($files); $i++) {
+            $files[$i] = $path . '/' . $files[$i];
+        }
+
+        for ($i = 0; $i < count($dirs); $i++) {
+            $dirs[$i] = $this->prependPathToDirContent($dirs[$i], $path);
+        }
+
+        $arr = array();
+
+        if (array_key_exists('files', $dirlist)) {
+            $arr['files'] = $files;
+        }
+
+        if (array_key_exists('dirs', $dirlist)) {
+            $arr['dirs'] = $dirs;
+        }
+
+        if (array_key_exists('name', $dirlist)) {
+            $arr['name'] = $path . '/' . $dirlist['name'];
+        }
+
+        return $arr;
+    }
+
+    protected function createTempDirWithFiles()
+    {
+        $temp1 = $this->getTempDirName();
 
         (new FileSystemManager())->createDir($temp1);
 
@@ -43,12 +104,127 @@ class ArchiveManagerTest extends TestCase implements StubInterface
             'Sailing on and on and on across the sea...'
         );
 
-        $tarFilename = $this->sandbox . '/temp1.tar';
+        $inner = $temp1 . '/inner';
 
-        (new ArchiveManager())->tar('cf', $tarFilename, $temp1);
+        (new FileSystemManager())->createDir($inner);
+
+        (new FileHandler())->write(
+            $inner . '/the-deeper-the-love.txt',
+            'The deeper the love' . PHP_EOL . 'The stronger the emotion'
+        );
+    }
+
+    public function testGetTheParametersToTheTarFunction()
+    {
+        $this->assertEquals(
+            ['x', 'z', 'v', 'f'],
+            $this->getStub()->callMethod(
+                'getTarParams',
+                'xzvf'
+            )
+        );
+    }
+
+    public function testCreateTarFile()
+    {
+        $this->createTempDirWithFiles();
+        $tarFilename = $this->getTempDirName() . '.tar';
+
+        $this->getStub()->callMethod(
+            'createTar',
+            array(
+                'filename' => $tarFilename,
+                'directory' => $this->getTempDirName(),
+            )
+        );
 
         $this->assertTrue(
             (new FileSystemManager())->fileExists($tarFilename)
+        );
+    }
+
+    public function testCanTarSomeDirectory()
+    {
+        $this->createTempDirWithFiles();
+        $tarFilename = $this->getTempDirName() . '.tar';
+
+        $this->assertTrue(
+            (new ArchiveManager())->tar(
+                'cf', 
+                $tarFilename, 
+                $this->getTempDirName()
+            ) &&
+            (new FileSystemManager())->fileExists($tarFilename)
+        );
+    }
+
+    public function testExtractTarFile()
+    {
+        $this->createTempDirWithFiles();
+        $tarFilename = $this->getTempDirName() . '.tar';
+
+        (new ArchiveManager())->tar(
+            'cf', 
+            $tarFilename, 
+            $this->getTempDirName()
+        );
+
+        $tempToExtract = $this->sandbox . '/extractHere';
+        (new FileSystemManager())->createDir($tempToExtract);
+
+        $result = $this->getStub()->callMethod(
+            'extractTar',
+            array(
+                'filename' => $tarFilename,
+                'pathTo' => $tempToExtract,
+            )
+        );
+
+        $dirlist = $this->prependPathToDirContent(
+            $this->listTempDirContent(),
+            $tempToExtract
+        );
+
+        $this->assertTrue(
+            $result &&
+            (new FileSystemManager())->fileExists(
+                $dirlist['files'][0]
+            ) &&
+            (new FileSystemManager())->fileExists(
+                $dirlist['files'][1]
+            ) &&
+            (new FileSystemManager())->dirExists(
+                $dirlist['dirs'][0]['name']
+            ) &&
+            (new FileSystemManager())->fileExists(
+                $dirlist['dirs'][0]['files'][0]
+            )
+        );
+    }
+
+    public function testCanUntarTarball()
+    {
+        $this->createTempDirWithFiles();
+        $tarFilename = $this->getTempDirName() . '.tar';
+
+        (new ArchiveManager())->tar(
+            'cf', 
+            $tarFilename, 
+            $this->getTempDirName()
+        );
+
+        $tempToExtract = $this->sandbox . '/extractHere';
+        (new FileSystemManager())->createDir($tempToExtract);
+
+        $this->assertTrue(
+            (new ArchiveManager())->tar(
+                'xf', 
+                $tarFilename, 
+                $tempToExtract
+            ) &&
+            (new FileSystemManager())->fileExists(
+                $tempToExtract . '/evil-that-men-do.txt'
+            )
         );
     }
 }
