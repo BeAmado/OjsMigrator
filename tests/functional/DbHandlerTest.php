@@ -2,12 +2,12 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\DbHandler;
+use BeAmado\OjsMigrator\StubInterface;
 
-class DbHandlerTest extends TestCase
+class DbHandlerTest extends TestCase implements StubInterface
 {
-    private function getStub()
+    public function getStub()
     {
-        require_once(dirname(__FILE__) . '/../TestStub.php');
         return new class extends DbHandler {
             use BeAmado\OjsMigrator\TestStub;
         };
