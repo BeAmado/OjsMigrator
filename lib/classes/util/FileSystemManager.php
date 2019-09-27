@@ -324,4 +324,20 @@ class FileSystemManager
         unset($vars);
         return true;
     }
+
+    /**
+     * Copies the specifies file to the name and path chosen
+     *
+     * @param string $originalFilename
+     * @param string $newFilename
+     * @return boolean
+     */
+    public function copyFile($originalFilename, $newFilename)
+    {
+        if (!$this->fileExists($originalFilename)) {
+            return false;
+        }
+
+        return \copy($originalFilename, $newFilename);
+    }
 }

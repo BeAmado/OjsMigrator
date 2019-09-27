@@ -10,6 +10,7 @@ class FileSystemManagerTest extends TestCase implements StubInterface
     {
         return new class extends FileSystemManager {
             use BeAmado\OjsMigrator\TestStub;
+            use BeAmado\OjsMigrator\WorkWithFiles;
         };
     }
 
@@ -81,7 +82,10 @@ class FileSystemManagerTest extends TestCase implements StubInterface
     {
         $this->assertEquals(
             '/home/feynman/lectures',
-            $this->getStub()->callMethod('removeTrailingSlashes', '/home/feynman/lectures')
+            $this->getStub()->callMethod(
+                'removeTrailingSlashes', 
+                '/home/feynman/lectures'
+            )
         );
     }
 
@@ -89,7 +93,10 @@ class FileSystemManagerTest extends TestCase implements StubInterface
     {
         $this->assertEquals(
             '/home/feynman/lectures',
-            $this->getStub()->callMethod('removeTrailingSlashes', '/home/feynman/lectures//////')
+            $this->getStub()->callMethod(
+                'removeTrailingSlashes',
+                '/home/feynman/lectures//////'
+            )
         );
     }
 
@@ -110,7 +117,10 @@ class FileSystemManagerTest extends TestCase implements StubInterface
     {
         $sep = \BeAmado\OjsMigrator\DIR_SEPARATOR;
         $this->assertEquals(
-            \BeAmado\OjsMigrator\BASE_DIR . $sep . 'path' . $sep . 'to' . $sep . 'dir',
+            \BeAmado\OjsMigrator\BASE_DIR 
+            . $sep . 'path' 
+            . $sep . 'to' 
+            . $sep . 'dir',
             (new FileSystemManager())->formPathFromBaseDir([
                 'path',
                 'to',
@@ -141,7 +151,10 @@ class FileSystemManagerTest extends TestCase implements StubInterface
             (new FileSystemManager())->dirExists(
                 explode(
                     \BeAmado\OjsMigrator\DIR_SEPARATOR,
-                    (new FileSystemManager())->formPath([dirname(__FILE__), 'temp'])
+                    (new FileSystemManager())->formPath(array(
+                        dirname(__FILE__), 
+                        'temp',
+                    ))
                 )
             )
         );
@@ -156,7 +169,10 @@ class FileSystemManagerTest extends TestCase implements StubInterface
     {
         $this->assertFalse(
             (new FileSystemManager())->dirExists(
-                (new FileSystemManager())->formPath([dirname(__FILE__), 'temp'])
+                (new FileSystemManager())->formPath(array(
+                    dirname(__FILE__),
+                    'temp'
+                 ))
             )
         );
     }
@@ -166,7 +182,10 @@ class FileSystemManagerTest extends TestCase implements StubInterface
      */
     public function testCreateDirectory()
     {
-        $dir = (new FileSystemManager())->formPath([dirname(__FILE__) , 'temp']);
+        $dir = (new FileSystemManager())->formPath(array(
+            dirname(__FILE__) ,
+            'temp'
+        ));
         (new FileSystemManager())->createDir($dir);
 
         $this->assertTrue(is_dir($dir));
@@ -179,7 +198,10 @@ class FileSystemManagerTest extends TestCase implements StubInterface
      */
     public function testRemovesEmptyDirectory()
     {
-        $dir = (new FileSystemManager())->formPath([dirname(__FILE__) , 'temp']);
+        $dir = (new FileSystemManager())->formPath(array(
+            dirname(__FILE__) ,
+            'temp'
+        ));
 
         (new FileSystemManager())->removeDir($dir);
         
@@ -188,7 +210,10 @@ class FileSystemManagerTest extends TestCase implements StubInterface
 
     public function testCanCreateFile()
     {
-        $filename = (new FileSystemManager())->formPath([dirname(__FILE__), 'file.txt']);
+        $filename = (new FileSystemManager())->formPath(array(
+            dirname(__FILE__),
+            'file.txt'
+        ));
 
         $this->assertTrue(
             (new FileSystemManager())->createFile($filename) &&
@@ -201,7 +226,10 @@ class FileSystemManagerTest extends TestCase implements StubInterface
      */
     public function testCanRemoveFile()
     {
-        $filename = (new FileSystemManager())->formPath([dirname(__FILE__), 'file.txt']);
+        $filename = (new FileSystemManager())->formPath(array(
+            dirname(__FILE__),
+            'file.txt'
+        ));
         
         $this->assertTrue(
             (new FileSystemManager())->removeFile($filename) &&
@@ -215,17 +243,46 @@ class FileSystemManagerTest extends TestCase implements StubInterface
     public function testRemoveWholeDir()
     {
         
-        $dir = (new FileSystemManager())->formPath([dirname(__FILE__) , 'temp', 'level1']);
+        $dir = (new FileSystemManager())->formPath(array(
+            dirname(__FILE__) ,
+            'temp',
+            'level1'
+        ));
         (new FileSystemManager())->createDir($dir);
-        (new FileSystemManager())->createFile($dir . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'file1.txt');
+        (new FileSystemManager())->createFile(
+            $dir . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'file1.txt'
+        );
 
         $parentDir = (new FileSystemManager())->parentDir($dir);
-        (new FileSystemManager())->createFile($parentDir . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'file2.txt');
+        (new FileSystemManager())->createFile(
+            $parentDir . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'file2.txt'
+        );
         
         $this->assertTrue(
             \is_dir($parentDir) &&
             (new FileSystemManager())->removeWholeDir($parentDir) &&
             !\is_dir($parentDir)
         );
+    }
+
+    public function testCopyFile()
+    {
+        $originalFilename = $this->getStub()->getDataDir()
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'humpty_dumpty.txt';
+
+        $copiedFilename = $this->getStub()->getDataDir() 
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'humpty_copy.txt';
+
+        $this->assertTrue(
+            (new FileSystemManager())->copyFile(
+                $originalFilename,
+                $copiedFilename
+            ) &&
+            (new FileSystemManager())->fileExists($copiedFilename)
+        );
+
+        if ((new FileSystemManager())->fileExists($copiedFilename)) {
+            (new FileSystemManager())->removeFile($copiedFilename);
+        }
     }
 }
