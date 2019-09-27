@@ -21,6 +21,33 @@ class ArchiveManager
         return $params;
     }
 
+    protected function hasParamCreate($flags)
+    {
+        if (\strlen($flags) < 1) {
+            return false;
+        }
+
+        return \strtolower($this->getTarParams($flags)[0]) === 'c';
+    }
+
+    protected function hasParamExtract($flags)
+    {
+        if (\strlen($flags) < 1) {
+            return false;
+        }
+
+        return \strtolower($this->getTarParams($flags)[0]) === 'x';
+    }
+
+    protected function hasParamZip($flags)
+    {
+        if (\strlen($flags) < 2) {
+            return false;
+        }
+
+        return \strtolower($this->getTarParams($flags)[1]) === 'z';
+    }
+
     /**
      * Creates a tarball of the specified directory.
      *
@@ -51,6 +78,39 @@ class ArchiveManager
         return true;
 
     }
+
+    /**
+     * Creates a tarball of the given directory and zips it using gzip.
+     *
+     * @param string $filename
+     * @param string $directory
+     * @return boolean
+     */
+    protected function createTarAndZipIt($filename, $directory)
+    {
+        $vars = (new MemoryManager())->create();
+        $vars->set(
+            'success',
+            $this->createTar($filename, $directory)
+        );
+
+        if ($vars->get('success')->getValue()) {
+            $vars->set(
+                'success',
+                (new ZipHandler())->gzip($filename)
+            );
+        }
+
+        if ($vars->get('success')->getValue()) {
+            (new MemoryManager())->destroy($vars);
+            unset($vars);
+            return true;
+        }
+
+        (new MemoryManager())->destroy($vars);
+        unset($vars);
+        return false;
+    }
     
     /**
      * Extracts contents of the tarball to the specified directory.
@@ -63,10 +123,17 @@ class ArchiveManager
      */
     protected function extractTar($filename, $pathTo, $files = null)
     {
-        if (
-            !(new FileSystemManager())->fileExists($filename) ||
-            !(new FileSystemManager())->dirExists($pathTo)
-        ) {
+        if (!(new FileSystemManager())->dirExists(
+            (new FileSystemManager())->parentDir($pathTo)
+        )) {
+            return false;
+        }
+
+        if (!(new FileSystemManager())->dirExists($pathTo)) {
+            (new FileSystemManager())->createDir($pathTo);
+        }
+
+        if (!(new FileSystemManager())->fileExists($filename)) {
             return false;
         }
 
@@ -89,10 +156,46 @@ class ArchiveManager
     }
 
     /**
+     * Uncompresses the tarball and extracts its content
+     *
+     * @param string $filename
+     * @param string $pathTo
+     * @param array|string $files
+     * @return boolean
+     */
+    protected function unzipAndExtractTar($filename, $pathTo, $files = null)
+    {
+        $vars = (new MemoryManager())->create();
+
+        $vars->set(
+            'success',
+            (new ZipHandler())->gunzip($filename)
+        );
+
+        if ($vars->get('success')->getValue()) {
+            $vars->set(
+                'success',
+                $this->extractTar($filename, $pathTo, $files)
+            );
+        }
+
+        if ($vars->get('success')->getValue()) {
+            (new MemoryManager())->destroy($vars);
+            unset($vars);
+            return true;
+        }
+
+        (new MemoryManager())->destroy($vars);
+        unset($vars);
+        return false;
+    }
+
+    /**
      * Tarball manager method.
      * It can perform the following actions:
      * - Create a tarball -> flag c
-     * 
+     * - Extract content from tarball -> flag x
+     * - Perform zip compression/decompression -> flag z
      *
      * @param string $flags
      * @param string $filename
@@ -101,35 +204,28 @@ class ArchiveManager
      */
     public function tar($flags, $filename, $directory)
     {
-        $vars = (new MemoryManager())->create(array(
-            'params' => $this->getTarParams($flags),
-        ));
-
-        if ($vars->get('params')->get(0)->getValue() === 'c') {
-            $vars->set(
-                'result', 
-                $this->createTar($filename, $directory)
-            );
-        } else if ($vars->get('params')->get(0)->getValue() === 'x') {
-            $vars->set(
-                'result',
-                $this->extractTar($filename, $directory)
-            );
+        if (
+            \substr($filename, -4) !== '.tar' && 
+            \substr($filename, -3) !== '.gz'
+        ) {
+            $filename .= '.tar';
         }
 
-        if ($vars->get('result')->getValue() === true) {
-            (new MemoryManager())->destroy($vars);
-            unset($vars);
+        if ($this->hasParamCreate($flags)) {
+            if ($this->hasParamZip($flags)) {
+                return $this->createTarAndZipIt($filename, $directory);
+            }
 
-            return true;
-        } else if ($vars->get('result')->getValue() === false) {
-            (new MemoryManager())->destroy($vars);
-            unset($vars);
+            return $this->createTar($filename, $directory);
 
-            return false;
+        } else if ($this->hasParamExtract($flags)) {
+            if ($this->hasParamZip($flags)) {
+                return $this->unzipAndExtractTar($filename, $directory);
+            }
+
+            return $this->extractTar($filename, $directory);
         }
 
-        (new MemoryManager())->destroy($vars);
-        unset($vars);
+        return false;
     }
 }

@@ -227,4 +227,55 @@ class ArchiveManagerTest extends TestCase implements StubInterface
             )
         );
     }
+
+    public function testCanTarAndCompressADirectory()
+    {
+        $this->createTempDirWithFiles();
+        //$createdFilename = $this->getTempDirName() . '.tar.gz';
+
+        $this->assertTrue(
+            (new ArchiveManager())->tar(
+                'czf',
+                $this->getTempDirName(),
+                $this->getTempDirName()
+            ) &&
+            (new FileSystemManager())->fileExists(
+                $this->getTempDirName() . '.tar.gz'
+            )
+        );
+    }
+
+    public function testCanUncompressAndUntarAFile()
+    {
+        $this->createTempDirWithFiles();
+
+        (new ArchiveManager())->tar(
+            'czf',
+            $this->getTempDirName(),
+            $this->getTempDirName()
+        );
+
+
+        $this->assertTrue(
+            //removing the temp directory
+            (new FileSystemManager())->removeWholeDir(
+                $this->getTempDirName()
+            ) &&
+            !(new FileSystemManager())->dirExists($this->getTempDirName()) &&
+
+            //extracting the tarball and creating the temp directory with its content
+            (new ArchiveManager())->tar(
+                'xzf',
+                $this->getTempDirName(),
+                $this->getTempDirName()
+            ) &&
+            (new FileSystemManager())->dirExists($this->getTempDirName()) &&
+            (new FileSystemManager())->fileExists(
+                $this->getTempDirName ()
+                . \BeAmado\OjsMigrator\DIR_SEPARATOR
+                . 'evil-that-men-do.txt'
+            )
+        );
+
+    }
 }
