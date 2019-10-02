@@ -32,30 +32,51 @@ class IoManager
      * Opens the specified stream
      *
      * @param string $s
-     * @return void
+     * @return boolean
      */
-    protected function openStream($s)
+    protected function openStream($s, $mode = 'r+')
     {
         if (
             \gettype($s) !== 'string' ||
             !\array_key_exists($s, $this->streams)
         ) {
-            unset($s);
-            return;
+            return false;
+        }
+
+        if (\is_resource($this->streams[$s])) {
+            return true;
         }
 
         switch ($s) {
             case 'stdin':
-                $this->openStdin();
+                $this->streams['stdin'] = \fopen('php://stdin', $mode);
                 break;
+            
+            case 'stdout':
+                $this->streams['stdout'] = \fopen('php://stdout', $mode);
         }
+
+        return \is_resource($this->streams[$s]);
     }
 
+    /**
+     * Opens a stream to read from the standard input.
+     *
+     * @return boolean
+     */
     protected function openStdin()
     {
-        if (!is_resource($this->streams['stdin'])) {
-            $this->streams['stdin'] = \fopen('php://stdin', 'r');
-        }
+        return $this->openStream('stdin', 'r');
+    }
+
+    /**
+     * Opens a stream to write to the standard output.
+     *
+     * @return boolean
+     */
+    protected function openStdout()
+    {
+        return $this->openStream('stdout', 'w');
     }
 
     protected function closeStream($s)
@@ -64,19 +85,16 @@ class IoManager
             \gettype($s) !== 'string' ||
             !\array_key_exists($s, $this->streams)
         ) {
-            unset($s);
-            return;
+            return false;
         }
 
         if (
             \is_resource($this->streams[$s]) &&
             \fclose($this->streams[$s])
         ) {
-            unset($s);
             return true;
         }
 
-        unset($s);
         return false;
     }
 
@@ -87,24 +105,66 @@ class IoManager
      */
     protected function readFromStdin()
     {
-        /*if ($this->getStream('stdin') === null) {
-            $this->openStream('stdin');
+        $this->openStdin();
+        $content = \fgetc($this->streams['stdin']);
+
+        //$this->closeStream('stdin');
+        return $content;
+    }
+
+    /**
+     * Clears the standard output.
+     */
+    public function clearStdout()
+    {
+        $this->openStdout();
+
+        $spaces = ' ';
+        for ($i = 0; $i < 100; $i++) {
+            $spaces .= ' ';
+        }
+        
+        \fwrite($this->streams['stdout'], "\r$spaces\r");
+        $this->closeStream('stdout');
+    }
+
+    /**
+     * Writes the specified content to stdout.
+     *
+     * @param string $content
+     * @param boolean $clear
+     * @return boolean
+     */
+    public function writeToStdout($content, $clear = false)
+    {
+        if ($clear) {
+            $this->clearStdout();
         }
 
-        return \fgets($this->getStream('stdin'));*/
+        $this->openStdout();
+        if (!\fwrite($this->streams['stdout'], $content)) {
+            return false;
+        }
 
+        return $this->closeStream('stdout');
     }
 
-    protected function writeToStdout()
+    public function getUserInput($message)
     {
-        /*if ($this->getStream('stdout') === null) {
-            $this->openStream('stdout');
-        }*/
-    }
+        $this->writeToStdout($message, true);
+        $content = '';
+        do {
+            $c = $this->readFromStdin();
+            $content .= $c;
+        } while ($c != PHP_EOL );
 
-    public function getUserInput($args = array())
-    {
+        $this->closeStream('stdin');
 
+        if (substr($content, -1) == PHP_EOL) {
+            return substr($content, 0, -1);
+        }
+
+        return $content;
     }
 
     public function destroy()
@@ -112,7 +172,10 @@ class IoManager
         foreach ($this->streams as $key => $stream) {
             if ($this->closeStream($key)) {
             }
-            else if (\is_object($stream) && \method_exists($stream, 'destroy')) {
+            else if (
+                \is_object($stream) 
+             && \method_exists($stream, 'destroy')
+            ) {
                 $stream->destroy();
             }
             else if (\is_resource($stream)) {
