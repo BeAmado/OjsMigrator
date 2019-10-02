@@ -15,8 +15,8 @@ $names = array(
     'Luciano',
 );
 
-$chars = array('|', '/', '-', '\\', '|', '/', '-', '\\',);
-$chars = array('-', '--', '---', '----', '-----', '------', '-------', '--------', '---------', '----------');
+$chars1 = array('|', '/', '-', '\\', '|', '/', '-', '\\',);
+$chars2 = array('-', '--', '---', '----', '-----', '------', '-------', '--------', '---------', '----------');
 
 function wait($time)
 {
@@ -56,18 +56,25 @@ function wait($time)
 );*/
 
 for ($i = 0 ; $i < 5; $i++) {
-    foreach ($chars as $char) {
+    foreach ($chars1 as $char) {
         wait(50);
         $io->clearStdout();
-        $io->writeToStdout($char);
+        $io->writeToStdout('      ' . $char);
     }
 }
 
+for ($i = 0 ; $i < 5; $i++) {
+    foreach ($chars2 as $char) {
+        wait(50);
+        $io->clearStdout();
+        $io->writeToStdout('      ' . $char);
+    }
+}
 $io->clearStdout();
 
 
-$data = $io->getUserInput('Enter some data: ');
+//$data = $io->getUserInput('Enter some data: ');
 $io->clearStdout();
-var_dump($data);
+//var_dump($data);
 (new \BeAmado\OjsMigrator\Util\MemoryManager())->destroy($io);
 
