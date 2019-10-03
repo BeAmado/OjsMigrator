@@ -145,4 +145,22 @@ class MyObjectTest extends TestCase implements StubInterface
         );
     }
 
+    public function testObjectHasAttributeAge()
+    {
+        $obj = new MyObject();
+        $obj->set('age', 27);
+        $obj->set('color', 'green');
+
+        $this->assertTrue($obj->hasAttribute('age'));
+    }
+    
+    public function testObjectDoesNotHaveAttibuteWeight()
+    {
+        $obj = new MyObject(array(
+            'age' => 45,
+            'hero' => 'Iron Man',
+        ));
+
+        $this->assertFalse($obj->hasAttribute('weight'));
+    }
 }

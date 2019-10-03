@@ -153,5 +153,16 @@ class MyObject extends AbstractObject implements MyIterable
 
         return $arr;
     }
+
+    /**
+     * Checks if the object has the specified attibute.
+     *
+     * @param string $name
+     * @return boolean
+     */
+    public function hasAttribute($name)
+    {
+        return \array_key_exists($name, $this->values);
+    }
 }
 
