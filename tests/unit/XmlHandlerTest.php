@@ -117,19 +117,69 @@ class XmlHandlerTest extends TestCase implements StubInterface
         $songsNodes = $xml->getElementsByTagName('songs');
 
         $expected = array(
-            'Prowler',
-            'Sanctuary',
-            'Remember Tomorrow',
-            'Running Free',
-            'The Phantom of the Opera',
-            'Transylvania',
-            'Strange World',
-            'Charlotte the Harlot',
-            'Iron Maiden',
+            'name' => 'songs',
+            'text' => null,
+            'attributes' => array(),
+            'children' => array(
+                array(
+                    'name' => 'song',
+                    'text' => 'Prowler',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Sanctuary',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Remember Tomorrow',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Running Free',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'The Phantom of the Opera',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Transylvania',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Strange World',
+                    'attributes' => array(),
+                        'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Charlotte the Harlot',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Iron Maiden',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+            ),
         );
 
         $arr = $this->getStub()->callMethod(
-            'xmlIntoIndexArray',
+            'xmlIntoArray',
             $songsNodes->item(0)
         );
 
@@ -145,10 +195,13 @@ class XmlHandlerTest extends TestCase implements StubInterface
 
         $album = $xml->getElementsByTagName('album')->item(0);
 
-        $expected = $this->getStub()->bandsAsArray()['bands'][0]['albums'][0];
+        $expected = $this->getStub()->bandsAsVerboseArray()
+            ['children'][0]  // Iron Maiden
+            ['children'][1]  // albums
+            ['children'][0]; // Iron Maiden album
 
         $arr = $this->getStub()->callMethod(
-            'xmlIntoAssocArray',
+            'xmlIntoArray',
             $album
         );
 
@@ -168,7 +221,9 @@ class XmlHandlerTest extends TestCase implements StubInterface
         );
 
         $this->assertEquals(
-            $this->getStub()->bandsAsArray()['bands'][0]['albums'],
+            $this->getStub()->bandsAsVerboseArray()
+                ['children'][0]  // Iron Maiden
+                ['children'][1], // albums
             $arr
         );
 
@@ -189,7 +244,7 @@ class XmlHandlerTest extends TestCase implements StubInterface
     public function testReadXmlIntoArray()
     {
         $this->assertEquals(
-            $this->getStub()->bandsAsArray(),
+            $this->getStub()->bandsAsVerboseArray(),
             $this->getStub()->callMethod(
                 'readIntoArray',
                 $this->getBandsXmlFilename()
@@ -205,7 +260,10 @@ class XmlHandlerTest extends TestCase implements StubInterface
 
         $this->assertSame(
             'Helloween',
-            $obj->get('bands')->get(1)->get('name')->getValue()
+            $obj
+            ->get('children')->get(1) // Helloween
+            ->get('children')->get(0) // name
+            ->get('text')->getValue()
         );
 
         $obj->destroy();
@@ -215,7 +273,7 @@ class XmlHandlerTest extends TestCase implements StubInterface
     public function testCreateFromFileAndTurnIntoArray()
     {
         $this->assertEquals(
-            $this->getStub()->bandsAsArray(),
+            $this->getStub()->bandsAsVerboseArray(),
             (new XmlHandler())->createFromFile(
                 $this->getBandsXmlFilename()
             )->toArray()

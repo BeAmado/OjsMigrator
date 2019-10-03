@@ -39,11 +39,15 @@ class SchemaHandlerTest extends TestCase implements StubInterface
         (new FileSystemManager())->removeWholeDir($this->sandbox);
     }
 
-    public function testCanReadTheJournalsSchemaFromTheOjsSchemaFile()
+    public function testCanReadSchemaFromTheOjsSchemaFile()
     {
-        $schema = (new SchemaHandler())->CreateFromFile(
+        $schema = (new SchemaHandler())->createFromFile(
             $this->getStub()->getOjsSchemaFilename()
         );
-        $this->assertTrue($schema->hasAttribute('journals'));
+
+        $this->assertInstanceOf(
+            \BeAmado\OjsMigrator\Db\Schema::class,
+            $schema
+        );
     }
 }

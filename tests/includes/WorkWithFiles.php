@@ -85,6 +85,400 @@ trait WorkWithFiles
         ];
     }
 
+    private function getIronMaidenAlbumSongs()
+    {
+        return array(
+            'name' => 'songs',
+            'text' => null,
+            'attributes' => array(),
+            'children' => array(
+                array(
+                    'name' => 'song',
+                    'text' => 'Prowler',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Sanctuary',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Remember Tomorrow',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Running Free',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'The Phantom of the Opera',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Transylvania',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Strange World',
+                    'attributes' => array(),
+                        'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Charlotte the Harlot',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Iron Maiden',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+            ),
+        );
+    }
+
+    private function getTheNumberOfTheBeastAlbumSongs()
+    {
+        return array(
+            'name' => 'songs',
+            'text' => null,
+            'attributes' => array(),
+            'children' => array(
+                array(
+                    'name' => 'song',
+                    'text' => 'Invaders',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Children of the Damned',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'The prisoner',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => '22 Acacia Avenue',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'The number of the beast',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Run to the hills',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Gangland',
+                    'attributes' => array(),
+                        'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Total Eclipse',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Hallowed Be Thy Name',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+            ),
+        );
+    }
+
+    private function getSomewhereInTimeAlbumSongs()
+    {
+        return array(
+            'name' => 'songs',
+            'text' => null,
+            'attributes' => array(),
+            'children' => array(
+                array(
+                    'name' => 'song',
+                    'text' => 'Caught somewhere in time',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Wasted years',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Sea of madness',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Heaven can wait',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'The loneliness of the long distance runner',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Stranger in a strange land',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Déjà vu',
+                    'attributes' => array(),
+                        'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Alexander the great',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+            ),
+        );
+    }
+
+    private function getIronMaidenAlbums()
+    {
+        return [
+            [
+                'name' => 'album',
+                'text' => null,
+                'attributes' => [],
+                'children' => [
+                    [
+                        'name' => 'title',
+                        'text' => 'Iron Maiden',
+                        'attributes' => [],
+                        'children' => [],
+                    ],
+                    [
+                        'name' => 'year',
+                        'text' => '1980',
+                        'attributes' => [],
+                        'children' => []
+                    ],
+                    $this->getIronMaidenAlbumSongs(),
+                ],
+            ],
+            [
+                'name' => 'album',
+                'text' => null,
+                'attributes' => [],
+                'children' => [
+                    [
+                        'name' => 'title',
+                        'text' => 'The number of the beast',
+                        'attributes' => [],
+                        'children' => [],
+                    ],
+                    [
+                        'name' => 'year',
+                        'text' => '1983',
+                        'attributes' => [],
+                        'children' => []
+                    ],
+                    $this->getTheNumberOfTheBeastAlbumSongs(),
+                ],
+            ],
+            [
+                'name' => 'album',
+                'text' => null,
+                'attributes' => [],
+                'children' => [
+                    [
+                        'name' => 'title',
+                        'text' => 'Somewhere in time',
+                        'attributes' => [],
+                        'children' => [],
+                    ],
+                    [
+                        'name' => 'year',
+                        'text' => '1986',
+                        'attributes' => [],
+                        'children' => []
+                    ],
+                    $this->getSomewhereInTimeAlbumSongs(),
+                ],
+            ],
+        ];
+    }
+
+    private function getKeeperOfTheSevenKeysPart1AlbumSongs()
+    {
+        return array(
+            'name' => 'songs',
+            'text' => null,
+            'attributes' => array(),
+            'children' => array(
+                array(
+                    'name' => 'song',
+                    'text' => 'Initiation',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'I\'m alive',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'A little time',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Twilight of the gods',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'A tale that wasn\'t right',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Future world',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Halloween',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+                array(
+                    'name' => 'song',
+                    'text' => 'Follow the sign',
+                    'attributes' => array(),
+                    'children' => array(),
+                ),
+            ),
+        );
+    }
+
+    private function getHelloweenAlbums()
+    {
+        return [
+            [
+                'name' => 'album',
+                'text' => null,
+                'attributes' => [],
+                'children' => [
+                    [
+                        'name' => 'title',
+                        'text' => 'Keeper of the seven keys - Part I',
+                        'attributes' => [],
+                        'children' => [],
+                    ],
+                    [
+                        'name' => 'year',
+                        'text' => '1987',
+                        'attributes' => [],
+                        'children' => []
+                    ],
+                    $this->getKeeperOfTheSevenKeysPart1AlbumSongs(),
+                ],
+            ]
+        ];
+    }
+
+    public function bandsAsVerboseArray()
+    {
+        $Helloween = [
+            'name' => 'band',
+            'text' => null,
+            'attributes' => [],
+            'children' => [
+                [
+                    'name' => 'name',
+                    'text' => 'Helloween',
+                    'attributes' => [],
+                    'children' => [],
+                ],
+                [
+                    'name' => 'albums',
+                    'text' => null,
+                    'attributes' => [],
+                    'children' => $this->getHelloweenAlbums(),
+                ],
+            ],
+        ];
+
+        $IronMaidenAlbums = [];
+        $IronMaiden = [
+            'name' => 'band',
+            'text' => null,
+            'attributes' => [],
+            'children' => [
+                [
+                    'name' => 'name',
+                    'text' => 'Iron Maiden',
+                    'attributes' => [],
+                    'children' => [],
+                ],
+                [
+                    'name' => 'albums',
+                    'text' => null,
+                    'attributes' => [],
+                    'children' => $this->getIronMaidenAlbums(),
+                ],
+            ],
+        ];
+
+        return [
+            'name' => 'bands',
+            'text' => null,
+            'attributes' => [],
+            'children' => [
+                $IronMaiden,
+                $Helloween
+            ],
+        ];
+    }
+
     public function getFileFullpath($filename)
     {
         return $this->getDataDir() . '/' . $filename;

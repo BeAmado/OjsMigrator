@@ -7,7 +7,6 @@ class AutoloaderTest extends TestCase
 {
     private function getStub()
     {
-        require_once(dirname(__FILE__) . '/../TestStub.php');
         return new class extends Autoloader {
             use BeAmado\OjsMigrator\TestStub;
         };

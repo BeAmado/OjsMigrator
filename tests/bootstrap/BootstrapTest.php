@@ -11,7 +11,6 @@ class BootstrapTest extends TestCase
 
     public function testWeHaveTestStubTrait()
     {
-        require_once(dirname(__FILE__) . '/../TestStub.php');
         $this->assertTrue(trait_exists('BeAmado\OjsMigrator\TestStub'));
     }
 

@@ -97,22 +97,39 @@ class XmlHandler implements FiletypeHandler
 
     protected function xmlIntoArray($xml)
     {
-        $arr = array();
+        $arr = array(
+            'name' => null,
+            'text' => null,
+            'attributes' => array(),
+            'children' => array(),
+        );
 
-        if ($this->isTextNode($xml)) {
-            return $this->getTextContent($xml);
+        if ($this->isRootNode($xml)) {
+            return $this->xmlIntoArray($this->getChildNodes($xml)[0]);
+        } else {
+            $arr['name'] = $xml->nodeName;
         }
 
-        if (
+        if ($this->isTextNode($xml)) {
+            $arr['text'] = $this->getTextContent($xml);
+        }
+
+        /*if (
             !$this->isRootNode($xml) &&
             $this->arrayType($xml) === 'indexed'
         ) {
             return $this->xmlIntoIndexArray($xml);
+        }*/
+
+        if ($xml->hasAttributes()) {
+            foreach ($xml->attributes as $attr) {
+                $arr['attributes'][$attr] = $xml->getAttribute($attr);
+            }
         }
 
         foreach ($this->getChildNodes($xml) as $node) {
 
-            switch($this->arrayType($node)) {
+            /*switch($this->arrayType($node)) {
                 case 'none':
                     $arr[$node->nodeName] = $this->xmlIntoArray($node);
                     break;
@@ -122,7 +139,9 @@ class XmlHandler implements FiletypeHandler
                 case 'indexed':
                     $arr[$node->nodeName] = $this->xmlIntoIndexArray($node);
                     break;
-            }
+            }*/
+
+            $arr['children'][] = $this->XmlIntoArray($node);
 
         }
 

@@ -134,6 +134,13 @@ class MyObject extends AbstractObject implements MyIterable
     {
         $arr = array();
 
+        if (
+            $this->getValue() === null &&
+            $this->listValues() === null
+        ) {
+            return null;
+        }
+
         /** @var $myObj \BeAmado\OjsMigrator\MyObject */
         foreach ($this->values as $key => $myObj) {
             if ($myObj->getValue() === null) {
