@@ -4,6 +4,16 @@ namespace BeAmado\OjsMigrator;
 
 trait WorkWithXmlSchema
 {
+    //use WorkWithFiles;
+
+    public function getOjs2XmlSchemaFilename()
+    {
+        return $this->getOjs2PublicHtmlDir()
+            . $this->sep() . 'dbscripts'
+            . $this->sep() . 'xml'
+            . $this->sep() . 'ojs_schema.xml';
+    }
+
     public function schemaArray()
     {
         return array(

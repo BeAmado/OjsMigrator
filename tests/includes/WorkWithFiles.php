@@ -4,9 +4,35 @@ namespace BeAmado\OjsMigrator;
 
 trait WorkWithFiles
 {
+    public function sep()
+    {
+        return \BeAmado\OjsMigrator\DIR_SEPARATOR;
+    }
+    
     public function getDataDir()
     {
-        return \BeAmado\OjsMigrator\BASE_DIR . '/tests/_data';
+        return \BeAmado\OjsMigrator\BASE_DIR 
+            . $this->sep() . 'tests' 
+            . $this->sep() . '_data';
+    }
+
+    public function getOjs2PublicHtmlDir()
+    {
+        return $this->getDataDir() 
+            . $this->sep() . 'ojs2'
+            . $this->sep() . 'public_html';
+    }
+
+    public function getOjs2FilesDir()
+    {
+        return $this->getDataDir()
+            . $this->sep() . 'ojs2'
+            . $this->sep() . 'files';
+    }
+
+    public function getOjs2ConfigFile()
+    {
+        return $this->getOjs2PublicHtmlDir() . $this->sep() . 'config.inc.php';
     }
 
     public function bandsAsArray()
