@@ -163,4 +163,23 @@ class MyObjectTest extends TestCase implements StubInterface
 
         $this->assertFalse($obj->hasAttribute('weight'));
     }
+
+    public function testCanCreateInstancePassingAnotherMyObjectInstance()
+    {
+        $obj1 = new MyObject(array(
+            'singer' => 'Bruce Dickinson',
+            'bass' => 'Flea',
+            'guitar' => 'Reb Beach',
+            'drums' => 'Mike Portnoy',
+        ));
+
+        $obj2 = new MyObject($obj1);
+
+        $this->assertTrue(
+            $obj2->get('singer')->getValue() === 'Bruce Dickinson' &&
+            $obj2->get('bass')->getValue() === 'Flea' &&
+            $obj2->get('guitar')->getValue() === 'Reb Beach' &&
+            $obj2->get('drums')->getValue() === 'Mike Portnoy'
+        );
+    }
 }

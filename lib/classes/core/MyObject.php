@@ -17,7 +17,10 @@ class MyObject extends AbstractObject implements MyIterable
      */
     public function __construct($vals = null)
     {
-        if (\is_array($vals)) {
+        if (\is_a($vals, self::class)) {
+            $this->value = $vals->getValue();
+            $this->values = $vals->listValues();
+        } else if (\is_array($vals)) {
             $this->values = array();
             foreach ($vals as $key => $value) {
                 $this->set($key, $value);
@@ -94,7 +97,7 @@ class MyObject extends AbstractObject implements MyIterable
      */
     public function listValues()
     {
-        return $this->values;
+        return isset($this->values) ? $this->values : null;
     }
 
     /**
