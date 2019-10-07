@@ -1,6 +1,6 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Db;
 
 class DbHandler
 {
@@ -17,9 +17,9 @@ class DbHandler
     protected function createMySqlConnection($connData = array())
     {
         $host = $connData['host'];
-        $db = $connData['db'];
-        $user = $connData['user'];
-        $pass = $connData['pass'];
+        $db = $connData['name'];
+        $user = $connData['username'];
+        $pass = $connData['password'];
         return new \PDO("mysql:host=$host;dbname=$db", $user, $pass);
     }
 
