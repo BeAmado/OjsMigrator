@@ -21,11 +21,19 @@ $ojs2Dir = (new \BeAmado\OjsMigrator\Util\FileSystemManager())->parentDir(
     . $sep . '_data' // /_data
     . $sep . 'ojs2'; // result -> OjsMigrator/tests/_data/ojs2
 
+(new \BeAmado\OjsMigrator\Util\ArchiveManager)->tar(
+    'xzf', 
+    $ojs2Dir . '.tar.gz',
+    (new \BeAmado\OjsMigrator\Util\FileSystemManager())->parentDir($ojs2Dir)
+);
+
 $ojs2ConfigFile = $ojs2Dir 
     . $sep . 'public_html' 
-    . $sep . 'config.inc.php.TEMPLATE';
+    . $sep . 'config.inc.php';
 
-$template = file($ojs2ConfigFile);
+$ojs2ConfigTemplate = $ojs2ConfigFile . '.TEMPLATE';
+
+$template = file($ojs2ConfigTemplate);
 
 $filesDirLineNumber = -1;
 
@@ -42,6 +50,6 @@ $template[$filesDirLineNumber] = str_replace(
 );
 
 file_put_contents(
-    $ojs2Dir . $sep . 'public_html' . $sep . 'config.inc.php',
+    $ojs2ConfigFile,
     $template
 );

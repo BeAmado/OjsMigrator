@@ -4,7 +4,7 @@ namespace BeAmado\OjsMigrator\Util;
 use \BeAmado\OjsMigrator\Util\FileSystemManager;
 use \BeAmado\OjsMigrator\Util\FileHandler;
 
-class ConfigRetriever
+class ConfigHandler
 {
     /**
      * @var string
@@ -30,6 +30,7 @@ class ConfigRetriever
     {
         $this->setConfigFile($filename);
         $this->setFilesDir();
+        $this->setConnectionSettings();
     }
 
     /**
@@ -78,12 +79,47 @@ class ConfigRetriever
 
         return true;
     }
+    
+    /**
+     * Tests if the given string is a configuration of the connection setting 
+     * identified by the specified name. If it is, include its value to the 
+     * connectionSettings array.
+     *
+     * @param string $name
+     * @param string $str
+     * @return boolean
+     */
+    protected function testForAndAddConnectionSetting($name, $str)
+    {
+        if (\substr($str, 0, (strlen($name) + 2)) === $name . ' =') {
+            $this->connectionSettings[$name] = \trim(\substr(
+                $str, 
+                strlen($name) + 2
+            ));
+
+            return true;
+        }
+
+        return false;
+    }
 
     protected function setConnectionSettings()
     {
         if(!$this->validateContent()) {
             return false;
         }
+
+        $this->connectionSettings = array();
+
+        foreach ($this->configContent as $line) {
+            $this->testForAndAddConnectionSetting('driver', $line) ||
+            $this->testForAndAddConnectionSetting('host', $line) ||
+            $this->testForAndAddConnectionSetting('username', $line) ||
+            $this->testForAndAddConnectionSetting('password', $line) ||
+            $this->testForAndAddConnectionSetting('name', $line); 
+        }
+
+        unset($line);
     }
 
     protected function setFilesDir()
@@ -97,6 +133,8 @@ class ConfigRetriever
                 $this->filesDir = \substr($line, 11); // from the 11th chararacter forth
             }
         }
+
+        unset($line);
 
         if (\substr($this->filesDir, -1) == PHP_EOL) {
             $this->filesDir = \substr($this->filesDir, 0, -1);

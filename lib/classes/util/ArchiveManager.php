@@ -5,6 +5,25 @@ namespace BeAmado\OjsMigrator\Util;
 class ArchiveManager
 {
     /**
+     * Gets the name of the file without the .tar or .gz extensions
+     *
+     * @param string $name
+     * @return string
+     */
+    protected function getFilename($name)
+    {
+        if (\substr($name, -3) === '.gz') {
+            $name = \substr($name, 0, -3);
+        }
+
+        if (\substr($name, -4) === '.tar') {
+            $name = \substr($name, 0, -4);
+        }
+
+        return $name;
+    }
+
+    /**
      * Discriminates the parameters passed to the tar function.
      *
      * @param string $flags
@@ -179,6 +198,13 @@ class ArchiveManager
             );
         }
 
+        $vars->set(
+            'file', 
+             $this->getFilename($filename) . '.tar'
+        );
+
+        (new FileSystemManager())->removeFile($vars->get('file')->getValue());
+
         if ($vars->get('success')->getValue()) {
             (new MemoryManager())->destroy($vars);
             unset($vars);
@@ -202,7 +228,7 @@ class ArchiveManager
      * @param string $directory
      * @return mixed
      */
-    public function tar($flags, $filename, $directory)
+    public function tar($flags, $filename, $directory = null)
     {
         if (
             \substr($filename, -4) !== '.tar' && 
@@ -219,6 +245,11 @@ class ArchiveManager
             return $this->createTar($filename, $directory);
 
         } else if ($this->hasParamExtract($flags)) {
+            if ($directory === null) {
+                $pos = \strpos($filename, '.tar');
+                $directory = substr($filename, 0, $pos);
+            }
+
             if ($this->hasParamZip($flags)) {
                 return $this->unzipAndExtractTar($filename, $directory);
             }
