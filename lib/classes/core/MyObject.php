@@ -3,7 +3,7 @@
 namespace BeAmado\OjsMigrator;
 
 
-class MyObject extends AbstractObject implements MyIterable
+class MyObject extends AbstractObject implements MyIterable, MyCloneable
 {
     /**
      * @var array
@@ -173,6 +173,58 @@ class MyObject extends AbstractObject implements MyIterable
     public function hasAttribute($name)
     {
         return \array_key_exists($name, $this->values);
+    }
+
+    protected function cloneArray($arr)
+    {
+        $newArr = $arr;
+
+        foreach ($arr as $key => $value) {
+            if (\is_array($value)) {
+                $newArr[$key] = $this->cloneArray($value);
+            } else if (\is_a($value, MyObject::class)) {
+                if (empty($value->listValues())) {
+                    $newArr[$key] = $value->getValue();
+                } else {
+                    $newArr[$key] = $value->cloneInstance();
+                }
+            } else if (\is_object($value)) {
+                $newArr[$key] = clone $value;
+            } else {
+                $newArr[$key] = $value;
+            }
+        }
+        unset($key);
+        unset($value);
+
+        return $newArr;
+    }
+
+    public function cloneInstance()
+    {
+        if (empty($this->values)) {
+            return new MyObject($this->getValue());
+        }
+
+        $vals = array();
+
+        foreach ($this->values as $key => $value) {
+            if (\is_array($value)) {
+                $vals[$key] = $this->cloneArray($value);
+            } else if (\is_a($value, MyObject::class)) {
+                if (empty($value->listValues())) {
+                    $vals[$key] = $value->getValue();
+                } else {
+                    $vals[$key] = $value->cloneInstance();
+                }
+            } else if (\is_object($value)) {
+                $vals[$key] = clone $value;
+            } else {
+                $vals[$key] = $value;
+            }
+        }
+
+        return new MyObject($vals);
     }
 }
 

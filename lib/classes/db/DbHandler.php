@@ -5,11 +5,6 @@ namespace BeAmado\OjsMigrator\Db;
 class DbHandler
 {
     /**
-     * @var PDO
-     */
-    private $conn;
-
-    /**
      * Creates a connection to MySQL
      *
      * @param array $connData
@@ -22,13 +17,32 @@ class DbHandler
         $pass = $connData['password'];
         return new \PDO("mysql:host=$host;dbname=$db", $user, $pass);
     }
+    
+    /**
+     * Creates a connectin to a Sqlite database
+     *
+     * @param string $db
+     */
+    protected function createSqliteConnection($db)
+    {
+        return new \PDO('sqlite:' . $db);
+    }
 
     /**
-     * 
-     * @param array $connData
+     * Creates a database connection using the specified driver
+     *
+     * @param string $driver
+     * @param array $args
+     * @return \PDO
      */
-    public function __construct($args = array())
+    public function createConnection($driver, $args = array())
     {
-        
+        switch(\strtolower($driver)) {
+            case 'mysql':
+                return $this->createMySqlConnection($args);
+
+            case 'sqlite':
+                return $this->createSqliteConnection($args);
+        }
     }
 }

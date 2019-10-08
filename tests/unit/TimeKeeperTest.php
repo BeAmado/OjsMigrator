@@ -27,6 +27,8 @@ class TimeKeeperTest extends TestCase implements StubInterface
 
     public function testGetElapsedTimeForAThreeSecondAwait()
     {
+        $this->markTestSkipped('Skip this test in order for the unit tests to '
+        . 'run fast');
         $begin = (new TimeKeeper())->now();
 
         do {
@@ -43,6 +45,8 @@ class TimeKeeperTest extends TestCase implements StubInterface
 
     public function testWaitForTwoSeconds()
     {
+        $this->markTestSkipped('Skip this test in order for the unit tests to '
+        . 'run fast');
         $begin = (new TimeKeeper())->now();
         (new TimeKeeper())->wait(2000);
         $end = (new TimeKeeper())->now();

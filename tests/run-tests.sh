@@ -9,6 +9,7 @@ phpunit-begin()
 phpunit-end()
 {
     rm -rf "$(dirname $0)/_data/ojs2"
+    rm -rf "$(dirname $0)/_data/db_sandbox"
     echo
     echo 
     echo "========= End of $1 tests ========="
