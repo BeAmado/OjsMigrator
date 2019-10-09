@@ -25,6 +25,7 @@ unset($directory);
 unset($filename);
 
 $vars = (new \BeAmado\OjsMigrator\Util\MemoryManager())->create();
+$vars->set('sep', $sep);
 
 // format the config.inc.php file
 $vars->set(
@@ -59,41 +60,82 @@ $vars->set(
     file($vars->get('ojs2ConfigTemplate')->getValue())
 );
 
-$vars->set(
-    'filesDirLineNumber',
-    -1
-);
+function setFilesDir($str, $vars)
+{
+    return str_replace(
+        '[ojs2_dir]',
+        $vars->get('ojs2Dir')->getValue(),
+        $str
+    );
+}
 
-for ($i = 0; $i < count($vars->get('template')->listValues()); $i++) {
-    if (
-        substr(
-            $vars->get('template')->get($i)->getValue(), 
-            0, 
-            11
-        ) === 'files_dir ='
-    ) {
-        $vars->set('filesDirLineNumber', $i);
-        break;
+function setDbName($vars)
+{
+    switch(getDbDriver()) {
+        case 'sqlite':
+            return $vars->get('ojs2Dir')->getValue()
+                . $vars->get('sep')->getValue() . 'tests_ojs.db';
+        case 'mysql':
+            return 'tests_ojs';
     }
 }
 
-$vars->get('template')->set(
-    $vars->get('filesDirLineNumber')->getValue(),
-    str_replace(
-        '[ojs2_dir]',
-        $vars->get('ojs2Dir')->getValue(),
-        $vars->get('template')
-             ->get($vars->get('filesDirLineNumber')->getValue())
-             ->getValue()
-    )
-);
+function getDbDriver()
+{
+    if (array_search('pdo_sqlite', get_loaded_extensions())) {
+        return 'sqlite';
+    } else if (array_search('pdo_mysql', get_loaded_extensions())) {
+        return 'mysql';
+    }
+}
+
+function isInTheLine($id, $str)
+{
+    switch($id) {
+        case 'files_dir':
+            return substr($str, 0, 11) === 'files_dir =';
+        case 'name':
+            return substr($str, 0, 6) === 'name =';
+        case 'driver':
+            return substr($str, 0, 8) === 'driver =';
+    }
+
+    return false;
+}
+
+$config = array();
+
+foreach ($vars->get('template')->toArray() as $line) {
+    if (isInTheLine('files_dir', $line)) {
+        $config[] = setFilesDir($line, $vars) . PHP_EOL;
+    } else if (isInTheLine('name', $line)) {
+        $config[] = 'name = ' . setDbName($vars) . PHP_EOL;
+    } else if (isInTheLine('driver', $line)) {
+        $config[] = 'driver = ' . getDbDriver() . PHP_EOL;
+    } else {
+        $config[] = $line;
+    }
+}
 
 file_put_contents(
     $vars->get('ojs2ConfigFile')->getValue(),
-    $vars->get('template')->toArray()
+    $config
+);
+
+\BeAmado\OjsMigrator\Registry::set(
+    'configFile',
+    $vars->get('ojs2ConfigFile')->getValue()
+);
+
+\BeAmado\OjsMigrator\Registry::set(
+    'ConfigHandler',
+    new \BeAmado\OjsMigrator\Util\ConfigHandler()
 );
 
 (new \BeAmado\OjsMigrator\Util\MemoryManager())->destroy($vars);
 unset($vars);
+(new \BeAmado\OjsMigrator\Util\MemoryManager())->destroy($config);
+unset($config);
+
 unset($sep);
 unset($fm);

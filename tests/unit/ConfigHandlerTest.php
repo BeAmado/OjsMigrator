@@ -42,14 +42,23 @@ class ConfigHandlerTest extends TestCase implements StubInterface
         $connData = (new ConfigHandler($this->getOjs2ConfigFile()))
                     ->getConnectionSettings();
 
+        $expected = array(
+            'host' => 'localhost',
+            'username' => 'ojs_user',
+            'password' => 'ojs',
+        );
+
+        if (array_search('pdo_sqlite', get_loaded_extensions())) {
+            $expected['driver'] = 'sqlite';
+            $expected['name'] = $this->getOjs2Dir() 
+                . $this->sep() . 'tests_ojs.db';
+        } else if (array_search('pdo_mysql', get_loaded_extensions())) {
+            $expected['driver'] = 'mysql';
+            $expected['name'] = 'tests_ojs';
+        }
+
         $this->assertEquals(
-            array(
-                'host' => 'localhost',
-                'driver' => 'mysql',
-                'username' => 'ojs_user',
-                'password' => 'ojs',
-                'name' => 'tests_ojs2',
-            ),
+            $expected,
             $connData
         );
     }

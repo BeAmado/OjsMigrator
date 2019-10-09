@@ -3,6 +3,7 @@
 namespace BeAmado\OjsMigrator\Util;
 use \BeAmado\OjsMigrator\Util\FileSystemManager;
 use \BeAmado\OjsMigrator\Util\FileHandler;
+use \BeAmado\OjsMigrator\Registry;
 
 class ConfigHandler
 {
@@ -26,9 +27,38 @@ class ConfigHandler
      */
     private $filesDir;
 
-    public function __construct($filename)
+    protected function findConfigFile()
     {
-        $this->setConfigFile($filename);
+        if (Registry::hasKey('configFile')) {
+            $this->setConfigFile(Registry::get('configFile'));
+            return;
+        }
+
+        $public_html = (new FileSystemManager())->parentDir(
+            \BeAmado\OjsMigrator\BASE_DIR
+        );
+
+        foreach (
+            (new FileSystemManager())->listdir($public_html) as $filename
+        ) {
+            if (\basename($filename) === 'confic.inc.php') {
+                $this->setConfigFile($filename);
+                break;
+            }
+        }
+
+        unset($filename);
+        unset($public_html);
+    }
+
+    public function __construct($filename = null)
+    {
+        if ($filename === null) {
+            $this->findConfigFile();
+        } else {
+            $this->setConfigFile($filename);
+        }
+
         $this->setFilesDir();
         $this->setConnectionSettings();
     }

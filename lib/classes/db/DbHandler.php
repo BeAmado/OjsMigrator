@@ -35,14 +35,18 @@ class DbHandler
      * @param array $args
      * @return \PDO
      */
-    public function createConnection($driver, $args = array())
+    public function createConnection($args = array())
     {
-        switch(\strtolower($driver)) {
+        if (!\array_key_exists('driver', $args)) {
+            return;
+        }
+
+        switch(\strtolower($args['driver'])) {
             case 'mysql':
                 return $this->createMySqlConnection($args);
 
             case 'sqlite':
-                return $this->createSqliteConnection($args);
+                return $this->createSqliteConnection($args['name']);
         }
     }
 }

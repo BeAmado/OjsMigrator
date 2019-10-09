@@ -44,6 +44,10 @@ class DbHandlerTest extends TestCase implements StubInterface
      */
     public function testConnectToMysql()
     {
+        if (array_search('pdo_sqlite', get_loaded_extensions())) {
+            $this->markTestSkipped('The driver used is sqlite');
+        }
+
         $connData = (new ConfigHandler($this->getOjs2ConfigFile()))
             ->getConnectionSettings();
 
@@ -53,6 +57,24 @@ class DbHandlerTest extends TestCase implements StubInterface
                 'createMySqlConnection',
                 array('args' => $connData)
             )
+        );
+    }
+
+    /**
+     * @requires extension pdo_mysql
+     */
+    public function testCreateMysqlConnection()
+    {
+        if (array_search('pdo_sqlite', get_loaded_extensions())) {
+            $this->markTestSkipped('The driver used is sqlite');
+        }
+
+        $connData = (new ConfigHandler($this->getOjs2ConfigFile()))
+            ->getConnectionSettings();
+        
+        $this->assertInstanceOf(
+            \PDO::class,
+            (new DbHandler())->createConnection($connData)
         );
     }
 
@@ -67,6 +89,20 @@ class DbHandlerTest extends TestCase implements StubInterface
                 'createSqliteConnection',
                 $this->getSqliteDbFilename()
             )
+        );
+    }
+
+    /**
+     * @requires extension pdo_sqlite
+     */
+    public function testCreateSqliteConnection()
+    {
+        $this->assertInstanceOf(
+            \PDO::class,
+            (new DbHandler())->createConnection(array(
+                'driver' => 'sqlite',
+                'name' => $this->getSqliteDbFilename(),
+            ))
         );
     }
 }

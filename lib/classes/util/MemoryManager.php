@@ -27,13 +27,14 @@ class MemoryManager
 
         if (\method_exists($obj, 'destroy')) {
             $obj->destroy();
-        } else {
+        } else if (\is_object($obj)) {
             foreach(\get_object_vars($obj) as $attr) {
                 unset($obj->$attr);
             }
             unset($attr);
         }
-
+        
+        $obj = null;
         unset($obj);
     }
 
