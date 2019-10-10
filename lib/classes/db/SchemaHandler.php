@@ -12,6 +12,16 @@ class SchemaHandler implements FiletypeHandler
         $xml->read($filename);
         return $xml;
     }*/
+    protected function formatTableDefinitionArray($obj)
+    {
+        if ($obj->get('name')->getValue() !== 'table') {
+            return;
+        }
+
+        $def = array();
+        $def = 
+
+    }
 
     public function createFromFile($filename)
     {

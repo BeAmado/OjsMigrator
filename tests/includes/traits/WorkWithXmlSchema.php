@@ -18,6 +18,7 @@ trait WorkWithXmlSchema
     {
         return array(
             'journals' => array(
+                'name' => 'journals',
                 'columns' => array(
                     'journal_id' => array(
                         'type' => 'integer',

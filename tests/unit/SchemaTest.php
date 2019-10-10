@@ -8,17 +8,18 @@ use BeAmado\OjsMigrator\WorkWithXmlSchema;
 
 class SchemaTest extends TestCase implements StubInterface
 {
+    use WorkWithXmlSchema;
+
     public function getStub()
     {
         return new class extends Schema {
             use TestStub;
-            use WorkWithXmlSchema;
         };
     }
 
     public function testGetJournalsTableDefinition()
     {
-        $schema = new Schema($this->getStub()->schemaArray());
+        $schema = new Schema($this->schemaArray());
 
         $this->assertInstanceOf(
             \BeAmado\OjsMigrator\Db\TableDefinition::class,

@@ -114,13 +114,6 @@ class XmlHandler implements FiletypeHandler
             $arr['text'] = $this->getTextContent($xml);
         }
 
-        /*if (
-            !$this->isRootNode($xml) &&
-            $this->arrayType($xml) === 'indexed'
-        ) {
-            return $this->xmlIntoIndexArray($xml);
-        }*/
-
         if ($xml->hasAttributes()) {
             foreach ($xml->attributes as $attr) {
                 $arr['attributes'][$attr] = $xml->getAttribute($attr);
@@ -128,21 +121,7 @@ class XmlHandler implements FiletypeHandler
         }
 
         foreach ($this->getChildNodes($xml) as $node) {
-
-            /*switch($this->arrayType($node)) {
-                case 'none':
-                    $arr[$node->nodeName] = $this->xmlIntoArray($node);
-                    break;
-                case 'associative':
-                    $arr[$node->nodeName] = $this->xmlIntoAssocArray($node);
-                    break;
-                case 'indexed':
-                    $arr[$node->nodeName] = $this->xmlIntoIndexArray($node);
-                    break;
-            }*/
-
             $arr['children'][] = $this->XmlIntoArray($node);
-
         }
 
         return $arr;
