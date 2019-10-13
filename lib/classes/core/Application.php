@@ -6,6 +6,7 @@ namespace BeAmado\OjsMigrator;
 use \BeAmado\OjsMigrator\Util\FileSystemManager;
 use \BeAmado\OjsMigrator\Util\MemoryManager;
 use \BeAmado\OjsMigrator\Util\ArchiveManager;
+use \BeAmado\OjsMigrator\Util\IoManager;
 
 ///////////// Handlers ////////////////////////
 use \BeAmado\OjsMigrator\Util\ConfigHandler;
@@ -19,6 +20,7 @@ class Application
         Registry::set('FileSystemManager', new FileSystemManager());
         Registry::set('MemoryManager', new MemoryManager());
         Registry::set('ArchiveManager', new ArchiveManager());
+        Registry::set('IoManager', new IoManager());
     }
 
     protected function loadHandlers()
@@ -38,5 +40,13 @@ class Application
     {
         $this->loadManagers();
         $this->loadHandlers();
+    }
+
+    public function run()
+    {
+        $this->preload();
+        Registry::get('IoManager')->writeToStdout(
+            '############### OJS journal migration #################' . PHP_EOL
+        );
     }
 }

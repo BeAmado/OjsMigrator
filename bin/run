@@ -1,0 +1,9 @@
+#!/usr/bin/env php
+<?php
+
+require_once(dirname(__FILE__)
+  . (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' 
+        ? '\..\index.php' 
+        : '/../index.php')
+);
+(new \BeAmado\OjsMigrator\Application())->run();
