@@ -45,6 +45,26 @@ class XmlHandler implements FiletypeHandler
         return $childNodes;
     }
 
+    protected function getAttributes($node)
+    {
+        if (!$node->hasAttributes()) {
+            return array();
+        }
+
+        $attributes = array();
+
+        $domNamedNodes = $node->attributes;
+
+        for ($i = 0; $i < $domNamedNodes->length; $i++) {
+            $item = $domNamedNodes->item($i);
+            $attributes[$item->nodeName] = $item->nodeValue;
+        }
+        unset($item);
+        unset($domNamedNodes);
+
+        return $attributes;
+    }
+
     protected function isRootNode($node)
     {
         return $node->parentNode === null;
@@ -104,8 +124,10 @@ class XmlHandler implements FiletypeHandler
             'children' => array(),
         );
 
-        if ($this->isRootNode($xml)) {
-            return $this->xmlIntoArray($this->getChildNodes($xml)[0]);
+        $childNodes = $this->getChildNodes($xml);
+
+        if ($this->isRootNode($xml) && count($childNodes) > 0) {
+            return $this->xmlIntoArray($childNodes[count($childNodes) - 1]);
         } else {
             $arr['name'] = $xml->nodeName;
         }
@@ -114,15 +136,14 @@ class XmlHandler implements FiletypeHandler
             $arr['text'] = $this->getTextContent($xml);
         }
 
-        if ($xml->hasAttributes()) {
-            foreach ($xml->attributes as $attr) {
-                $arr['attributes'][$attr] = $xml->getAttribute($attr);
-            }
-        }
+        $arr['attributes'] = $this->getAttributes($xml);
 
-        foreach ($this->getChildNodes($xml) as $node) {
+        foreach ($childNodes as $node) {
             $arr['children'][] = $this->XmlIntoArray($node);
         }
+
+        (new MemoryManager())->destroy($childNodes);
+        unset($childNodes);
 
         return $arr;
     }

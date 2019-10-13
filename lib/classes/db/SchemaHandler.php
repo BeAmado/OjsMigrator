@@ -6,12 +6,57 @@ use \BeAmado\OjsMigrator\FiletypeHandler; //interface
 
 class SchemaHandler implements FiletypeHandler
 {
-    /*protected function readXmlFile($filename)
+    /**
+     * Gets the name of the table to be defined
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $obj
+     * @return string
+     */
+    protected function getTableName($obj)
     {
-        $xml = new \DOMDocument('1.0', 'UTF-8');
-        $xml->read($filename);
-        return $xml;
-    }*/
+        if (
+            !$obj->get('attributes')->hasAttribute('name') ||
+            $obj->get('name')->getValue() !== 'table'
+        ) {
+            return;
+        }
+
+        return $obj->get('attributes')->get('name')->getValue();
+    }
+
+    protected function getColumn
+
+    /**
+     * Gets the datatype of the column.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $obj
+     * @return string
+     */
+    protected function getDataType($obj)
+    {
+        switch(\strtoupper(
+            \substr($obj->get('attributes')->get('type')->getValue(), 0, 1)
+        )) { //The first character of the type
+            case 'I':
+                return 'integer';
+
+            case 'F':
+                return 'float';
+
+            case 'X':
+            case 'C':
+                return 'string';
+
+            default:
+                return 'string';
+        }
+    }
+
+    protected function getSqlType($obj)
+    {
+        $sql
+    }
+
     protected function formatTableDefinitionArray($obj)
     {
         if ($obj->get('name')->getValue() !== 'table') {
@@ -19,7 +64,7 @@ class SchemaHandler implements FiletypeHandler
         }
 
         $def = array();
-        $def = 
+        $def['name'] = $this->getTableName($obj);
 
     }
 

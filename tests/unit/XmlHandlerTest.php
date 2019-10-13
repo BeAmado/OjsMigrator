@@ -6,17 +6,23 @@ use BeAmado\OjsMigrator\StubInterface;
 
 class XmlHandlerTest extends TestCase implements StubInterface
 {
+    use BeAmado\OjsMigrator\WorkWithFiles;
+
     public function getStub()
     {
         return new class extends XmlHandler {
             use BeAmado\OjsMigrator\TestStub;
-            use BeAmado\OjsMigrator\WorkWithFiles;
         };
     }
 
     private function getBandsXmlFilename()
     {
-        return $this->getStub()->getDataDir() . '/bands.xml';
+        return $this->getDataDir() . $this->sep() . 'bands.xml';
+    }
+
+    private function getAnimalsXmlFilename()
+    {
+        return $this->getDataDir() . $this->sep() . 'animals.xml';
     }
 
     private function readBandsIntoXml()
@@ -195,7 +201,7 @@ class XmlHandlerTest extends TestCase implements StubInterface
 
         $album = $xml->getElementsByTagName('album')->item(0);
 
-        $expected = $this->getStub()->bandsAsVerboseArray()
+        $expected = $this->bandsAsVerboseArray()
             ['children'][0]  // Iron Maiden
             ['children'][1]  // albums
             ['children'][0]; // Iron Maiden album
@@ -221,7 +227,7 @@ class XmlHandlerTest extends TestCase implements StubInterface
         );
 
         $this->assertEquals(
-            $this->getStub()->bandsAsVerboseArray()
+            $this->bandsAsVerboseArray()
                 ['children'][0]  // Iron Maiden
                 ['children'][1], // albums
             $arr
@@ -244,7 +250,7 @@ class XmlHandlerTest extends TestCase implements StubInterface
     public function testReadXmlIntoArray()
     {
         $this->assertEquals(
-            $this->getStub()->bandsAsVerboseArray(),
+            $this->bandsAsVerboseArray(),
             $this->getStub()->callMethod(
                 'readIntoArray',
                 $this->getBandsXmlFilename()
@@ -273,10 +279,26 @@ class XmlHandlerTest extends TestCase implements StubInterface
     public function testCreateFromFileAndTurnIntoArray()
     {
         $this->assertEquals(
-            $this->getStub()->bandsAsVerboseArray(),
+            $this->bandsAsVerboseArray(),
             (new XmlHandler())->createFromFile(
                 $this->getBandsXmlFilename()
             )->toArray()
+        );
+    }
+
+    public function testGetAttributes()
+    {
+        $xml = new DOMDocument('1.0', 'UTF-8');
+        $xml->load($this->getAnimalsXmlFilename());
+
+        $dog = $xml->getElementsByTagName('animal')->item(0);
+
+        $this->assertEquals(
+            array('class' => 'mammalia'),
+            $this->getStub()->callMethod(
+                'getAttributes',
+                $dog
+            )
         );
     }
 }

@@ -159,7 +159,6 @@ class ArchiveManager
         try {
             (new \PharData($filename))->extractTo($pathTo, $files);
         } catch (\Exception $e) {
-            var_dump($e);
             if (\is_a($e, \BadMethodCallException::class)) {
                 // TODO
                 //treat the exception

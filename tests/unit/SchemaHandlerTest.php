@@ -17,20 +17,28 @@ use BeAmado\OjsMigrator\Util\FileSystemManager;
 
 class SchemaHandlerTest extends TestCase implements StubInterface
 {
+    use WorkWithFiles;
+    use WorkWithXmlSchema;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->schema = (new SchemaHandler())->createFromFile(
+            $this->getOjs2XmlSchemaFilename()
+        );
+    }
+
     public function getStub()
     {
         return new class extends SchemaHandler {
             use TestStub;
-            use WorkWithFiles;
-            use WorkWithXmlSchema;
         };
     }
 
     protected function setUp() : void
     {
-        $this->sandbox = $this->getStub()->getDataDir() 
-            . $this->getStub()->sep() . 'sandbox';
-
+        $this->sandbox = $this->getDataDir() . $this->sep() . 'sandbox';
         (new FileSystemManager())->createDir($this->sandbox);
     }
 
@@ -41,13 +49,20 @@ class SchemaHandlerTest extends TestCase implements StubInterface
 
     public function testCanReadSchemaFromTheOjsSchemaFile()
     {
-        $schema = (new SchemaHandler())->createFromFile(
-            $this->getStub()->getOjs2XmlSchemaFilename()
+        $this->assertEquals(
+            $this->journalsSchemaRawArray(),
+            $this->schema->get('children')->get(0)->toArray()
         );
+    }
 
-        $this->assertInstanceOf(
-            \BeAmado\OjsMigrator\Db\Schema::class,
-            $schema
+    public function testGetTableName()
+    {
+        $this->assertSame(
+            'journals',
+            $this->getStub()->callMethod(
+                'getTableName',
+                $this->schema->get('children')->get(0)
+            )
         );
     }
 }
