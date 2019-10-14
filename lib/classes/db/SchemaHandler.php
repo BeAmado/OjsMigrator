@@ -182,17 +182,16 @@ class SchemaHandler implements FiletypeHandler
      */
     protected function getIntType($number)
     {
-
         if (
             !\is_numeric($number) ||
             $number < 1 ||
-            \log($number, 2) >= \count($this->intTypes())
-            \fmod(\log($number, 2), 2) != 0 // is not a power of two
+            \log($number, 2) >= \count($this->intTypes()) ||
+            \fmod(\log($number, 2), 1) != 0 // is not a power of two
         ) {
             return;
         }
 
-        return $this->intTypes()[\log($number, 2)];
+        return $this->intTypes()[(int) \log($number, 2)];
     }
 
     /**

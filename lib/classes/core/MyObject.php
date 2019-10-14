@@ -51,7 +51,7 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
     }
     
     /**
-     * Sets the key in the array
+     * Sets the attribute identified by $key
      *
      * @param string $key
      * @param mixed $value
@@ -68,6 +68,21 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
         } else {
             $this->values[$key] = new MyObject($value);
         }
+    }
+
+    /**
+     * Removes the specified attribute of the object
+     *
+     * @param string $key
+     * @return void
+     */
+    public function remove($key)
+    {
+        if (!$this->hasAttribute($key))
+            return;
+        
+        $this->get($key)->destroy();
+        unset($this->values[$key]);
     }
 
     /**
