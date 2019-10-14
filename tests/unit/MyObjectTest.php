@@ -182,4 +182,32 @@ class MyObjectTest extends TestCase implements StubInterface
             $obj2->get('drums')->getValue() === 'Mike Portnoy'
         );
     }
+
+    public function testPushElements()
+    {
+        $obj = new MyObject();
+
+        $obj->push('Iron Maiden');
+        $obj->push('Helloween');
+        $obj->push(new MyObject(array(
+            'bands' => array(
+                'Gamma Ray', 
+                'Whitesnake'
+            ),
+        )));
+
+        $this->assertEquals(
+            array(
+                'Iron Maiden',
+                'Helloween',
+                array(
+                    'bands' => array(
+                        'Gamma Ray',
+                        'Whitesnake',
+                    ),
+                ),
+            ),
+            $obj->toArray()
+        );
+    }
 }

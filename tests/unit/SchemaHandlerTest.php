@@ -219,4 +219,44 @@ class SchemaHandlerTest extends TestCase implements StubInterface
             $this->getStub()->callMethod('getIntType', 8) === 'bigint'
         );
     }
+
+    public function testCanGetJournalsTableColumns()
+    {
+        $journals = $this->schema->get('children')->get(0);
+
+        $this->assertSame(
+            5,
+            count($this->getStub()->callMethod(
+                'getColumns',
+                $journals
+            )->listValues())
+        );
+    }
+
+    public function testCanGetJournalsTableIndexes()
+    {
+        $journalSettings= $this->schema->get('children')->get(1);
+
+        $this->assertSame(
+            2,
+            count($this->getStub()->callMethod(
+                'getIndexes',
+                $journalSettings
+            )->listValues())
+        );
+    }
+
+    public function testFormatJournalsTableDefinition()
+    {
+        $journals = $this->schema->get('children')->get(0);
+        $arr = $this->getStub()->callMethod(
+            'formatTableDefinitionArray',
+            $journals
+        );
+
+        $this->assertEquals(
+            $this->schemaArray()['journals'],
+            $arr
+        );
+    }
 }

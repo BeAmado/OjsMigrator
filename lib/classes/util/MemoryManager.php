@@ -18,6 +18,11 @@ class MemoryManager
             return;
         }
 
+        if (\is_a($obj, self::class)) {
+            unset($obj);
+            return;
+        }
+
         if (\is_array($obj)) {
             foreach(\array_keys($obj) as $key) {
                 $this->destroy($obj[$key]);

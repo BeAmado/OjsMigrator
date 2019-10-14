@@ -241,5 +241,19 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
 
         return new MyObject($vals);
     }
+
+    /**
+     * Insert the value at the end of the values array.
+     *
+     * @param mixed $value
+     * @return void 
+     */
+    public function push($value)
+    {
+        $this->set(
+            (\is_array($this->values)) ? \count($this->values) : 0,
+            $value
+        );
+    }
 }
 
