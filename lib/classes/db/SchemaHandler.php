@@ -2,7 +2,9 @@
 
 namespace BeAmado\OjsMigrator\Db;
 use \BeAmado\OjsMigrator\Util\XmlHandler;
+use \BeAmado\OjsMigrator\Util\JsonHandler;
 use \BeAmado\OjsMigrator\Util\MemoryManager;
+use \BeAmado\OjsMigrator\Util\FileSystemManager;
 use \BeAmado\OjsMigrator\Registry;
 use \BeAmado\OjsMigrator\FiletypeHandler; //interface
 
@@ -31,39 +33,6 @@ class SchemaHandler implements FiletypeHandler
         }
 
         return \strtolower($o->get('name')->getValue()) === \strtolower($name);
-    }
-
-    /**
-     * Check whether or not the given obj is defining a table.
-     *
-     * @param \BeAmado\OjsMigrator\MyObject $obj
-     * @return boolean
-     */
-    protected function isTable($obj)
-    {
-        return $this->nameIs($obj, 'table');
-    }
-
-    /**
-     * Checks whether or not the given object is defining a table column.
-     *
-     * @param \BeAmado\OjsMigrator\MyObject $obj
-     * @return boolean
-     */
-    protected function isColumn($obj)
-    {
-        return $this->nameIs($obj, 'field');
-    }
-
-    /**
-     * Checks whether or not the given object is defining a table index.
-     *
-     * @param \BeAmado\OjsMigrator\MyObject $obj
-     * @return boolean
-     */
-    protected function isIndex($obj)
-    {
-        return $this->nameIs($obj, 'index');
     }
 
     /**
@@ -109,6 +78,44 @@ class SchemaHandler implements FiletypeHandler
         }
 
         return $obj->get('text')->getValue();
+    }
+
+    /**
+     * Checks if the given object has the specified child
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $obj
+     * @param string $name
+     * @return boolean
+     */
+    protected function hasChild($obj, $name)
+    {
+        Registry::remove('hasChild');
+        Registry::set('hasChild', false);
+        Registry::remove('name');
+        Registry::set('name', $name);
+        $obj->get('children')->forEachValue(function($child) {
+            if ($this->nameIs($child, Registry::get('name')))
+                Registry::set('hasChild', true);
+        });
+        Registry::remove('name');
+        return Registry::get('hasChild');
+    }
+
+
+
+
+
+    /////////////// TABLE HANDLING METHODS /////////////////////////////
+
+    /**
+     * Check whether or not the given obj is defining a table.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $obj
+     * @return boolean
+     */
+    protected function isTable($obj)
+    {
+        return $this->nameIs($obj, 'table');
     }
 
     /**
@@ -173,6 +180,22 @@ class SchemaHandler implements FiletypeHandler
             return $this->getAttribute($obj, 'name');
     }
 
+
+
+
+
+    ////////////// COLUMN HANDLING METHODS ////////////////////////////
+    /**
+     * Checks whether or not the given object is defining a table column.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $obj
+     * @return boolean
+     */
+    protected function isColumn($obj)
+    {
+        return $this->nameIs($obj, 'field');
+    }
+
     /**
      * Gets the name of the column being defined for the table
      *
@@ -202,22 +225,10 @@ class SchemaHandler implements FiletypeHandler
         /** @var $attr \BeAmado\OjsMigrator\MyObject */
         $obj->get('children')->forEachValue(function($attr) {
             if ($this->nameIs($attr, 'key'))
-                Registry::set('isPK', true);
+                Registry::set('isPk', true);
         });
 
         return Registry::get('isPk');
-    }
-    
-    /**
-     * Gets the name of the index being defined for the table
-     *
-     * @param \BeAmado\OjsMigrator\MyObject $obj
-     * @return string
-     */
-    protected function getIndexName($obj)
-    {
-        if ($this->isIndex($obj)) 
-            return $this->getAttribute($obj, 'name');
     }
 
     /**
@@ -351,6 +362,91 @@ class SchemaHandler implements FiletypeHandler
     }
 
     /**
+     * Gets the default value of the given column.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $column
+     * @return mixed
+     */
+    protected function getDefaultValue($column)
+    {
+        if (
+            !$this->isColumn($column) || 
+            !$this->hasChild($column, 'default')
+        ) {
+            return;
+        }
+
+        Registry::remove('default');
+        Registry::set('default', null);
+
+        $column->get('children')->forEachValue(function($child) {
+            if ($this->nameIs($child, 'default'))
+                Registry::set(
+                    'default', 
+                    $this->getAttribute($child, 'VALUE')
+                );
+        });
+
+        return Registry::get('default');
+    }
+
+
+
+
+
+    ////////////// INDEX HANDLING METHODS /////////////////////////////
+
+    /**
+     * Checks whether or not the given object is defining a table index.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $obj
+     * @return boolean
+     */
+    protected function isIndex($obj)
+    {
+        return $this->nameIs($obj, 'index');
+    }
+    
+    /**
+     * Gets the name of the index being defined for the table
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $obj
+     * @return string
+     */
+    protected function getIndexName($obj)
+    {
+        if ($this->isIndex($obj)) 
+            return $this->getAttribute($obj, 'name');
+    }
+
+    /**
+     * Checks if the index is defining a column to be unique
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $index
+     * @return boolean
+     */
+    protected function isUniqueColumnIndex($index)
+    {
+        if (!$this->isIndex($index))
+            return;
+        
+        Registry::remove('colCount');
+        Registry::remove('isUnique');
+        Registry::set('colCount', 0);
+        Registry::set('isUnique', false);
+
+        $index->get('children')->forEachValue(function($child) {
+            if ($this->nameIs($child, 'col'))
+                Registry::increment('colCount');
+
+            if ($this->nameIs($child, 'unique'))
+                Registry::set('isUnique', true);
+        });
+
+        return Registry::get('isUnique') && Registry::get('colCount') === 1;
+    }
+
+    /**
      * Checks whether or not the given index object defines primary keys.
      *
      * @param \BeAmado\OjsMigrator\MyObject $index
@@ -362,28 +458,33 @@ class SchemaHandler implements FiletypeHandler
     }
 
     /**
-     * Checks if the given object has the specified child
+     * Gets the columns of the index.
      *
-     * @param \BeAmado\OjsMigrator\MyObject $obj
-     * @param string $name
-     * @return boolean
+     * @param \BeAmado\OjsMigrator\MyObject $index
+     * @return array
      */
-    protected function hasChild($obj, $name)
+    protected function getIndexColumns($index)
     {
-        Registry::remove('hasChild');
-        Registry::set('hasChild', false);
-        Registry::remove('name');
-        Registry::set('name', $name);
+        if (!$this->isIndex($index))
+            return;
 
-        $obj->get('children')->forEachValue(function($child) {
-            if ($this->nameIs($child, Registry::get('name')))
-                Registry::set('hasChild', true);
+        Registry::remove('indexColumns');
+        Registry::set(
+            'indexColumns', 
+            Registry::get('MemoryManager')->create()
+        );
+
+        /** @var $o \BeAmado\OjsMigrator\MyObject */
+        $index->get('children')->forEachValue(function($o) {
+            if ($this->nameIs($o, 'col'))
+                Registry::get('indexColumns')->push($this->getTextValue($o));
         });
 
-        Registry::remove('name');
-
-        return Registry::get('hasChild');
+        return Registry::get('indexColumns')->toArray();
     }
+
+
+    ///////////////  MOST IMPORTANT METHOD  ///////////////////////////////////
 
     /**
      * Receives an object representing a table definition an outputs an array
@@ -408,37 +509,23 @@ class SchemaHandler implements FiletypeHandler
             ))
         );
 
-        $this->getIndexes($obj)->forEachValue(function($index) {
-            if ($this->isPkIndex($index)) {
-                $index->get('children')->forEachValue(function ($col) {
-                    if ($this->nameIs($col, 'col'))
-                        Registry::get('def')->get('primary_keys')
-                                            ->push($this->getTextValue($col));
-                });
-            }
-        });
-
         $this->getColumns($obj)->forEachValue(function($column) {
             Registry::remove('column');
             Registry::set(
                 'column', 
-                Registry::get('MemoryManager')->create()
+                Registry::get('MemoryManager')->create(array(
+                    'type' => $this->getDataType($column),
+                    'sql_type' => $this->getSqlType($column),
+                ))
             );
 
-            if (
-                $this->isPkColumn($column) &&
-                !\in_array(
-                    $this->getColumnName($column), 
-                    Registry::get('def')->get('primary_keys')->toArray()
-                )
-            ) {
+            if ($this->isPkColumn($column))
                 Registry::get('def')->get('primary_keys')
                                     ->push($this->getColumnName($column));
-            }
 
             Registry::get('column')->set(
                 'nullable',
-                $this->hasChild($column, 'notnull') ? true : false
+                $this->hasChild($column, 'notnull') ? false : true
             );
 
             if ($this->hasChild($column, 'key'))
@@ -450,7 +537,7 @@ class SchemaHandler implements FiletypeHandler
             if ($this->hasChild($column, 'default'))
                 Registry::get('column')->set(
                     'default', 
-                    $this->getAttribute($column, 'VALUE')
+                    $this->getDefaultValue($column)
                 );
 
             Registry::get('def')->get('columns')->set(
@@ -459,6 +546,21 @@ class SchemaHandler implements FiletypeHandler
             );
 
             Registry::remove('column');
+        });
+
+        $this->getIndexes($obj)->forEachValue(function($index) {
+            if ($this->isPkIndex($index)) {
+                $index->get('children')->forEachValue(function ($col) {
+                    if ($this->nameIs($col, 'col'))
+                        Registry::get('def')->get('primary_keys')
+                                            ->push($this->getTextValue($col));
+                });
+            }
+
+            if ($this->isUniqueColumnIndex($index))
+                Registry::get('def')->get('columns')
+                                    ->get($this->getIndexColumns($index)[0]) //the name of the column
+                                    ->set('unique', true);
         });
 
         return Registry::get('def')->toArray();
@@ -473,14 +575,82 @@ class SchemaHandler implements FiletypeHandler
      */
     public function createFromFile($filename)
     {
-        return new Schema(
-            (new XmlHandler())->createFromFile($filename)
+        if (!Registry::hasKey('XmlHandler'))
+            Registry::set('XmlHandler', new XmlHandler());
+
+        if (!Registry::hasKey('Schema'))
+            Registry::set('Schema', new Schema());
+
+        Registry::set(
+            'XmlSchema',
+            Registry::get('XmlHandler')->createFromFile($filename)
         );
+
+        if (!\is_a(
+            Registry::get('XmlSchema'), 
+            \BeAmado\OjsMigrator\MyObject::class
+        )) {
+            Registry::remove('XmlSchema');
+            return;
+        }
+
+        /** @var $table \BeAmado\OjsMigrator\MyObject */
+        Registry::get('XmlSchema')->get('children')
+                                  ->forEachValue(
+        function($table) {
+            if ($this->isTable($table))
+                Registry::get('Schema')->setDefinition(
+                    $this->getTableName($table),
+                    $this->formatTableDefinitionArray($table)
+                );
+        });
+
+        return Registry::get('Schema')->cloneInstance();
     }
 
     public function dumpToFile($filename, $content)
     {
+        if (!Registry::hasKey('JsonHandler'))
+            Registry::set('JsonHandler', new JsonHandler());
 
+        return Registry::get('JsonHandler')->dumpToFile(
+            $filename,
+            $content
+        );
+    }
+
+    public function saveSchema($schema)
+    {
+        if (!Registry::hasKey('SchemaDir'))
+            Registry::set(
+                'SchemaDir', 
+                \BeAmado\OjsMigrator\BASE_DIR 
+              . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'schema'
+            );
+
+        if (!Registry::hasKey('FileSystemManager'))
+            Registry::set('FileSystemManager', new FileSystemManager());
+
+        if (!Registry::get('FileSystemManager')->dirExists(
+            Registry::get('SchemaDir')
+        )) {
+            Registry::get('FileSystemManager')->createDir(
+                Registry::get('SchemaDir')
+            );
+        }
+
+        if (\is_a($schema, Schema::class)) {
+            $schema->forEachValue(function($table) {
+                $this->dumpToFile(
+                    Registry::get('SchemaDir') 
+                    . \BeAmado\OjsMigrator\DIR_SEPARATOR
+                    . $table->getName() . '.json',
+                    $table
+                );
+            });
+        } else if (\is_array($schema)) {
+            $this->saveSchema(new Schema($schema));
+        }
     }
 
     public function destroy()
@@ -490,5 +660,9 @@ class SchemaHandler implements FiletypeHandler
         Registry::remove('def');
         Registry::remove('indexes');
         Registry::remove('columns');
+        Registry::remove('default');
+        Registry::remove('column');
+        Registry::remove('indexColumns');
+        Registry::remove('XmlSchema');
     }
 }

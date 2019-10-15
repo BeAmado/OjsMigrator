@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Db\SchemaHandler;
+use BeAmado\OjsMigrator\Db\Schema;
+use BeAmado\OjsMigrator\Db\TableDefinition;
 
 /////////// interfaces ///////////////////
 use BeAmado\OjsMigrator\StubInterface;
@@ -14,6 +16,7 @@ use BeAmado\OjsMigrator\WorkWithXmlSchema;
 //////////////////////////////////////////
 
 use BeAmado\OjsMigrator\Util\FileSystemManager;
+use BeAmado\OjsMigrator\Util\XmlHandler;
 use BeAmado\OjsMigrator\Registry;
 
 class SchemaHandlerTest extends TestCase implements StubInterface
@@ -25,7 +28,7 @@ class SchemaHandlerTest extends TestCase implements StubInterface
     {
         parent::__construct();
 
-        $this->schema = (new SchemaHandler())->createFromFile(
+        $this->schema = (new XmlHandler())->createFromFile(
             $this->getOjs2XmlSchemaFilename()
         );
     }
@@ -257,6 +260,50 @@ class SchemaHandlerTest extends TestCase implements StubInterface
         $this->assertEquals(
             $this->schemaArray()['journals'],
             $arr
+        );
+    }
+
+    public function testCreateSchemaFromOjsSchemaFile()
+    {
+        $schema = (new SchemaHandler())->createFromFile(
+            $this->getOjs2XmlSchemaFilename()
+        );
+
+        $this->assertInstanceOf(
+            TableDefinition::class,
+            $schema->getDefinition('sections')
+        );
+    }
+
+    public function testCreateSchemaJsonFile()
+    {
+        $schema = (new SchemaHandler())->createFromFile(
+            $this->getOjs2XmlSchemaFilename()
+        );
+
+        $filename = $this->getDataDir() . $this->sep() . 'ojs_schema.json';
+
+        (new SchemaHandler())->dumpToFile(
+            $filename,
+            $schema
+        );
+
+        $this->assertTrue((new FileSystemManager())->fileExists($filename));
+    }
+
+    public function testSaveSchema()
+    {
+        $schema = (new SchemaHandler())->createFromFile(
+            $this->getOjs2XmlSchemaFilename()
+        );
+
+        (new SchemaHandler())->saveSchema($schema);
+
+        $this->assertTrue(
+            (new FileSystemManager())->fileExists(
+                \BeAmado\OjsMigrator\BASE_DIR . $this->sep()
+              . 'schema' . $this->sep() . 'journals.json'
+            )
         );
     }
 }

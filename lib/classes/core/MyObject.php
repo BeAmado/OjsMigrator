@@ -103,6 +103,8 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
             }
         }
         unset($this->values);
+
+        Registry::remove('objClass');
     }
 
     /**
@@ -215,7 +217,7 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
         return $newArr;
     }
 
-    public function cloneInstance()
+    public function cloneInstance($class = null)
     {
         if (empty($this->values)) {
             return new MyObject($this->getValue());
@@ -239,7 +241,10 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
             }
         }
 
-        return new MyObject($vals);
+        if ($class === null)
+            $class = \get_class($this);
+
+        return new $class($vals);
     }
 
     /**

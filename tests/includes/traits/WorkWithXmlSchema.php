@@ -159,10 +159,9 @@ trait WorkWithXmlSchema
                     'journal_id' => array(
                         'type' => 'integer',
                         'sql_type' => 'bigint',
-                        'nullable' => false,
-                        'default' => null,
                         'auto_increment' => true,
                         'primary_key' => true,
+                        'nullable' => true,
                     ),
                     'path' => array(
                         'type' => 'string',
@@ -180,7 +179,6 @@ trait WorkWithXmlSchema
                         'type' => 'string',
                         'sql_type' => 'varchar(5)',
                         'nullable' => false,
-                        'default' => 'en',
                     ),
                     'enabled' => array(
                         'type' => 'integer',

@@ -6,6 +6,11 @@ use \BeAmado\OjsMigrator\Util\MemoryManager;
 
 class TableDefinition extends MyObject
 {
+    public function getName()
+    {
+        return $this->get('name')->getValue();
+    }
+
     public function hasColumn($colName)
     {
         if (!$this->hasAttribute('columns')) {

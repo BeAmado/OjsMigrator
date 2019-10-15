@@ -49,4 +49,17 @@ class Registry
     {
         return \count(self::$data);
     }
+
+    public static function increment($key)
+    {
+        if (
+            !self::hasKey($key) || //does not have the key
+            !\is_numeric(self::$data[$key]) || // is not a number
+            \strpos('' . self::$data[$key], '.') !== false // is a float
+        ) {
+            return;
+        }
+
+        self::$data[$key]++;
+    }
 }
