@@ -289,6 +289,8 @@ class SchemaHandlerTest extends TestCase implements StubInterface
         );
 
         $this->assertTrue((new FileSystemManager())->fileExists($filename));
+
+        (new FileSystemManager())->removeFile($filename);
     }
 
     public function testSaveSchema()
@@ -305,5 +307,7 @@ class SchemaHandlerTest extends TestCase implements StubInterface
               . 'schema' . $this->sep() . 'journals.json'
             )
         );
+
+        (new FileSystemManager())->removeWholeDir(Registry::get('SchemaDir'));
     }
 }

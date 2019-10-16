@@ -621,15 +621,16 @@ class SchemaHandler implements FiletypeHandler
 
     public function saveSchema($schema)
     {
+        if (!Registry::hasKey('FileSystemManager'))
+            Registry::set('FileSystemManager', new FileSystemManager());
+
         if (!Registry::hasKey('SchemaDir'))
             Registry::set(
                 'SchemaDir', 
-                \BeAmado\OjsMigrator\BASE_DIR 
-              . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'schema'
+                Registry::get('FileSystemManager')->formPathFromBaseDir(array(
+                    'schema'
+                ))
             );
-
-        if (!Registry::hasKey('FileSystemManager'))
-            Registry::set('FileSystemManager', new FileSystemManager());
 
         if (!Registry::get('FileSystemManager')->dirExists(
             Registry::get('SchemaDir')
@@ -642,9 +643,10 @@ class SchemaHandler implements FiletypeHandler
         if (\is_a($schema, Schema::class)) {
             $schema->forEachValue(function($table) {
                 $this->dumpToFile(
-                    Registry::get('SchemaDir') 
-                    . \BeAmado\OjsMigrator\DIR_SEPARATOR
-                    . $table->getName() . '.json',
+                    Registry::get('FileSystemManager')->formPath(array(
+                        Registry::get('SchemaDir'),
+                        $table->getName() . '.json'
+                    )),
                     $table
                 );
             });
