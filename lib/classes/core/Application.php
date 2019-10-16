@@ -12,6 +12,7 @@ use \BeAmado\OjsMigrator\Util\IoManager;
 use \BeAmado\OjsMigrator\Util\ConfigHandler;
 use \BeAmado\OjsMigrator\Util\FileHandler;
 use \BeAmado\OjsMigrator\Util\XmlHandler;
+use \BeAmado\OjsMigrator\Util\JsonHandler;
 use \BeAmado\OjsMigrator\Db\SchemaHandler;
 use \BeAmado\OjsMigrator\Db\DbHandler;
 
@@ -35,6 +36,7 @@ class Application
         Registry::set('DbHandler', new DbHandler());
         Registry::set('XmlHandler', new XmlHandler());
         Registry::set('SchemaHandler', new SchemaHandler());
+        Registry::set('JsonHandler', new JsonHandler());
     }
 
     protected function setSchemaDir()
@@ -43,6 +45,61 @@ class Application
             'SchemaDir',
             BASE_DIR . DIR_SEPARATOR . 'schema'
         );
+    }
+
+    /**
+     * 
+     * 
+     * @param \BeAmado\OjsMigrator\MyObject $xml
+     * @return string
+     */
+    protected function getSchemaFile($xml)
+    {
+        if (\strtolower($xml->get('name')->getValue()) !== 'schema')
+            return;
+
+        return Registry::get('FileSystemManager')->formPath(
+            \array_merge(
+                \explode(
+                    DIR_SEPARATOR,
+                    Registry::get('OjsDir')
+                ),
+                \explode(
+                    '/', 
+                    $xml->get('attributes')->get('file')->getValue()
+                )
+            )
+        );
+    }
+
+    /**
+     * 
+     * 
+     * @param \BeAmado\OjsMigrator\MyObject $xml
+     * @return \BeAmado\OjsMigrator\Db\Schema
+     */
+    protected function getSchema($xml)
+    {
+        return Registry::get('SchemaHandler')->createFromFile(
+            $this->getSchemaFile($xml)
+        );
+    }
+
+    /**
+     * Saves the table definitions from the schema that are in the files 
+     * indicated in the xml.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $xml
+     * @return void
+     */
+    protected function saveDefinitionsFromSchema($xml)
+    {
+        $xml->get('children')->forEachValue(function($o) {
+            if (\strtolower($o->get('name')->getValue()) !== 'schema')
+                return;
+
+            Registry::get('SchemaHandler')->saveSchema($this->getSchema($o));
+        });
     }
 
     protected function loadSchema()
@@ -58,6 +115,9 @@ class Application
             );
 
         $vars = Registry::get('MemoryManager')->create();
+
+        // setting the schema locations file to be 
+        // [ojs_dir]/dbscripts/xml/install.xml
         $vars->set(
             'schemaLocationsFile',
             Registry::get('FileSystemManager')->formPath(\array_merge(
@@ -70,6 +130,7 @@ class Application
             ))
         );
 
+        // xmlContent will be the data in the file dbscripts/xml/install.xml
         $vars->set(
             'xmlContent',
             Registry::get('XmlHandler')->createFromFile(
@@ -77,34 +138,9 @@ class Application
             )
         );
 
-        $vars->get('xmlContent')->get('children')->forEachValue(function($o) {
-            if (\strtolower($o->get('name')->getValue()) !== 'schema')
-                return;
+        $this->saveDefinitionsFromSchema($vars->get('xmlContent'));
 
-            Registry::remove('schema');
-            //var_dump(Registry::get('OjsDir'));
-            Registry::set(
-                'schema',
-                Registry::get('SchemaHandler')->createFromFile(
-                    Registry::get('FileSystemManager')->formPath(
-                        \array_merge(
-                            \explode(
-                                DIR_SEPARATOR,
-                                Registry::get('OjsDir')
-                            ),
-                            \explode(
-                                '/', 
-                                $o->get('attributes')->get('file')->getValue()
-                            )
-                        )
-                    )
-                )
-            );
 
-            Registry::get('SchemaHandler')->saveSchema(Registry::get('schema'));
-        });
-
-        Registry::remove('schema');
         Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
     }
@@ -116,30 +152,15 @@ class Application
         );
     }
 
-    protected function setOjsDir($test = true)
+    protected function setOjsDir($dir = null)
     {
-        if ($test) {
-            Registry::get('ArchiveManager')->tar(
-                'xzf',
-                Registry::get('FileSystemManager')->formPathFromBaseDir(array(
-                    'tests',
-                    '_data',
-                    'ojs2.tar.gz',
-                )),
-                BASE_DIR . DIR_SEPARATOR . 'sandbox'
-            );
+        if (!Registry::hasKey('FileSystemManager'))
+            Registry::set('FileSystemManager', new FileSystemManager());
 
-            Registry::set(
-                'OjsDir',
-                Registry::get('FileSystemManager')->formPathFromBaseDir(array(
-                    'sandbox',
-                    'ojs2',
-                    'public_html',
-                ))
-            );
-
-            return;
-        }
+        Registry::set(
+            'OjsDir',
+            $dir ?: Registry::get('FileSystemManager')->parentDir(BASE_DIR)
+        );
             
     }
 
