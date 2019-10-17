@@ -28,9 +28,8 @@ class Application
 
     protected function loadHandlers()
     {
-        if (!Registry::hasKey('ConfigHandler')) {
+        if (!Registry::hasKey('ConfigHandler'))
             Registry::set('ConfigHandler', new ConfigHandler());
-        }
 
         Registry::set('FileHandler', new FileHandler());
         Registry::set('DbHandler', new DbHandler());
@@ -139,7 +138,6 @@ class Application
         );
 
         $this->saveDefinitionsFromSchema($vars->get('xmlContent'));
-
 
         Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
