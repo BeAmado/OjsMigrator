@@ -122,6 +122,8 @@ file_put_contents(
     $config
 );
 
+\BeAmado\OjsMigrator\Registry::clear();
+
 \BeAmado\OjsMigrator\Registry::set(
     'configFile',
     $vars->get('ojs2ConfigFile')->getValue()
@@ -131,6 +133,8 @@ file_put_contents(
     'ConfigHandler',
     new \BeAmado\OjsMigrator\Util\ConfigHandler()
 );
+
+var_dump(\BeAmado\OjsMigrator\Registry::listKeys());
 
 (new \BeAmado\OjsMigrator\Util\MemoryManager())->destroy($vars);
 unset($vars);

@@ -7,12 +7,12 @@ class StatementHandler
     /**
      * Creates a statement using the query identified by the name.
      * 
-     * @param string $name
+     * @param string $query
      * @return boolean
      */
-    public function create($name)
+    public function create($query)
     {
-
+        return new MyStatement($query);
     }
 
     /**

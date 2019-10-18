@@ -17,6 +17,9 @@ class ConnectionManager
 
     public function getConnection()
     {
+        if (!Registry::hasKey('connection'))
+            $this->setConnection();
+
         return Registry::get('connection');
     }
 

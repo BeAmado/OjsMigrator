@@ -165,12 +165,12 @@ class Application
     /**
      * Loads the Handlers and Managers
      */
-    protected function preload()
+    protected function preload($args)
     {
         $this->loadManagers();
         $this->loadHandlers();
 
-        $this->setOjsDir(true);
+        $this->setOjsDir($args['OjsDir']);
 
         $this->setSchemaDir();
         $this->loadSchema();
@@ -182,9 +182,11 @@ class Application
         Registry::clear();
     }
 
-    public function run()
+    public function run($ojsDir = null)
     {
-        $this->preload();
+        $this->preload(array(
+            'OjsDir' => $ojsDir,
+        ));
         Registry::get('IoManager')->writeToStdout(
             '############### OJS journal migration #################' . PHP_EOL
         );
