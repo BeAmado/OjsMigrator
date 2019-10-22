@@ -14,8 +14,6 @@ class MyStatement extends MyObject
     {
         parent::__construct();
         $this->setQuery($query);
-        if ($this->hasAttribute('query'))
-            $this->create();
     }
 
     /**
@@ -28,6 +26,7 @@ class MyStatement extends MyObject
     {
         if (\is_string($query))
             $this->set('query', $query);
+            $this->createStmt();
     }
 
     /**
@@ -46,7 +45,7 @@ class MyStatement extends MyObject
      *
      * @return void
      */
-    protected function create()
+    protected function createStmt()
     {
         $this->set(
             'stmt',
@@ -66,6 +65,37 @@ class MyStatement extends MyObject
             return $this->get('stmt')->getValue();
     }
 
+    protected function setParameter($name, $value)
+    {
+        if (!$this->attribute('params'))
+            $this->set('params', array());
+        
+        $this->get('params')->set(
+            $name,
+            $value
+        );
+    }
+
+    protected function getParameter($name)
+    {
+        if (
+            !$this->hasAttribute('params') ||
+            !$this->get('params')->hasAttribute($name)
+        ) {
+            return;
+        }
+
+        return $this->get('params')->get($name)->getValue();
+    }
+
+    protected function getParameters()
+    {
+        if (!$this->hasAttribute('params'))
+            return;
+
+        return $this->get('params')->toArray();
+    }
+
     /**
      * Binds a parameter to the prepared statement.
      *
@@ -75,7 +105,16 @@ class MyStatement extends MyObject
      */
     protected function bindParameter($name, $data)
     {
-        return $this->getStmt()->bindParam($name, $data);
+        if ($this->getStmt()->bindParam($name, $data)) {
+            $this->setParameter(
+                $name,
+                $data
+            );
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

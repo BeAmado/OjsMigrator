@@ -134,8 +134,6 @@ file_put_contents(
     new \BeAmado\OjsMigrator\Util\ConfigHandler()
 );
 
-var_dump(\BeAmado\OjsMigrator\Registry::listKeys());
-
 (new \BeAmado\OjsMigrator\Util\MemoryManager())->destroy($vars);
 unset($vars);
 (new \BeAmado\OjsMigrator\Util\MemoryManager())->destroy($config);
