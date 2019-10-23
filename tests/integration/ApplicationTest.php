@@ -104,49 +104,4 @@ class ApplicationTest extends TestCase implements StubInterface
         );
     }
 
-    public function testLoadSchema()
-    {
-
-        Registry::clear();
-        $this->getStub()->callMethod('loadManagers');
-        $this->getStub()->callMethod('loadHandlers');
-
-        $this->getStub()->callMethod(
-            'setOjsDir',
-            $this->getDataDir() 
-            . $this->sep() . 'sandbox' 
-            . $this->sep() . 'ojs2' 
-            . $this->sep() . 'public_html'
-        );
-
-        //extract the ojs2 dir to /tests/_data/sandbox
-        Registry::get('ArchiveManager')->tar(
-            'xzf',
-            $this->getDataDir() . $this->sep() . 'ojs2.tar.gz',
-            $this->getDataDir() . $this->sep() . 'sandbox'
-        );
-
-        $this->getStub()->callMethod('loadSchema');
-
-        $tableDefinitions = array_map(
-            'basename',
-            Registry::get('FileSystemManager')->listdir(
-                Registry::get('SchemaDir')
-            )
-        );
-
-        $this->assertTrue(
-            in_array('access_keys.json', $tableDefinitions) &&
-            in_array('roles.json', $tableDefinitions) &&
-            in_array('users.json', $tableDefinitions) &&
-            in_array('user_settings.json', $tableDefinitions) &&
-            in_array('announcements.json', $tableDefinitions) &&
-            in_array('journals.json', $tableDefinitions) &&
-            in_array('announcement_settings.json', $tableDefinitions) &&
-            in_array('journal_settings.json', $tableDefinitions) &&
-            in_array('plugin_settings.json', $tableDefinitions) &&
-            in_array('issues.json', $tableDefinitions) &&
-            in_array('issue_settings.json', $tableDefinitions)
-        );
-    }
 }

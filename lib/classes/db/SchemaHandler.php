@@ -6,6 +6,7 @@ use \BeAmado\OjsMigrator\Util\JsonHandler;
 use \BeAmado\OjsMigrator\Util\MemoryManager;
 use \BeAmado\OjsMigrator\Util\FileSystemManager;
 use \BeAmado\OjsMigrator\Registry;
+use \BeAmado\OjsMigrator\Maestro;
 use \BeAmado\OjsMigrator\FiletypeHandler; //interface
 
 class SchemaHandler implements FiletypeHandler
@@ -653,6 +654,144 @@ class SchemaHandler implements FiletypeHandler
         } else if (\is_array($schema)) {
             $this->saveSchema(new Schema($schema));
         }
+    }
+
+    /**
+     * Sets directory where the table definitions .json files will be stored.
+     * If no directory is specified it will be set to [...]/OjsMigrator/schema
+     *
+     * @param string $dir
+     * @return void
+     */
+    public function setSchemaDir($dir = null)
+    {
+        if (Registry::get('FileSystemManager')->dirExists($dir)) {
+            Registry::set('SchemaDir', $dir);
+            return;
+        }
+
+        Registry::set(
+            'SchemaDir',
+            BASE_DIR . DIR_SEPARATOR . 'schema'
+        );
+    }
+
+    /**
+     * 
+     * 
+     * @param \BeAmado\OjsMigrator\MyObject $xml
+     * @return string
+     */
+    protected function getSchemaFile($xml)
+    {
+        if (\strtolower($xml->get('name')->getValue()) !== 'schema')
+            return;
+
+        if (!Registry::hasKey('OjsDir'))
+            Maestro::setOjsDir();
+
+        return Registry::get('FileSystemManager')->formPath(
+            \array_merge(
+                \explode(
+                    DIR_SEPARATOR,
+                    Registry::get('OjsDir')
+                ),
+                \explode(
+                    '/', 
+                    $xml->get('attributes')->get('file')->getValue()
+                )
+            )
+        );
+    }
+
+    /**
+     * 
+     * 
+     * @param \BeAmado\OjsMigrator\MyObject $xml
+     * @return \BeAmado\OjsMigrator\Db\Schema
+     */
+    protected function getSchema($xml)
+    {
+        return Registry::get('SchemaHandler')->createFromFile(
+            $this->getSchemaFile($xml)
+        );
+    }
+
+    /**
+     * Saves the table definitions from the schema that are in the files 
+     * indicated in the xml.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $xml
+     * @return void
+     */
+    protected function saveDefinitionsFromSchema($xml)
+    {
+        $xml->get('children')->forEachValue(function($o) {
+            if (\strtolower($o->get('name')->getValue()) !== 'schema')
+                return;
+
+            Registry::get('SchemaHandler')->saveSchema($this->getSchema($o));
+        });
+    }
+
+    public function loadAllSchema()
+    {
+        if (!Registry::hasKey('SchemaDir'))
+            $this->setSchemaDir();
+
+        if (!Registry::get('FileSystemManager')->dirExists(
+            Registry::get('SchemaDir')
+        ))
+            Registry::get('FileSystemManager')->createDir(
+                Registry::get('SchemaDir')
+            );
+
+        $vars = Registry::get('MemoryManager')->create();
+
+        // setting the schema locations file to be 
+        // [ojs_dir]/dbscripts/xml/install.xml
+        $vars->set(
+            'schemaLocationsFile',
+            Registry::get('FileSystemManager')->formPath(\array_merge(
+                \explode(DIR_SEPARATOR, Registry::get('OjsDir')),
+                array(
+                    'dbscripts',
+                    'xml',
+                    'install.xml',
+                )
+            ))
+        );
+
+        // xmlContent will be the data in the file dbscripts/xml/install.xml
+        $vars->set(
+            'xmlContent',
+            Registry::get('XmlHandler')->createFromFile(
+                $vars->get('schemaLocationsFile')->getValue()
+            )
+        );
+
+        $this->saveDefinitionsFromSchema($vars->get('xmlContent'));
+
+        Registry::get('MemoryManager')->destroy($vars);
+        unset($vars);
+    }
+
+    public function removeSchemaDir()
+    {
+        Registry::get('FileSystemManager')->removeWholeDir(
+            Registry::get('SchemaDir')
+        );
+    }
+
+    /**
+     * Gets the TableDefinition instance of the specified table.
+     *
+     * @param string $name
+     * @return \BeAmado\OjsMigrator\Db\TableDefinition
+     */
+    public function getTableDefinition($name)
+    {
+        
     }
 
     public function destroy()

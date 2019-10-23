@@ -17,7 +17,7 @@ class Registry
 
     public static function get($key)
     {
-        if (!self::hasKey($key)) {
+        /*if (!self::hasKey($key)) {
             self::set(
                 $key,
                 (new Factory())->create($key)
@@ -27,9 +27,9 @@ class Registry
                 self::remove($key);
                 return;
             }
-        }
+        }*/
 
-        return self::$data[$key];
+        return self::hasKey($key) ? self::$data[$key] : Maestro::get($key);
     }
 
     public static function set($key, $value)

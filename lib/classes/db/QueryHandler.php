@@ -88,6 +88,13 @@ class QueryHandler
      */
     public function createQueryGetLast($tableDefinition)
     {
+        if (
+            !\method_exists($tableDefinition, 'getPrimaryKeys') ||
+            !\method_exists($tableDefinition, 'getName')
+        ) {
+            return;
+        }
+
         return 'SELECT '
           . \implode(', ', $tableDefinition->getPrimaryKeys())
           . ' FROM ' . $tableDefinition->getName()
