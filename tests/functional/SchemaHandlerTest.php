@@ -53,6 +53,11 @@ class SchemaHandlerTest extends TestCase implements StubInterface
         (new FileSystemManager())->removeWholeDir($this->sandbox);
     }
 
+    public static function tearDownAfterClass() : void
+    {
+        Registry::get('SchemaHandler')->removeSchemaDir();
+    }
+
     public function testCanReadSchemaFromTheOjsSchemaFile()
     {
         $this->assertEquals(
@@ -349,6 +354,28 @@ class SchemaHandlerTest extends TestCase implements StubInterface
             in_array('plugin_settings.json', $tableDefinitions) &&
             in_array('issues.json', $tableDefinitions) &&
             in_array('issue_settings.json', $tableDefinitions)
+        );
+    }
+
+    public function testGetUsersTableDefinition()
+    {
+        Registry::get('ArchiveManager')->tar(
+            'xzf',
+            $this->getDataDir() . $this->sep() . 'ojs2.tar.gz',
+            $this->sandbox
+        );
+
+        $ojs2PublicHtmlDir = $this->sandbox 
+            . $this->sep() . 'ojs2' 
+            . $this->sep() . 'public_html';
+
+        Maestro::setOjsDir($ojs2PublicHtmlDir);
+
+        $def = Registry::get('SchemaHandler')->getTableDefinition('users');
+
+        $this->assertEquals(
+            array('user_id'),
+            $def->getPrimaryKeys()
         );
     }
 }

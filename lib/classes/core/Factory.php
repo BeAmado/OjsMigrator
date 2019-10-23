@@ -9,6 +9,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\FileHandler();
     }
 
+    protected function createJsonHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\JsonHandler();
+    }
+
     protected function createSchemaHandler()
     {
         return new \BeAmado\OjsMigrator\Db\SchemaHandler();

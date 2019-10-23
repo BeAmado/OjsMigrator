@@ -745,6 +745,40 @@ class SchemaHandler implements FiletypeHandler
         );
     }
 
+    protected function schemaDirExists()
+    {
+        return Registry::get('FileSystemManager')->dirExists(
+            Registry::get('SchemaDir')
+        );
+    }
+
+    /**
+     * Finds the file where the table schema is defined.
+     *
+     * @param string $name
+     * @return string
+     */
+    protected function getTableDefinitionFile($name)
+    {
+        if (!Registry::get('FileSystemManager')->dirExists(
+            Registry::get('OjsDir')
+        ))
+            $this->loadAllSchema();
+
+        Registry::set(
+            'filename',
+             Registry::get('FileSystemManager')->formPath(array(
+                 Registry::get('SchemaDir'),
+                 $name . '.json'
+             ))
+        );
+
+        if (Registry::get('FileSystemManager')->fileExists(
+            Registry::get('filename')
+        ))
+            return Registry::get('filename');
+    }
+
     /**
      * Gets the TableDefinition instance of the specified table.
      *
@@ -753,7 +787,18 @@ class SchemaHandler implements FiletypeHandler
      */
     public function getTableDefinition($name)
     {
-        
+        if (!$this->schemaDirExists())
+            $this->loadAllSchema();
+
+
+        if (!$this->getTableDefinitionFile($name))
+            return;
+    
+        return new TableDefinition(
+            Registry::get('JsonHandler')->createFromFile(
+                $this->getTableDefinitionFile($name)
+            )
+        );
     }
 
     public function destroy()
@@ -767,5 +812,6 @@ class SchemaHandler implements FiletypeHandler
         Registry::remove('column');
         Registry::remove('indexColumns');
         Registry::remove('XmlSchema');
+        Registry::remove('filename');
     }
 }

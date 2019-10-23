@@ -28,4 +28,16 @@ class TableDefinitionTest extends TestCase implements StubInterface
             !$def->isNullable('journal_id')
         );
     }
+
+    public function testGetJournalsTablePrimaryKeys()
+    {
+        $def = new TableDefinition(
+            $this->getStub()->schemaArray()['journals']
+        );
+
+        $this->assertEquals(
+            array('journal_id'),
+            $def->getPrimaryKeys()
+        );
+    }
 }

@@ -4,9 +4,35 @@ use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Db\QueryHandler;
 use BeAmado\OjsMigrator\TestStub;
 use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Registry;
+use BeAmado\OjsMigrator\WorkWithFiles;
+use BeAmado\OjsMigrator\Maestro;
 
 class QueryHandlerTest extends TestCase implements StubInterface
 {
+    use WorkWithFiles;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->sandbox = $this->getDataDir() . $this->sep() . 'sandbox';
+    }
+
+    protected function setUp() : void
+    {
+        Registry::get('FileSystemManager')->createDir($this->sandbox);
+    }
+
+    protected function tearDown() : void
+    {
+        Registry::get('FileSystemManager')->removeWholeDir($this->sandbox);
+    }
+
+    public static function tearDownAfterClass() : void
+    {
+        Registry::get('SchemaHandler')->removeSchemaDir();
+    }
+
     public function getStub()
     {
         return new class extends QueryHandler {
@@ -75,8 +101,22 @@ class QueryHandlerTest extends TestCase implements StubInterface
 
     public function testGetTheLastInsertedIdQueryForUsers()
     {
+        Registry::get('ArchiveManager')->tar(
+            'xzf',
+            $this->getDataDir() . $this->sep() . 'ojs2.tar.gz',
+            $this->sandbox
+        );
+
+        $ojs2PublicHtmlDir = $this->sandbox 
+            . $this->sep() . 'ojs2' 
+            . $this->sep() . 'public_html';
+
+        Maestro::setOjsDir($ojs2PublicHtmlDir);
+        
         $expected = 'SELECT user_id FROM users ORDER BY user_id DESC LIMIT 1';
-        $query = (new QueryHandler())->createQueryGetLast('users');
+        $query = (new QueryHandler())->createQueryGetLast(
+            Registry::get('SchemaHandler')->getTableDefinition('users')
+        );
 
         $this->assertSame(
             $expected,

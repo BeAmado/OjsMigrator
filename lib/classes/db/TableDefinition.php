@@ -156,4 +156,14 @@ class TableDefinition extends MyObject
 
         return $size;
     }
+
+    /**
+     * Gets the table primary keys
+     *
+     * @return array
+     */
+    public function getPrimaryKeys()
+    {
+        return $this->get('primary_keys')->toArray();
+    }
 }
