@@ -55,6 +55,8 @@ class ConfigHandlerTest extends TestCase implements StubInterface
         } else if (array_search('pdo_mysql', get_loaded_extensions())) {
             $expected['driver'] = 'mysql';
             $expected['name'] = 'tests_ojs';
+        } else {
+            $this->markTestSkipped('Does not have either sqlite or mysql');
         }
 
         $this->assertEquals(

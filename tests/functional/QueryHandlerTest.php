@@ -78,8 +78,6 @@ class QueryHandlerTest extends TestCase implements StubInterface
         $expected = 'SELECT user_id FROM users ORDER BY user_id DESC LIMIT 1';
         $query = (new QueryHandler())->createQueryGetLast('users');
 
-        $appStub()->callMethod('finish');
-
         $this->assertSame(
             $expected,
             $query

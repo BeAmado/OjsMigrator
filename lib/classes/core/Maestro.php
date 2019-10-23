@@ -87,7 +87,7 @@ class Maestro
      * @param string $dir
      * @return void
      */
-    public static function setSchemaDir($dir)
+    public static function setSchemaDir($dir = null)
     {
         if (
             $dir !== null && 

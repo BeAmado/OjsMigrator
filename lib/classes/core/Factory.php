@@ -9,6 +9,21 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\FileHandler();
     }
 
+    protected function createSchemaHandler()
+    {
+        return new \BeAmado\OjsMigrator\Db\SchemaHandler();
+    }
+
+    protected function createXmlHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\XmlHandler();
+    }
+
+    protected function createArchiveManager()
+    {
+        return new \BeAmado\OjsMigrator\Util\ArchiveManager();
+    }
+
     protected function createFileSystemManager()
     {
         return new \BeAmado\OjsMigrator\Util\FileSystemManager();

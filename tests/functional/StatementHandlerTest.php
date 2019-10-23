@@ -7,14 +7,15 @@ use BeAmado\OjsMigrator\Registry;
 
 class StatementHandlerTest extends TestCase
 {
-    public static function setUpBeforeClass() : void
-    {
-        if (!Registry::hasKey('ConnectionManager'))
-            Registry::set('ConnectionManager', new ConnectionManager());
-    }
-
     public function testCanCreateAStatement()
     {
+        if (
+            !array_search('pdo_sqlite', get_loaded_extensions()) ||
+            !array_search('pdo_mysql', get_loaded_extensions())
+        ) {
+            $this->markTestSkipped('None of the database drivers available');
+        }
+
         $this->assertInstanceOf(
             \BeAmado\OjsMigrator\Db\MyStatement::class,
             (new StatementHandler())->create(

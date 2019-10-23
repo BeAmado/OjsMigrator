@@ -7,14 +7,15 @@ use BeAmado\OjsMigrator\Registry;
 
 class MyStatementTest extends TestCase
 {
-    public static function setUpBeforeClass() : void
-    {
-        if (!Registry::hasKey('ConnectionManager'))
-            Registry::set('ConnectionManager', new ConnectionManager());
-    }
-
     public function testCreateStatement()
     {
+        if (
+            !array_search('pdo_sqlite', get_loaded_extensions()) ||
+            !array_search('pdo_mysql', get_loaded_extensions())
+        ) {
+            $this->markTestSkipped('None of the database drivers available');
+        }
+
         $query = 'SELECT * FROM users WHERE name = "Edil" AND level = "superstar"';
         $stmt = new MyStatement($query);
 

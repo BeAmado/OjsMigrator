@@ -282,6 +282,9 @@ class FileSystemManager
      */
     public function removeWholeDir($dir)
     {
+        if (!$this->dirExists($dir))
+            return;
+
         $vars = (new MemoryManager())->create(array(
             'dir' => $dir,
             'ls' => $this->listdir($dir),

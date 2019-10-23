@@ -622,17 +622,6 @@ class SchemaHandler implements FiletypeHandler
 
     public function saveSchema($schema)
     {
-        if (!Registry::hasKey('FileSystemManager'))
-            Registry::set('FileSystemManager', new FileSystemManager());
-
-        if (!Registry::hasKey('SchemaDir'))
-            Registry::set(
-                'SchemaDir', 
-                Registry::get('FileSystemManager')->formPathFromBaseDir(array(
-                    'schema'
-                ))
-            );
-
         if (!Registry::get('FileSystemManager')->dirExists(
             Registry::get('SchemaDir')
         )) {
@@ -657,26 +646,6 @@ class SchemaHandler implements FiletypeHandler
     }
 
     /**
-     * Sets directory where the table definitions .json files will be stored.
-     * If no directory is specified it will be set to [...]/OjsMigrator/schema
-     *
-     * @param string $dir
-     * @return void
-     */
-    public function setSchemaDir($dir = null)
-    {
-        if (Registry::get('FileSystemManager')->dirExists($dir)) {
-            Registry::set('SchemaDir', $dir);
-            return;
-        }
-
-        Registry::set(
-            'SchemaDir',
-            BASE_DIR . DIR_SEPARATOR . 'schema'
-        );
-    }
-
-    /**
      * 
      * 
      * @param \BeAmado\OjsMigrator\MyObject $xml
@@ -693,7 +662,7 @@ class SchemaHandler implements FiletypeHandler
         return Registry::get('FileSystemManager')->formPath(
             \array_merge(
                 \explode(
-                    DIR_SEPARATOR,
+                    \BeAmado\OjsMigrator\DIR_SEPARATOR,
                     Registry::get('OjsDir')
                 ),
                 \explode(
@@ -736,16 +705,6 @@ class SchemaHandler implements FiletypeHandler
 
     public function loadAllSchema()
     {
-        if (!Registry::hasKey('SchemaDir'))
-            $this->setSchemaDir();
-
-        if (!Registry::get('FileSystemManager')->dirExists(
-            Registry::get('SchemaDir')
-        ))
-            Registry::get('FileSystemManager')->createDir(
-                Registry::get('SchemaDir')
-            );
-
         $vars = Registry::get('MemoryManager')->create();
 
         // setting the schema locations file to be 
@@ -753,7 +712,10 @@ class SchemaHandler implements FiletypeHandler
         $vars->set(
             'schemaLocationsFile',
             Registry::get('FileSystemManager')->formPath(\array_merge(
-                \explode(DIR_SEPARATOR, Registry::get('OjsDir')),
+                \explode(
+                    \BeAmado\OjsMigrator\DIR_SEPARATOR, 
+                    Registry::get('OjsDir')
+                ),
                 array(
                     'dbscripts',
                     'xml',

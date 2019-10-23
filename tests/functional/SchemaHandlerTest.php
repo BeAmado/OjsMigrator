@@ -18,6 +18,7 @@ use BeAmado\OjsMigrator\WorkWithXmlSchema;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
 use BeAmado\OjsMigrator\Util\XmlHandler;
 use BeAmado\OjsMigrator\Registry;
+use BeAmado\OjsMigrator\Maestro;
 
 class SchemaHandlerTest extends TestCase implements StubInterface
 {
@@ -44,6 +45,7 @@ class SchemaHandlerTest extends TestCase implements StubInterface
     {
         $this->sandbox = $this->getDataDir() . $this->sep() . 'sandbox';
         (new FileSystemManager())->createDir($this->sandbox);
+        Registry::clear();
     }
 
     protected function tearDown() : void
@@ -313,23 +315,20 @@ class SchemaHandlerTest extends TestCase implements StubInterface
 
     public function testLoadSchema()
     {
-
-        $this->getStub()->callMethod(
-            'setOjsDir',
-            $this->getDataDir() 
-            . $this->sep() . 'sandbox' 
-            . $this->sep() . 'ojs2' 
-            . $this->sep() . 'public_html'
-        );
-
         //extract the ojs2 dir to /tests/_data/sandbox
         Registry::get('ArchiveManager')->tar(
             'xzf',
             $this->getDataDir() . $this->sep() . 'ojs2.tar.gz',
-            $this->getDataDir() . $this->sep() . 'sandbox'
+            $this->sandbox
         );
 
-        $this->getStub()->callMethod('loadSchema');
+        $ojs2PublicHtmlDir = $this->sandbox 
+            . $this->sep() . 'ojs2' 
+            . $this->sep() . 'public_html';
+
+        Maestro::setOjsDir($ojs2PublicHtmlDir);
+
+        Registry::get('SchemaHandler')->loadAllSchema();
 
         $tableDefinitions = array_map(
             'basename',
