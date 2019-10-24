@@ -8,7 +8,7 @@ trait WorkWithXmlSchema
 
     public function getOjs2XmlSchemaFilename()
     {
-        return $this->getOjs2PublicHtmlDir()
+        return $this->getOjsPublicHtmlDir()
             . $this->sep() . 'dbscripts'
             . $this->sep() . 'xml'
             . $this->sep() . 'ojs_schema.xml';

@@ -9,7 +9,7 @@ class ConnectionManager
     {
         Registry::set(
             'connection',
-            (new DbHandler())->createConnection(
+            Registry::get('DbHandler')->createConnection(
                 Registry::get('ConfigHandler')->getConnectionSettings()
             )
         );

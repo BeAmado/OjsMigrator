@@ -4,6 +4,18 @@ namespace BeAmado\OjsMigrator;
 
 class Factory
 {
+    ///////////////////////////// HANDLERS ///////////////////////////////////
+    
+    protected function createConfigHandler($configFile = null)
+    {
+        return new \BeAmado\OjsMigrator\Util\ConfigHandler($configFile);
+    }
+
+    protected function createDbHandler()
+    {
+        return new \BeAmado\OjsMigrator\Db\DbHandler();
+    }
+
     protected function createFileHandler()
     {
         return new \BeAmado\OjsMigrator\Util\FileHandler();
@@ -12,6 +24,11 @@ class Factory
     protected function createJsonHandler()
     {
         return new \BeAmado\OjsMigrator\Util\JsonHandler();
+    }
+
+    protected function createQueryHandler()
+    {
+        return new \BeAmado\OjsMigrator\Db\QueryHandler();
     }
 
     protected function createSchemaHandler()
@@ -24,9 +41,17 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\XmlHandler();
     }
 
+
+    ////////////////////////////// MANAGERS //////////////////////////////////
+
     protected function createArchiveManager()
     {
         return new \BeAmado\OjsMigrator\Util\ArchiveManager();
+    }
+
+    protected function createConnectionManager()
+    {
+        return new \BeAmado\OjsMigrator\Db\ConnectionManager();
     }
 
     protected function createFileSystemManager()

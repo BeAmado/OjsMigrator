@@ -13,6 +13,7 @@ use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\TestStub;
 use BeAmado\OjsMigrator\WorkWithFiles;
 use BeAmado\OjsMigrator\WorkWithXmlSchema;
+use BeAmado\OjsMigrator\WorkWithOjsDir;
 //////////////////////////////////////////
 
 use BeAmado\OjsMigrator\Util\FileSystemManager;
@@ -24,6 +25,18 @@ class SchemaHandlerTest extends TestCase implements StubInterface
 {
     use WorkWithFiles;
     use WorkWithXmlSchema;
+    use WorkWithOjsDir;
+
+    protected function setUp() : void
+    {
+        $this->prepareStage();
+    }
+
+    public static function tearDownAfterClass() : void
+    {
+        Registry::get('SchemaHandler')->removeSchemaDir();
+        Registry::clear();
+    }
 
     public function __construct()
     {
@@ -39,23 +52,6 @@ class SchemaHandlerTest extends TestCase implements StubInterface
         return new class extends SchemaHandler {
             use TestStub;
         };
-    }
-
-    protected function setUp() : void
-    {
-        $this->sandbox = $this->getDataDir() . $this->sep() . 'sandbox';
-        (new FileSystemManager())->createDir($this->sandbox);
-        Registry::clear();
-    }
-
-    protected function tearDown() : void
-    {
-        (new FileSystemManager())->removeWholeDir($this->sandbox);
-    }
-
-    public static function tearDownAfterClass() : void
-    {
-        Registry::get('SchemaHandler')->removeSchemaDir();
     }
 
     public function testCanReadSchemaFromTheOjsSchemaFile()
@@ -321,7 +317,7 @@ class SchemaHandlerTest extends TestCase implements StubInterface
     public function testLoadSchema()
     {
         //extract the ojs2 dir to /tests/_data/sandbox
-        Registry::get('ArchiveManager')->tar(
+        /*Registry::get('ArchiveManager')->tar(
             'xzf',
             $this->getDataDir() . $this->sep() . 'ojs2.tar.gz',
             $this->sandbox
@@ -331,7 +327,7 @@ class SchemaHandlerTest extends TestCase implements StubInterface
             . $this->sep() . 'ojs2' 
             . $this->sep() . 'public_html';
 
-        Maestro::setOjsDir($ojs2PublicHtmlDir);
+        Maestro::setOjsDir($ojs2PublicHtmlDir);*/
 
         Registry::get('SchemaHandler')->loadAllSchema();
 
@@ -359,7 +355,7 @@ class SchemaHandlerTest extends TestCase implements StubInterface
 
     public function testGetUsersTableDefinition()
     {
-        Registry::get('ArchiveManager')->tar(
+        /*Registry::get('ArchiveManager')->tar(
             'xzf',
             $this->getDataDir() . $this->sep() . 'ojs2.tar.gz',
             $this->sandbox
@@ -369,7 +365,7 @@ class SchemaHandlerTest extends TestCase implements StubInterface
             . $this->sep() . 'ojs2' 
             . $this->sep() . 'public_html';
 
-        Maestro::setOjsDir($ojs2PublicHtmlDir);
+        Maestro::setOjsDir($ojs2PublicHtmlDir);*/
 
         $def = Registry::get('SchemaHandler')->getTableDefinition('users');
 

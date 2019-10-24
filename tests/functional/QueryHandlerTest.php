@@ -114,7 +114,7 @@ class QueryHandlerTest extends TestCase implements StubInterface
         Maestro::setOjsDir($ojs2PublicHtmlDir);
         
         $expected = 'SELECT user_id FROM users ORDER BY user_id DESC LIMIT 1';
-        $query = (new QueryHandler())->createQueryGetLast(
+        $query = Registry::get('QueryHandler')->createQueryGetLast(
             Registry::get('SchemaHandler')->getTableDefinition('users')
         );
 

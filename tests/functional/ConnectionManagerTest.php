@@ -9,7 +9,7 @@ class ConnectionManagerTest extends TestCase
     public function testSetConnection()
     {
         if (
-            !array_search('pdo_sqlite', get_loaded_extensions()) ||
+            !array_search('pdo_sqlite', get_loaded_extensions()) &&
             !array_search('pdo_mysql', get_loaded_extensions())
         ) {
             $this->markTestSkipped('None of the database drivers available');

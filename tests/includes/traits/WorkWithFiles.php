@@ -16,27 +16,6 @@ trait WorkWithFiles
             . $this->sep() . '_data';
     }
 
-    public function getOjs2Dir()
-    {
-        return $this->getDataDir() 
-            . $this->sep() . 'ojs2';
-    }
-
-    public function getOjs2PublicHtmlDir()
-    {
-        return $this->getOjs2Dir() . $this->sep() . 'public_html';
-    }
-
-    public function getOjs2FilesDir()
-    {
-        return $this->getOjs2Dir() . $this->sep() . 'files';
-    }
-
-    public function getOjs2ConfigFile()
-    {
-        return $this->getOjs2PublicHtmlDir() . $this->sep() . 'config.inc.php';
-    }
-
     public function bandsAsArray()
     {
         return [
