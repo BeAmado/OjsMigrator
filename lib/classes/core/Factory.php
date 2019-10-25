@@ -59,6 +59,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\FileSystemManager();
     }
 
+    protected function createMemoryManager()
+    {
+        return new \BeAmado\OjsMigrator\Util\MemoryManager();
+    }
+
     /**
      * Creates an instance of the specified class passing the parameters to
      * the class constructor.

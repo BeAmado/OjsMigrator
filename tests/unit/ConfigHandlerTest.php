@@ -10,36 +10,50 @@ use BeAmado\OjsMigrator\StubInterface;
 //////////// traits /////////////////////////
 use BeAmado\OjsMigrator\TestStub;
 use BeAmado\OjsMigrator\WorkWithFiles;
+use BeAmado\OjsMigrator\WorkWithOjsDir;
 /////////////////////////////////////////////
 
 use BeAmado\OjsMigrator\Util\FileSystemManager;
 use BeAmado\OjsMigrator\Util\ArchiveManager;
+use BeAmado\OjsMigrator\Registry;
+use BeAmado\OjsMigrator\OjsScenarioTester;
 
 class ConfigHandlerTest extends TestCase implements StubInterface
 {
     use WorkWithFiles;
+    use WorkWithOjsDir;
+
+    public static function setUpBeforeClass() : void
+    {
+        (new OjsScenarioTester())->prepareStage();
+    }
+
+    public static function tearDownAfterClass() : void
+    {
+        (new OjsScenarioTester())->removeSandbox();
+    }
 
     public function getStub()
     {
-        return new class($this->getOjs2ConfigFile()) extends ConfigHandler {
+        return new class($this->getOjsConfigFile()) extends ConfigHandler {
             use TestStub;
         };
     }
 
     public function testCanRetrieveFilesDirLocation()
     {
-        $location = (new ConfigHandler($this->getOjs2ConfigFile()))
+        $location = Registry::get('ConfigHandler')
                     ->getFilesDir();
 
         $this->assertSame(
-            $this->getOjs2FilesDir(),
+            $this->getOjsFilesDir(),
             $location
         );
     }
 
     public function testCanRetrieveConnectionSettings()
     {
-        $connData = (new ConfigHandler($this->getOjs2ConfigFile()))
+        $connData = (new ConfigHandler($this->getOjsConfigFile()))
                     ->getConnectionSettings();
 
         $expected = array(
@@ -50,7 +64,7 @@ class ConfigHandlerTest extends TestCase implements StubInterface
 
         if (array_search('pdo_sqlite', get_loaded_extensions())) {
             $expected['driver'] = 'sqlite';
-            $expected['name'] = $this->getOjs2Dir() 
+            $expected['name'] = $this->getOjsDir() 
                 . $this->sep() . 'tests_ojs.db';
         } else if (array_search('pdo_mysql', get_loaded_extensions())) {
             $expected['driver'] = 'mysql';

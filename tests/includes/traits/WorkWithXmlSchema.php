@@ -4,8 +4,6 @@ namespace BeAmado\OjsMigrator;
 
 trait WorkWithXmlSchema
 {
-    //use WorkWithFiles;
-
     public function getOjs2XmlSchemaFilename()
     {
         return $this->getOjsPublicHtmlDir()

@@ -16,14 +16,16 @@ require_once(
 
 $fm = new \BeAmado\OjsMigrator\Util\FileSystemManager();
 
-foreach (array('interfaces', 'traits') as $directory) {
+foreach (array('classes', 'interfaces', 'traits') as $directory) {
     foreach ($fm->listdir(dirname(__FILE__) . $sep . $directory) as $filename) {
         require_once($filename);
     }
 }
 unset($directory);
 unset($filename);
+unset($fm);
 
+/*
 $vars = (new \BeAmado\OjsMigrator\Util\MemoryManager())->create();
 $vars->set('sep', $sep);
 
@@ -60,48 +62,6 @@ $vars->set(
     file($vars->get('ojs2ConfigTemplate')->getValue())
 );
 
-function setFilesDir($str, $vars)
-{
-    return str_replace(
-        '[ojs2_dir]',
-        $vars->get('ojs2Dir')->getValue(),
-        $str
-    );
-}
-
-function setDbName($vars)
-{
-    switch(getDbDriver()) {
-        case 'sqlite':
-            return $vars->get('ojs2Dir')->getValue()
-                . $vars->get('sep')->getValue() . 'tests_ojs.db';
-        case 'mysql':
-            return 'tests_ojs';
-    }
-}
-
-function getDbDriver()
-{
-    if (array_search('pdo_sqlite', get_loaded_extensions())) {
-        return 'sqlite';
-    } else if (array_search('pdo_mysql', get_loaded_extensions())) {
-        return 'mysql';
-    }
-}
-
-function isInTheLine($id, $str)
-{
-    switch($id) {
-        case 'files_dir':
-            return substr($str, 0, 11) === 'files_dir =';
-        case 'name':
-            return substr($str, 0, 6) === 'name =';
-        case 'driver':
-            return substr($str, 0, 8) === 'driver =';
-    }
-
-    return false;
-}
 
 $config = array();
 
@@ -141,3 +101,4 @@ unset($config);
 
 unset($sep);
 unset($fm);
+*/

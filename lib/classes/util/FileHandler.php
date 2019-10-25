@@ -1,6 +1,7 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Util;
+use \BeAmado\OjsMigrator\Registry;
 
 class FileHandler
 {
@@ -24,11 +25,11 @@ class FileHandler
      */
     public function write($filename, $content)
     {
-        if ((new FileSystemManager())->fileExists($filename)) {
-            (new FileSystemManager())->removeFile($filename);
+        if (Registry::get('FileSystemManager')->fileExists($filename)) {
+            Registry::get('FileSystemManager')->removeFile($filename);
         }
 
-        (new FileSystemManager())->createFile($filename);
+        Registry::get('FileSystemManager')->createFile($filename);
         return $this->appendToFile($filename, $content);
     }
     
@@ -42,7 +43,7 @@ class FileHandler
      */
     public function appendToFile($filename, $content, $newline = false)
     {
-        $vars = (new MemoryManager())->create(array(
+        $vars = Registry::get('MemoryManager')->create(array(
             'result' => false,
             'resource' => \fopen($filename, 'a'),
             'content' => ($newline) ? PHP_EOL . $content : $content,
@@ -66,12 +67,12 @@ class FileHandler
         }
 
         if ($vars->get('result')->getValue() === false) {
-            (new MemoryManager())->destroy($vars);
+            Registry::get('MemoryManager')->destroy($vars);
             unset($vars);
             return false;
         }
 
-        (new MemoryManager())->destroy($vars);
+        Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
         return true;
     }

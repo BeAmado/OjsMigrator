@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use BeAmado\OjsMigrator\OjsScenarioTester;
 
 class BootstrapTest extends TestCase
 {
@@ -17,6 +18,14 @@ class BootstrapTest extends TestCase
     public function testWeHaveAutoloaderClass()
     {
         $this->assertTrue(class_exists('BeAmado\OjsMigrator\Util\Autoloader'));
+    }
+
+    public function testCreateConfigFile()
+    {
+        (new OjsScenarioTester())->prepareStage();
+        $this->assertFileExists(
+            (new OjsScenarioTester())->getOjsConfigFile()
+        );
     }
 
 }
