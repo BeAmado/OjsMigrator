@@ -1,10 +1,10 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Db\ConnectionManager;
 use BeAmado\OjsMigrator\Registry;
+use BeAmado\OjsMigrator\FunctionalTest;
 
-class ConnectionManagerTest extends TestCase
+class ConnectionManagerTest extends FunctionalTest
 {
     public function testSetConnection()
     {

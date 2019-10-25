@@ -35,21 +35,12 @@ class ConfigHandler
             return;
         }
 
-        /*
-        echo "\n\n\n\n\n";
-        var_dump(Registry::get('OjsDir'));
-        echo "\n\n\n\n\n\n";
-        */
-
         foreach (
             Registry::get('FileSystemManager')->listdir(
                 Registry::get('OjsDir')
             ) as $filename
         ) {
-            //var_dump(\basename($filename));
             if (\basename($filename) === 'config.inc.php') {
-                //echo "\n\nFoud the config file\n\n";
-                //var_dump($filename);
                 $this->setConfigFile($filename);
                 break;
             }
@@ -84,7 +75,15 @@ class ConfigHandler
         }
 
         $this->configFile = $filename;
-        return true;
+        $this->setContent();
+
+        if ($this->validateContent()) {
+            $this->setFilesDir();
+            $this->setConnectionSettings();
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -178,10 +177,7 @@ class ConfigHandler
             $this->filesDir = \substr($this->filesDir, 0, -1);
         }
 
-        echo "\n\n\nGot to the end\n\n\n";
-
         $this->filesDir = \trim($this->filesDir);
-        var_dump($this->filesDir);
     }
 
     public function getConnectionSettings()

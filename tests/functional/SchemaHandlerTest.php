@@ -1,6 +1,6 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+use BeAmado\OjsMigrator\FunctionalTest;
 use BeAmado\OjsMigrator\Db\SchemaHandler;
 use BeAmado\OjsMigrator\Db\Schema;
 use BeAmado\OjsMigrator\Db\TableDefinition;
@@ -21,30 +21,25 @@ use BeAmado\OjsMigrator\Util\XmlHandler;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Maestro;
 
-class SchemaHandlerTest extends TestCase implements StubInterface
+class SchemaHandlerTest extends FunctionalTest implements StubInterface
 {
     use WorkWithFiles;
     use WorkWithXmlSchema;
     use WorkWithOjsDir;
 
-    protected function setUp() : void
-    {
-        $this->prepareStage();
-    }
-
     public static function tearDownAfterClass() : void
     {
+        parent::tearDownAfterClass();
         Registry::get('SchemaHandler')->removeSchemaDir();
-        Registry::clear();
     }
 
-    public function __construct()
+    public function setUp() : void
     {
-        parent::__construct();
-
         $this->schema = (new XmlHandler())->createFromFile(
             $this->getOjs2XmlSchemaFilename()
         );
+
+        //var_dump($this->schema->toArray());
     }
 
     public function getStub()
@@ -147,7 +142,6 @@ class SchemaHandlerTest extends TestCase implements StubInterface
             unset($types);
         });
         $dataTypes = Registry::get('dataTypes');
-        Registry::clear();
 
         $this->assertEquals(
             array(
@@ -189,7 +183,6 @@ class SchemaHandlerTest extends TestCase implements StubInterface
             unset($types);
         });
         $sqlDataTypes = Registry::get('sqlDataTypes');
-        Registry::clear();
 
         $this->assertEquals(
             array(

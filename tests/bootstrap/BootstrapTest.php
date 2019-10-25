@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\OjsScenarioTester;
+use BeAmado\OjsMigrator\ConfigPreprocessor;
+use BeAmado\OjsMigrator\Registry;
 
 class BootstrapTest extends TestCase
 {
@@ -23,6 +25,7 @@ class BootstrapTest extends TestCase
     public function testCreateConfigFile()
     {
         (new OjsScenarioTester())->prepareStage();
+
         $this->assertFileExists(
             (new OjsScenarioTester())->getOjsConfigFile()
         );

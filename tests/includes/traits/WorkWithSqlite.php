@@ -6,28 +6,33 @@ trait WorkWithSqlite
 {
     public function createDbSandbox()
     {
-        (new \BeAmado\OjsMigrator\Util\FileSystemManager())->createDir(
+        if (!Registry::get('FileSystemManager')->dirExists(
             $this->getDbSandbox()
-        );
+        ))
+            Registry::get('FileSystemManager')->createDir(
+                $this->getDbSandbox()
+            );
     }
 
     public function removeDbSandbox()
     {
-        (new \BeAmado\OjsMigrator\Util\FileSystemManager())->removeWholeDir(
+        Registry::get('FileSystemManager')->removeWholeDir(
             $this->getDbSandbox()
         );
     }
 
     public function getDbSandbox()
     {
-        return (new \BeAmado\OjsMigrator\Util\FileSystemManager())
-               ->formPathFromBaseDir(array('tests', '_data', 'db_sandbox'));
+        return Registry::get('FileSystemManager')->formPathFromBaseDir(array(
+            'tests',
+            '_data',
+            'db_sandbox'
+        ));
     }
 
     public function getSqliteDbFilename()
     {
-        return $this->getDbSandbox()
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'tests_ojs2.db';
+        return $this->getDbSandbox() . DIR_SEPARATOR . 'tests_ojs2.db';
     }
 
     public function getAutoIncrement()

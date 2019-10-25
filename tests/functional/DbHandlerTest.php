@@ -1,6 +1,6 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+use BeAmado\OjsMigrator\FunctionalTest;
 use BeAmado\OjsMigrator\Db\DbHandler;
 use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\Util\ConfigHandler;
@@ -11,17 +11,21 @@ use BeAmado\OjsMigrator\TestStub;
 use BeAmado\OjsMigrator\WorkWithFiles;
 use BeAmado\OjsMigrator\WorkWithSqlite;
 
-class DbHandlerTest extends TestCase implements StubInterface
+class DbHandlerTest extends FunctionalTest implements StubInterface
 {
     use WorkWithFiles;
     use WorkWithSqlite;
 
-    public function __construct()
+    public static function setUpBeforeClass() : void
     {
-        parent::__construct();
-        if (!(new FileSystemManager())->dirExists($this->getDbSandbox())) {
-            $this->createDbSandbox();
-        }
+        parent::setUpBeforeClass();
+        (new class { use WorkWithSqlite; })->createDbSandbox();
+    }
+
+    public static function tearDownAfterClass() : void
+    {
+        parent::tearDownAfterClass();
+        (new class { use WorkWithSqlite; })->removeDbSandbox();
     }
 
     public function getStub()
@@ -48,8 +52,7 @@ class DbHandlerTest extends TestCase implements StubInterface
             $this->markTestSkipped('The driver used is sqlite');
         }
 
-        $connData = (new ConfigHandler($this->getOjs2ConfigFile()))
-            ->getConnectionSettings();
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
 
         $this->assertInstanceOf(
             \PDO::class,
@@ -69,8 +72,7 @@ class DbHandlerTest extends TestCase implements StubInterface
             $this->markTestSkipped('The driver used is sqlite');
         }
 
-        $connData = (new ConfigHandler($this->getOjs2ConfigFile()))
-            ->getConnectionSettings();
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
         
         $this->assertInstanceOf(
             \PDO::class,

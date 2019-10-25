@@ -102,8 +102,6 @@ class ConfigPreprocessor
                 $this->vars->get('config')->push($line);
         }
 
-        unset($line);
-
         return Registry::get('FileHandler')->write(
             $this->getOjsScenarioTester()->getOjsConfigFile(),
             $this->vars->get('config')->toArray()

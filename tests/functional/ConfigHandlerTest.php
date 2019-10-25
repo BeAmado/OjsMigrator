@@ -1,6 +1,6 @@
 <?php 
 
-use PHPUnit\Framework\TestCase;
+use BeAmado\OjsMigrator\FunctionalTest;
 use BeAmado\OjsMigrator\Util\ConfigHandler;
 
 /////////// interfaces //////////////////////
@@ -13,25 +13,13 @@ use BeAmado\OjsMigrator\WorkWithFiles;
 use BeAmado\OjsMigrator\WorkWithOjsDir;
 /////////////////////////////////////////////
 
-use BeAmado\OjsMigrator\Util\FileSystemManager;
-use BeAmado\OjsMigrator\Util\ArchiveManager;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\OjsScenarioTester;
 
-class ConfigHandlerTest extends TestCase implements StubInterface
+class ConfigHandlerTest extends FunctionalTest implements StubInterface
 {
     use WorkWithFiles;
     use WorkWithOjsDir;
-
-    public static function setUpBeforeClass() : void
-    {
-        (new OjsScenarioTester())->prepareStage();
-    }
-
-    public static function tearDownAfterClass() : void
-    {
-        (new OjsScenarioTester())->removeSandbox();
-    }
 
     public function getStub()
     {
@@ -42,8 +30,7 @@ class ConfigHandlerTest extends TestCase implements StubInterface
 
     public function testCanRetrieveFilesDirLocation()
     {
-        $location = Registry::get('ConfigHandler')
-                    ->getFilesDir();
+        $location = Registry::get('ConfigHandler')->getFilesDir();
 
         $this->assertSame(
             $this->getOjsFilesDir(),
@@ -53,8 +40,7 @@ class ConfigHandlerTest extends TestCase implements StubInterface
 
     public function testCanRetrieveConnectionSettings()
     {
-        $connData = (new ConfigHandler($this->getOjsConfigFile()))
-                    ->getConnectionSettings();
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
 
         $expected = array(
             'host' => 'localhost',

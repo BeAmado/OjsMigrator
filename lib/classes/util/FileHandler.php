@@ -25,9 +25,8 @@ class FileHandler
      */
     public function write($filename, $content)
     {
-        if (Registry::get('FileSystemManager')->fileExists($filename)) {
+        if (Registry::get('FileSystemManager')->fileExists($filename))
             Registry::get('FileSystemManager')->removeFile($filename);
-        }
 
         Registry::get('FileSystemManager')->createFile($filename);
         return $this->appendToFile($filename, $content);
@@ -43,6 +42,9 @@ class FileHandler
      */
     public function appendToFile($filename, $content, $newline = false)
     {
+        if (\is_array($content))
+            $content = \implode('', $content);
+
         $vars = Registry::get('MemoryManager')->create(array(
             'result' => false,
             'resource' => \fopen($filename, 'a'),
