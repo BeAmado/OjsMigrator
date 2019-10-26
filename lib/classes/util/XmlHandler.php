@@ -2,6 +2,7 @@
 
 namespace BeAmado\OjsMigrator\Util;
 use \BeAmado\OjsMigrator\FiletypeHandler;
+use \BeAmado\OjsMigrator\Registry;
 
 class XmlHandler implements FiletypeHandler
 {
@@ -142,7 +143,7 @@ class XmlHandler implements FiletypeHandler
             $arr['children'][] = $this->XmlIntoArray($node);
         }
 
-        (new MemoryManager())->destroy($childNodes);
+        Registry::get('MemoryManager')->destroy($childNodes);
         unset($childNodes);
 
         return $arr;
@@ -161,7 +162,9 @@ class XmlHandler implements FiletypeHandler
      */
     public function createFromFile($filename)
     {
-        return (new MemoryManager())->create($this->readIntoArray($filename));
+        return Registry::get('MemoryManager')->create(
+            $this->readIntoArray($filename)
+        );
     }
 
     /**

@@ -1,22 +1,12 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Db;
-use \BeAmado\OjsMigrator\Util\XmlHandler;
-use \BeAmado\OjsMigrator\Util\JsonHandler;
-use \BeAmado\OjsMigrator\Util\MemoryManager;
-use \BeAmado\OjsMigrator\Util\FileSystemManager;
 use \BeAmado\OjsMigrator\Registry;
 use \BeAmado\OjsMigrator\Maestro;
 use \BeAmado\OjsMigrator\FiletypeHandler; //interface
 
 class SchemaHandler implements FiletypeHandler
 {
-    public function __construct()
-    {
-        if (!Registry::hasKey('MemoryManager'))
-            Registry::set('MemoryManager', new MemoryManager());
-    }
-
     /**
      * Checks whether or not the given object has the specified name.
      *
@@ -576,12 +566,6 @@ class SchemaHandler implements FiletypeHandler
      */
     public function createFromFile($filename)
     {
-        if (!Registry::hasKey('XmlHandler'))
-            Registry::set('XmlHandler', new XmlHandler());
-
-        if (!Registry::hasKey('Schema'))
-            Registry::set('Schema', new Schema());
-
         Registry::set(
             'XmlSchema',
             Registry::get('XmlHandler')->createFromFile($filename)
@@ -594,6 +578,9 @@ class SchemaHandler implements FiletypeHandler
             Registry::remove('XmlSchema');
             return;
         }
+
+        Registry::remove('Schema');
+        Registry::set('Schema', new Schema());
 
         /** @var $table \BeAmado\OjsMigrator\MyObject */
         Registry::get('XmlSchema')->get('children')
@@ -611,9 +598,6 @@ class SchemaHandler implements FiletypeHandler
 
     public function dumpToFile($filename, $content)
     {
-        if (!Registry::hasKey('JsonHandler'))
-            Registry::set('JsonHandler', new JsonHandler());
-
         return Registry::get('JsonHandler')->dumpToFile(
             $filename,
             $content
@@ -813,5 +797,6 @@ class SchemaHandler implements FiletypeHandler
         Registry::remove('indexColumns');
         Registry::remove('XmlSchema');
         Registry::remove('filename');
+        Registry::remove('Schema');
     }
 }

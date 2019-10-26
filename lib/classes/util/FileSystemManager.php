@@ -1,6 +1,7 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Util;
+use \BeAmado\OjsMigrator\Registry;
 
 class FileSystemManager
 {
@@ -285,7 +286,7 @@ class FileSystemManager
         if (!$this->dirExists($dir))
             return;
 
-        $vars = (new MemoryManager())->create(array(
+        $vars = Registry::get('MemoryManager')->create(array(
             'dir' => $dir,
             'ls' => $this->listdir($dir),
         ));
@@ -293,7 +294,7 @@ class FileSystemManager
         unset($dir);
         
         if (!\is_array($vars->get('ls')->listValues())) {
-            (new MemoryManager())->destroy($vars);
+            Registry::get('MemoryManager')->destroy($vars);
             unset($vars);
             return false;
         }
@@ -301,9 +302,13 @@ class FileSystemManager
         /** @var $item MyObject */
         $vars->get('ls')->forEachValue(function($item) {
             if (\is_file($item->getValue()) || \is_link($item->getValue())) {
-                (new FileSystemManager())->removeFile($item->getValue());
+                Registry::get('FileSystemManager')->removeFile(
+                    $item->getValue()
+                );
             } else if (\is_dir($item->getValue())) {
-                (new FileSystemManager())->removeWholeDir($item->getValue());
+                Registry::get('FileSystemManager')->removeWholeDir(
+                    $item->getValue()
+                );
             }
 
             unset($item);
@@ -318,12 +323,12 @@ class FileSystemManager
             !empty($vars->get('ls')->listValues()) ||
             !$this->removeDir($vars->get('dir')->getValue())
         ) {
-            (new MemoryManager())->destroy($vars);
+            Registry::get('MemoryManager')->destroy($vars);
             unset($vars);
             return false;
         }
 
-        (new MemoryManager())->destroy($vars);
+        Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
         return true;
     }

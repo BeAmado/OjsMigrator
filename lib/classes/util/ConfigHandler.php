@@ -1,8 +1,6 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Util;
-use \BeAmado\OjsMigrator\Util\FileSystemManager;
-use \BeAmado\OjsMigrator\Util\FileHandler;
 use \BeAmado\OjsMigrator\Registry;
 use \BeAmado\OjsMigrator\Maestro;
 
@@ -69,7 +67,7 @@ class ConfigHandler
      */
     public function setConfigFile($filename)
     {
-        if (!(new FileSystemManager())->fileExists($filename)) {
+        if (!Registry::get('FileSystemManager')->fileExists($filename)) {
             return false;
             // TODO raise an Exception
         }
@@ -93,7 +91,7 @@ class ConfigHandler
      */
     protected function setContent()
     {
-        if (!(new FileSystemManager())->fileExists($this->configFile)) {
+        if (!Registry::get('FileSystemManager')->fileExists($this->configFile)) {
             return false;
             // TODO treat better, maybe raise an Exception
         }

@@ -2,7 +2,7 @@
 
 namespace BeAmado\OjsMigrator\Db;
 use \BeAmado\OjsMigrator\MyObject;
-use \BeAmado\OjsMigrator\Util\MemoryManager;
+use \BeAmado\OjsMigrator\Registry;
 
 class TableDefinition extends MyObject
 {
@@ -134,7 +134,7 @@ class TableDefinition extends MyObject
             return 1;
         }
 
-        $vars = (new MemoryManager())->create(array(
+        $vars = Registry::get('MemoryManager')->create(array(
             'openParens' => \strpos($this->getSqlType($colName), '('),
             'closeParens' => \strpos($this->getSqlType($colName), ')'),
         ));
@@ -151,7 +151,7 @@ class TableDefinition extends MyObject
             $vars->get('length')->getValue()
         );
 
-        (new MemoryManager())->destroy($vars);
+        Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
 
         return $size;

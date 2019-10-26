@@ -2,6 +2,7 @@
 
 namespace BeAmado\OjsMigrator\Util;
 use \BeAmado\OjsMigrator\FiletypeHandler;
+use \BeAmado\OjsMigrator\Registry;
 
 class JsonHandler implements FiletypeHandler
 {
@@ -13,9 +14,9 @@ class JsonHandler implements FiletypeHandler
      */
     public function createFromFile($filename)
     {
-        return (new MemoryManager())->create(
+        return Registry::get('MemoryManager')->create(
             \json_decode(
-                (new FileHandler())->read($filename),
+                Registry::get('FileHandler')->read($filename),
                 true
             )
         );
@@ -30,7 +31,7 @@ class JsonHandler implements FiletypeHandler
      */
     public function dumpToFile($filename, $obj)
     {
-        return (new FileHandler())->write(
+        return Registry::get('FileHandler')->write(
             $filename,
             \json_encode($obj->toArray())
         );

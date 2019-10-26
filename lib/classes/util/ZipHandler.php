@@ -1,6 +1,7 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Util;
+use \BeAmado\OjsMigrator\Registry;
 
 class ZipHandler
 {
@@ -20,7 +21,7 @@ class ZipHandler
         
         \gzwrite(
             $gz,
-            (new FileHandler())->read($filename)
+            Registry::get('FileHandler')->read($filename)
         );
 
         return \gzclose($gz);

@@ -41,6 +41,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\XmlHandler();
     }
 
+    protected function createZipHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\ZipHandler();
+    }
+
 
     ////////////////////////////// MANAGERS //////////////////////////////////
 

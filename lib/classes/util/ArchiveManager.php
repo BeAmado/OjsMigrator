@@ -1,6 +1,7 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Util;
+use \BeAmado\OjsMigrator\Registry;
 
 class ArchiveManager
 {
@@ -76,7 +77,7 @@ class ArchiveManager
      */
     protected function createTar($filename, $directory)
     {
-        if (!(new FileSystemManager())->dirExists($directory)) {
+        if (!Registry::get('FileSystemManager')->dirExists($directory)) {
             return false;
         }
 
@@ -107,7 +108,7 @@ class ArchiveManager
      */
     protected function createTarAndZipIt($filename, $directory)
     {
-        $vars = (new MemoryManager())->create();
+        $vars = Registry::get('MemoryManager')->create();
         $vars->set(
             'success',
             $this->createTar($filename, $directory)
@@ -116,17 +117,17 @@ class ArchiveManager
         if ($vars->get('success')->getValue()) {
             $vars->set(
                 'success',
-                (new ZipHandler())->gzip($filename)
+                Registry::get('ZipHandler')->gzip($filename)
             );
         }
 
         if ($vars->get('success')->getValue()) {
-            (new MemoryManager())->destroy($vars);
+            Registry::get('MemoryManager')->destroy($vars);
             unset($vars);
             return true;
         }
 
-        (new MemoryManager())->destroy($vars);
+        Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
         return false;
     }
@@ -142,17 +143,17 @@ class ArchiveManager
      */
     protected function extractTar($filename, $pathTo, $files = null)
     {
-        if (!(new FileSystemManager())->dirExists(
-            (new FileSystemManager())->parentDir($pathTo)
+        if (!Registry::get('FileSystemManager')->dirExists(
+            Registry::get('FileSystemManager')->parentDir($pathTo)
         )) {
             return false;
         }
 
-        if (!(new FileSystemManager())->dirExists($pathTo)) {
-            (new FileSystemManager())->createDir($pathTo);
+        if (!Registry::get('FileSystemManager')->dirExists($pathTo)) {
+            Registry::get('FileSystemManager')->createDir($pathTo);
         }
 
-        if (!(new FileSystemManager())->fileExists($filename)) {
+        if (!Registry::get('FileSystemManager')->fileExists($filename)) {
             return false;
         }
 
@@ -183,11 +184,11 @@ class ArchiveManager
      */
     protected function unzipAndExtractTar($filename, $pathTo, $files = null)
     {
-        $vars = (new MemoryManager())->create();
+        $vars = Registry::get('MemoryManager')->create();
 
         $vars->set(
             'success',
-            (new ZipHandler())->gunzip($filename)
+            Registry::get('ZipHandler')->gunzip($filename)
         );
 
         if ($vars->get('success')->getValue()) {
@@ -202,15 +203,15 @@ class ArchiveManager
              $this->getFilename($filename) . '.tar'
         );
 
-        (new FileSystemManager())->removeFile($vars->get('file')->getValue());
+        Registry::get('FileSystemManager')->removeFile($vars->get('file')->getValue());
 
         if ($vars->get('success')->getValue()) {
-            (new MemoryManager())->destroy($vars);
+            Registry::get('MemoryManager')->destroy($vars);
             unset($vars);
             return true;
         }
 
-        (new MemoryManager())->destroy($vars);
+        Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
         return false;
     }
