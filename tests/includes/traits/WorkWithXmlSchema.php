@@ -48,7 +48,7 @@ trait WorkWithXmlSchema
             'name' => 'DEFAULT',
             'text' => null,
             'attributes' => array(
-                'VALUE' => $value,
+                'value' => $value,
             ),
             'children' => array(),
         );

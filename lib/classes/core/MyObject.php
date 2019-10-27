@@ -44,9 +44,9 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
             $key += count($this->values);
         }
 
-        if (\array_key_exists($key, $this->values))
+        if ($this->hasAttribute($key))
         {
-            return $this->values[$key];
+            return $this->values[\strtolower($key)];
         }
     }
     
@@ -64,9 +64,9 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
         }
 
         if (\is_a($value, MyObject::class)) {
-            $this->values[$key] = $value;
+            $this->values[\strtolower($key)] = $value;
         } else {
-            $this->values[$key] = new MyObject($value);
+            $this->values[\strtolower($key)] = new MyObject($value);
         }
     }
 
@@ -82,7 +82,7 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
             return;
         
         $this->get($key)->destroy();
-        unset($this->values[$key]);
+        unset($this->values[\strtolower($key)]);
     }
 
     /**
@@ -189,7 +189,7 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
      */
     public function hasAttribute($name)
     {
-        return \array_key_exists($name, $this->values);
+        return \array_key_exists(\strtolower($name), $this->values);
     }
 
     protected function cloneArray($arr)

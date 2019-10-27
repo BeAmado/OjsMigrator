@@ -96,7 +96,7 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
             'journals',
             $this->getStub()->callMethod(
                 'getTableName',
-                $this->schema->get('children')->get(0)
+                $this->schema->get('cHilDRen')->get(0)
             )
         );
     }
@@ -125,7 +125,7 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
             }
         );
         $journals->get('children')->forEachValue(function($columnObj) {
-            if (!Registry::get('stub')->callMethod('isColumn', $columnObj))
+            if (!Registry::get('stUB')->callMethod('isColumn', $columnObj))
                 return;
 
             $types = Registry::get('dataTypes');
@@ -133,7 +133,7 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
             
             $types[
                 Registry::get('stub')->callMethod('getColumnName', $columnObj)
-            ] = Registry::get('stub')->callMethod(
+            ] = Registry::get('Stub')->callMethod(
                 'getDataType',
                 $columnObj
             );
@@ -141,7 +141,7 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
             Registry::set('dataTypes', $types);
             unset($types);
         });
-        $dataTypes = Registry::get('dataTypes');
+        $dataTypes = Registry::get('dATaTypeS');
 
         $this->assertEquals(
             array(

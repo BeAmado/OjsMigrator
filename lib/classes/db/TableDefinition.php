@@ -17,6 +17,19 @@ class TableDefinition extends MyObject
     }
 
     /**
+     * Gets the names of the column being defined
+     *
+     * @return array
+     */
+    public function getColumnNames()
+    {
+        if (!$this->hasAttribute('columns'))
+            return;
+
+        return \array_keys($this->get('columns')->toArray());
+    }
+
+    /**
      * Checks if the table has the specified column.
      *
      * @param string $colName
@@ -24,9 +37,8 @@ class TableDefinition extends MyObject
      */
     public function hasColumn($colName)
     {
-        if (!$this->hasAttribute('columns')) {
+        if (!$this->hasAttribute('columns'))
             return false;
-        }
 
         return $this->get('columns')->hasAttribute($colName);
     }
@@ -40,7 +52,7 @@ class TableDefinition extends MyObject
         return $this->get('columns')->get($colName);
     }
 
-    protected function getColumnAttribute($colName, $attr)
+    protected function getColumnAttr($colName, $attr)
     {
         if (
             !$this->hasColumn($colName) ||
@@ -82,6 +94,11 @@ class TableDefinition extends MyObject
         return $this->is('primary_key', $colName);
     }
 
+    public function isAutoIncrement($colName)
+    {
+        return $this->is('auto_increment', $colName);
+    }
+
     /**
      * Gets the default value of the specified column.
      *
@@ -90,7 +107,7 @@ class TableDefinition extends MyObject
      */
     public function getDefaultValue($colName)
     {
-        return $this->getColumnAttribute($colName, 'default');
+        return $this->getColumnAttr($colName, 'default');
     }
 
     /**

@@ -81,12 +81,12 @@ class QueryHandler
     }
 
     /**
-     * Creates a query to get the last inserted record in the table
+     * Generates a query to get the last inserted record in the table
      *
      * @param \BeAmado\OjsMigrator\Db\TableDefinition $tableDefinition
      * @return string
      */
-    public function createQueryGetLast($tableDefinition)
+    public function generateQueryGetLast($tableDefinition)
     {
         if (
             !\method_exists($tableDefinition, 'getPrimaryKeys') ||
@@ -101,4 +101,66 @@ class QueryHandler
           . ' ORDER BY ' . \implode(', ', $tableDefinition->getPrimaryKeys())
           . ' DESC LIMIT 1';
     }
+
+    protected function generateParameters() {}
+
+    protected function autoIncrement()
+    {
+        return 'AUTO_INCREMENT';
+    }
+
+    public function generateQueryCreateTable($td)
+    {
+        if (
+            !\method_exists($td, 'getPrimaryKeys') ||
+            !\method_exists($td, 'getName')
+        ) {
+            return;
+        }
+
+        $query = 'CREATE TABLE ' . $td->getName() . ' (';
+        
+        foreach ($td->getColumnNames() as $column) {
+            $query .= '`' . $column . '` ' . \strtoupper($td->getSqlType($column));
+
+            if (!$td->isNullable($column))
+                $query .= ' NOT NULL';
+
+            if ($td->getDefaultValue($column) !== null) {
+                $query .= ' DEFAULT ';
+                if ($td->getDefaultValue($column) === '')
+                    $query .= '""';
+                else
+                    $query .= $td->getDefaultValue($column);
+            }
+
+            if ($td->isAutoIncrement($column))
+                $query .= $this->autoIncrement();
+
+            $query .= ', ';
+        }
+        unset($column);
+
+        $pks = $td->getPrimaryKeys();
+
+        if (\count($pks))
+            $query .= 'PRIMARY KEY(`' . \implode('`, `', $pks) . '`)';
+        else if (\substr($query, -2) === ', ')
+            $query = \substr($query, 0, -2);
+
+        Registry::get('MemoryManager')->destroy($pks);
+        unset($pks);
+
+        $query .= ')';
+
+        return $query;
+    }
+
+    public function generateQueryInsert($tableDefinition) {}
+
+    public function generateQueryUpdate($tableDefinition) {}
+
+    public function generateQueryDelete($tableDefinition) {}
+
+    public function generateQuerySelect($tableDefinition) {}
 }

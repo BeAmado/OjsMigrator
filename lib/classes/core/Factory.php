@@ -69,6 +69,38 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\MemoryManager();
     }
 
+    protected function fixCase($classname)
+    {
+        switch (\strtolower($classname)) {
+            case \strtolower('ConfigHandler'):
+                return 'ConfigHandler';
+            case \strtolower('DbHandler'):
+                return 'DbHandler';
+            case \strtolower('FileHandler'):
+                return 'FileHandler';
+            case \strtolower('JsonHandler'):
+                return 'JsonHandler';
+            case \strtolower('QueryHandler'):
+                return 'QueryHandler';
+            case \strtolower('SchemaHandler'):
+                return 'SchemaHandler';
+            case \strtolower('XmlHandler'):
+                return 'XmlHandler';
+            case \strtolower('ZipHandler'):
+                return 'ZipHandler';
+            case \strtolower('ArchiveManager'):
+                return 'ArchiveManager';
+            case \strtolower('ConnectionManager'):
+                return 'ConnectionManager';
+            case \strtolower('FileSystemManager'):
+                return 'FileSystemManager';
+            case \strtolower('MemoryManager'):
+                return 'MemoryManager';
+        }
+
+        return $classname;
+    }
+
     /**
      * Creates an instance of the specified class passing the parameters to
      * the class constructor.
@@ -79,7 +111,7 @@ class Factory
      */
     public function create($classname, $args = null)
     {
-        if (\method_exists($this, 'create' . $classname))
-            return $this->{'create' . $classname}($args);
+        if (\method_exists($this, 'create' . $this->fixCase($classname)))
+            return $this->{'create' . $this->fixCase($classname)}($args);
     }
 }

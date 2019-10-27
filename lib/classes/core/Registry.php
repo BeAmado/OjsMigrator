@@ -12,29 +12,27 @@ class Registry
 
     public static function hasKey($name)
     {
-        return \array_key_exists($name, self::$data);
+        return \array_key_exists(\strtolower($name), self::$data);
     }
 
     public static function get($key)
     {
-        /*if (!self::hasKey($key)) {
-            self::set(
-                $key,
-                (new Factory())->create($key)
-            );
+/*'      return (self::hasKey($key)
+            ? self::$data[\strtolower($key)] 
+            : Maestro::get($key));
+            */
+            if (!self::hasKey($key))
+                self::set($key, Maestro::get($key));
 
-            if (self::get($key) === null) {
+            if (self::$data[\strtolower($key)] === null)
                 self::remove($key);
-                return;
-            }
-        }*/
-
-        return self::hasKey($key) ? self::$data[$key] : Maestro::get($key);
+            else
+                return self::$data[\strtolower($key)];
     }
 
     public static function set($key, $value)
     {
-        self::$data[$key] = $value;
+        self::$data[\strtolower($key)] = $value;
     }
 
     public static function remove($key)
@@ -43,8 +41,8 @@ class Registry
             return;
         }
 
-        (new MemoryManager())->destroy(self::$data[$key]);
-        unset(self::$data[$key]);
+        (new MemoryManager())->destroy(self::$data[\strtolower($key)]);
+        unset(self::$data[\strtolower($key)]);
     }
 
     public static function clear()
@@ -64,12 +62,12 @@ class Registry
     {
         if (
             !self::hasKey($key) || //does not have the key
-            !\is_numeric(self::$data[$key]) || // is not a number
-            \strpos('' . self::$data[$key], '.') !== false // is a float
+            !\is_numeric(self::get($key)) || // is not a number
+            \strpos('' . self::get($key), '.') !== false // is a float
         ) {
             return;
         }
 
-        self::$data[$key]++;
+        self::$data[\strtolower($key)]++;
     }
 }

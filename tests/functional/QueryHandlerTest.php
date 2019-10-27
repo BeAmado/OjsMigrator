@@ -1,35 +1,19 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+use BeAmado\OjsMigrator\FunctionalTest;
 use BeAmado\OjsMigrator\Db\QueryHandler;
 use BeAmado\OjsMigrator\TestStub;
 use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\WorkWithFiles;
-use BeAmado\OjsMigrator\Maestro;
 
-class QueryHandlerTest extends TestCase implements StubInterface
+class QueryHandlerTest extends FunctionalTest implements StubInterface
 {
     use WorkWithFiles;
 
-    public function __construct()
-    {
-        parent::__construct();
-        $this->sandbox = $this->getDataDir() . $this->sep() . 'sandbox';
-    }
-
-    protected function setUp() : void
-    {
-        Registry::get('FileSystemManager')->createDir($this->sandbox);
-    }
-
-    protected function tearDown() : void
-    {
-        Registry::get('FileSystemManager')->removeWholeDir($this->sandbox);
-    }
-
     public static function tearDownAfterClass() : void
     {
+        parent::tearDownAfterClass();
         Registry::get('SchemaHandler')->removeSchemaDir();
     }
 
@@ -101,21 +85,39 @@ class QueryHandlerTest extends TestCase implements StubInterface
 
     public function testGetTheLastInsertedIdQueryForUsers()
     {
-        Registry::get('ArchiveManager')->tar(
-            'xzf',
-            $this->getDataDir() . $this->sep() . 'ojs2.tar.gz',
-            $this->sandbox
+        $expected = 'SELECT user_id FROM users ORDER BY user_id DESC LIMIT 1';
+        $query = Registry::get('QueRYhanDLer')->generateQueryGetLast(
+            Registry::get('ScHEMAhANDler')->getTableDefinition('users')
         );
 
-        $ojs2PublicHtmlDir = $this->sandbox 
-            . $this->sep() . 'ojs2' 
-            . $this->sep() . 'public_html';
+        $this->assertSame(
+            $expected,
+            $query
+        );
+    }
 
-        Maestro::setOjsDir($ojs2PublicHtmlDir);
-        
-        $expected = 'SELECT user_id FROM users ORDER BY user_id DESC LIMIT 1';
-        $query = Registry::get('QueryHandler')->createQueryGetLast(
-            Registry::get('SchemaHandler')->getTableDefinition('users')
+    public function testGetTheQueryForCreatingUserSettingsTable()
+    {
+        $expected = ''
+          . 'CREATE TABLE user_settings ('
+          .     '`user_id` BIGINT NOT NULL, '
+          .     '`locale` VARCHAR(5) NOT NULL DEFAULT "", '
+          .     '`setting_name` VARCHAR(255) NOT NULL, '
+          .     '`assoc_type` BIGINT DEFAULT 0, '
+          .     '`assoc_id` BIGINT DEFAULT 0, '
+          .     '`setting_value` TEXT, '
+          .     '`setting_type` VARCHAR(6) NOT NULL, '
+          .     'PRIMARY KEY('
+          .         '`user_id`, '
+          .         '`locale`, '
+          .         '`setting_name`, '
+          .         '`assoc_type`, '
+          .         '`assoc_id`'
+          .     ')'
+          . ')';
+
+        $query = Registry::get('QueryHandler')->generateQueryCreateTable(
+            Registry::get('SchemaHandler')->getTableDefinition('user_settings')
         );
 
         $this->assertSame(
