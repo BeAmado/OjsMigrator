@@ -3,6 +3,7 @@
 namespace BeAmado\OjsMigrator\Db;
 use BeAmado\OjsMigrator\MyObject;
 use BeAmado\OjsMigrator\MyStringRepr;
+use BeAmado\OJsMigrator\Registry;
 
 class ColumnDefinition extends MyObject implements MyStringRepr
 {
@@ -84,6 +85,14 @@ class ColumnDefinition extends MyObject implements MyStringRepr
 
     protected function autoIncrement()
     {
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        if (
+            \is_array($connData) && 
+            \array_key_exists('driver', $connData) &&
+            $connData['driver'] === 'sqlite'
+        )
+            return '';
+
         return 'AUTO_INCREMENT';
     }
 

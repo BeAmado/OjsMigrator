@@ -96,6 +96,56 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
         );
     }
 
+    public function testGetTheQueryForCreatingAuthSourcesTableInMysql()
+    {
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        if ($connData['driver'] !== 'mysql')
+            $this->markTestSkipped('The driver is not mysql');
+
+        $expected = 'CREATE TABLE `auth_sources` ('
+        . '`auth_id` BIGINT AUTO_INCREMENT, '
+        . '`title` VARCHAR(60) NOT NULL, '
+        . '`plugin` VARCHAR(32) NOT NULL, '
+        . '`auth_default` TINYINT NOT NULL DEFAULT 0, '
+        . '`settings` TEXT, '
+        . 'PRIMARY KEY(`auth_id`)'
+        . ')';
+
+        $query = Registry::get('QueryHandler')->generateQueryCreateTable(
+            Registry::get('SchemaHandler')->getTableDefinition('auth_sources')
+        );
+
+        $this->assertSame(
+            $expected,
+            $query
+        );
+    }
+
+    public function testGetTheQueryForCreatingAuthSourcesTableInSqlite()
+    {
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        if ($connData['driver'] !== 'sqlite')
+            $this->markTestSkipped('The driver is not sqlite');
+        
+        $expected = 'CREATE TABLE `auth_sources` ('
+        . '`auth_id` BIGINT , '
+        . '`title` VARCHAR(60) NOT NULL, '
+        . '`plugin` VARCHAR(32) NOT NULL, '
+        . '`auth_default` TINYINT NOT NULL DEFAULT 0, '
+        . '`settings` TEXT, '
+        . 'PRIMARY KEY(`auth_id`)'
+        . ')';
+
+        $query = Registry::get('QueryHandler')->generateQueryCreateTable(
+            Registry::get('SchemaHandler')->getTableDefinition('auth_sources')
+        );
+
+        $this->assertSame(
+            $expected,
+            $query
+        );
+    }
+
     public function testGetTheQueryForCreatingUserSettingsTable()
     {
         $expected = ''
