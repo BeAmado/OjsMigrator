@@ -20,6 +20,9 @@ use BeAmado\OjsMigrator\Util\FileSystemManager;
 use BeAmado\OjsMigrator\Util\XmlHandler;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Maestro;
+use BeAmado\OjsMigrator\Db\TableDefinitionHandler;
+use BeAmado\OjsMigrator\Db\ColumnDefinitionHandler;
+use BeAmado\OjsMigrator\Db\IndexDefinitionHandler;
 
 class SchemaHandlerTest extends FunctionalTest implements StubInterface
 {
@@ -42,11 +45,29 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
         //var_dump($this->schema->toArray());
     }
 
-    public function getStub()
+    public function getStub($type = 'SchemaHandler')
     {
-        return new class extends SchemaHandler {
-            use TestStub;
-        };
+        switch (strtolower($type)) {
+            case strtolower('SchemaHandler'):
+                return new class extends SchemaHandler {
+                    use TestStub;
+                };
+
+            case strtolower('TableDefinitionHandler'):
+                return new class extends TableDefinitionHandler {
+                    use TestStub;
+                };
+
+            case strtolower('ColumnDefinitionHandler'):
+                return new class extends ColumnDefinitionHandler {
+                    use TestStub;
+                };
+
+            case strtolower('IndexDefinitionHandler'):
+                return new class extends IndexDefinitionHandler {
+                    use TestStub;
+                };
+        }
     }
 
     public function testCanReadSchemaFromTheOjsSchemaFile()
@@ -61,14 +82,8 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
     {
         $journals = $this->schema->get('children')->get(0);
         $this->assertTrue(
-            $this->getStub()->callMethod(
-                'isTable',
-                $journals
-            ) &&
-            !$this->getStub()->callMethod(
-                'isColumn',
-                $journals
-            )
+            Registry::get('TableDefinitionHandler')->isTable($journals) &&
+            !Registry::get('ColumnDefinitionHandler')->isColumn($journals)
         );
     }
 
@@ -79,14 +94,8 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
             ->get('children')->get(0); //journal_id
 
         $this->assertTrue(
-            !$this->getStub()->callMethod(
-                'isTable',
-                $journalId
-            ) &&
-            $this->getStub()->callMethod(
-                'isColumn',
-                $journalId
-            )
+            !Registry::get('TableDefinitionHandler')->isTable($journalId) &&
+            Registry::get('ColumnDefinitionHandler')->isColumn($journalId)
         );
     }
 
@@ -94,8 +103,7 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
     {
         $this->assertSame(
             'journals',
-            $this->getStub()->callMethod(
-                'getTableName',
+            Registry::get('TableDefinitionHandler')->getTableName(
                 $this->schema->get('cHilDRen')->get(0)
             )
         );
@@ -105,8 +113,7 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
     {
         $this->assertSame(
             'path',
-            $this->getStub()->callMethod(
-                'getColumnName',
+            Registry::get('ColumnDefinitionHandler')->getColumnName(
                 $this->schema
                      ->get('children')->get(0) //journals
                      ->get('children')->get(1) //path
@@ -118,25 +125,18 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
     {
         $journals = $this->schema->get('children')->get(0);
         Registry::set('dataTypes', array());
-        Registry::set(
-            'stub', 
-            new class extends SchemaHandler {
-                use TestStub;
-            }
-        );
+
         $journals->get('children')->forEachValue(function($columnObj) {
-            if (!Registry::get('stUB')->callMethod('isColumn', $columnObj))
+            $cdHandler = $this->getStub('ColumnDefinitionHandler');
+            if (!$cdHandler->isColumn($columnObj))
                 return;
 
             $types = Registry::get('dataTypes');
             Registry::remove('dataTypes');
+
             
-            $types[
-                Registry::get('stub')->callMethod('getColumnName', $columnObj)
-            ] = Registry::get('Stub')->callMethod(
-                'getDataType',
-                $columnObj
-            );
+            $types[$cdHandler->callMethod('getColumnName', $columnObj)] = 
+                $cdHandler->callMethod('getDataType', $columnObj);
 
             Registry::set('dataTypes', $types);
             unset($types);
@@ -159,25 +159,17 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
     {
         $journals = $this->schema->get('children')->get(0);
         Registry::set('sqlDataTypes', array());
-        Registry::set(
-            'stub', 
-            new class extends SchemaHandler {
-                use TestStub;
-            }
-        );
+
         $journals->get('children')->forEachValue(function($columnObj) {
-            if (!Registry::get('stub')->callMethod('isColumn', $columnObj))
+            $cdHandler = $this->getStub('ColumnDefinitionHandler');
+            if (!$cdHandler->isColumn($columnObj))
                 return;
 
             $types = Registry::get('sqlDataTypes');
             Registry::remove('sqlDataTypes');
             
-            $types[
-                Registry::get('stub')->callMethod('getColumnName', $columnObj)
-            ] = Registry::get('stub')->callMethod(
-                'getSqlType',
-                $columnObj
-            );
+            $types[$cdHandler->callMethod('getColumnName', $columnObj)] = 
+                $cdHandler->callMethod('getSqlType', $columnObj);
 
             Registry::set('sqlDataTypes', $types);
             unset($types);
@@ -200,7 +192,7 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
     {
         $this->assertEquals(
             8,
-            $this->getStub()->callMethod(
+            $this->getStub('ColumnDefinitionHandler')->callMethod(
                 'getTypeLastChar',
                 $this->schema
                      ->get('children')->get(0) //journals
@@ -211,11 +203,12 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
 
     public function testGetIntTypes()
     {
+        $stub = $this->getStub('ColumnDefinitionHandler');
         $this->assertTrue(
-            $this->getStub()->callMethod('getIntType', 1) === 'tinyint' &&
-            $this->getStub()->callMethod('getIntType', 2) === 'smallint' &&
-            $this->getStub()->callMethod('getIntType', 4) === 'int' &&
-            $this->getStub()->callMethod('getIntType', 8) === 'bigint'
+            $stub->callMethod('getIntType', 1) === 'tinyint' &&
+            $stub->callMethod('getIntType', 2) === 'smallint' &&
+            $stub->callMethod('getIntType', 4) === 'int' &&
+            $stub->callMethod('getIntType', 8) === 'bigint'
         );
     }
 
@@ -225,10 +218,10 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
 
         $this->assertSame(
             5,
-            count($this->getStub()->callMethod(
-                'getColumns',
+            count($this->getStub('TableDefinitionHandler')->callMethod(
+                'getColumnsRaw',
                 $journals
-            )->listValues())
+            ))
         );
     }
 
@@ -238,10 +231,10 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
 
         $this->assertSame(
             2,
-            count($this->getStub()->callMethod(
-                'getIndexes',
+            count($this->getStub('TableDefinitionHandler')->callMethod(
+                'getIndexesRaw',
                 $journalSettings
-            )->listValues())
+            ))
         );
     }
 

@@ -3,17 +3,56 @@
 namespace BeAmado\OjsMigrator\Db;
 use \BeAmado\OjsMigrator\MyObject;
 use \BeAmado\OjsMigrator\Registry;
+use \BeAmado\OjsMigrator\MyStringRepr;
 
-class TableDefinition extends MyObject
+class TableDefinition extends MyObject implements MyStringRepr
 {
+    public function __construct($definition = null)
+    {
+        parent::__construct($definition);
+
+        if (!$this->hasAttribute('columns'))
+            return;
+
+        foreach ($this->get('columns')->toArray() as $name => $def) {
+            $this->setColumnDefinition($def, $name);
+        }
+        unset($name);
+        unset($def);
+    }
+
     /**
      * Gets the name of the table.
      *
      * @return string
      */
-    public function getName()
+    public function getTableName()
     {
         return $this->get('name')->getValue();
+    }
+
+    /**
+     * Sets the column definition.
+     *
+     * @param \BeAmado\OjsMigrator\Db\ColumnDefinition | array $def
+     * @param string $name optional
+     * @return void
+     */
+    public function setColumnDefinition($def, $name = null)
+    {
+        if (\is_array($def))
+            $def = new ColumnDefinition($def, $name ?: $def['name']);
+
+        if (!$this->hasAttribute('columns'))
+            $this->set('columns', array());
+
+        if ($this->get('columns')->hasAttribute($def->getColumnName()))
+            $this->get('columns')->remove($def->getColumnName());
+
+        $this->get('columns')->set(
+            $name ?: $def->getColumnName(),
+            $def
+        );
     }
 
     /**
@@ -43,135 +82,19 @@ class TableDefinition extends MyObject
         return $this->get('columns')->hasAttribute($colName);
     }
 
-    protected function getColumn($colName)
+    /**
+     * Gets the definiction of the specified column.
+     *
+     * @param string $colName
+     * @return \BeAmado\OjsMigrator\Db\ColumnDefinition
+     */
+    public function getColumn($colName)
     {
         if (!$this->hasColumn($colName)) {
             return;
         }
 
         return $this->get('columns')->get($colName);
-    }
-
-    protected function getColumnAttr($colName, $attr)
-    {
-        if (
-            !$this->hasColumn($colName) ||
-            !$this->getColumn($colName)->hasAttribute($attr)
-        ) {
-            return;
-        }
-
-        return $this->getColumn($colName)->get($attr)->getValue();
-    }
-
-    protected function is($attr, $colName)
-    {
-        return $this->hasColumn($colName) &&
-            $this->getColumn($colName)->hasAttribute($attr) &&
-            $this->getColumn($colName)->get($attr)->getValue();
-    }
-
-    /**
-     * Checks if the specified column might be null.
-     * 
-     * @param string $colName
-     * @return boolean
-     */
-    public function isNullable($colName)
-    {
-        return !$this->isPrimaryKey($colName) && 
-            $this->is('nullable', $colName);
-    }
-
-    /**
-     * Checks if the specified column is a primary key.
-     *
-     * @param string $colName
-     * @return boolean
-     */
-    public function isPrimaryKey($colName)
-    {
-        return $this->is('primary_key', $colName);
-    }
-
-    public function isAutoIncrement($colName)
-    {
-        return $this->is('auto_increment', $colName);
-    }
-
-    /**
-     * Gets the default value of the specified column.
-     *
-     * @param string $colName
-     * @return mixed
-     */
-    public function getDefaultValue($colName)
-    {
-        return $this->getColumnAttr($colName, 'default');
-    }
-
-    /**
-     * Gets the PHP data type of the specified column.
-     *
-     * @param string $colName
-     * @return string
-     */
-    public function getDataType($colName)
-    {
-        return $this->getColumnAttr($colName, 'type');
-    }
-
-    /**
-     * Gets the SQL type of the specified column.
-     *
-     * @param string $colName
-     * @return string
-     */
-    public function getSqlType($colName)
-    {
-        return $this->getColumnAttr($colName, 'sql_type');
-    }
-
-    /**
-     * Gets the maximum size of the varchar column.
-     *
-     * @param string $colName
-     * @return integer
-     */
-    public function getSize($colName)
-    {
-        if ($this->getColumnType($colName) !== 'string') {
-            return;
-        }
-
-        if (
-            \strpos($this->getSqlType($colName), 'varchar') === false &&
-            \strpos($this->getSqlType($colName), 'char') !== false
-        ) {
-            return 1;
-        }
-
-        $vars = Registry::get('MemoryManager')->create(array(
-            'openParens' => \strpos($this->getSqlType($colName), '('),
-            'closeParens' => \strpos($this->getSqlType($colName), ')'),
-        ));
-
-        $vars->set(
-            'length',
-            $vars->get('closeParens')->getValue() 
-                - $vars->get('openParens')->getValue()
-        );
-
-        $size = (int) \substr(
-            $this->getSqlType($colName),
-            $vars->get('openParens')->getValue() + 1,
-            $vars->get('length')->getValue()
-        );
-
-        Registry::get('MemoryManager')->destroy($vars);
-        unset($vars);
-
-        return $size;
     }
 
     /**
@@ -182,5 +105,24 @@ class TableDefinition extends MyObject
     public function getPrimaryKeys()
     {
         return $this->get('primary_keys')->toArray();
+    }
+
+    public function toString()
+    {
+        $repr = '`' . $this->getTableName() . '` (';
+        foreach ($this->getColumnNames() as $name) {
+            $repr .= $this->getColumn($name)->toString() . ', ';
+        }
+        unset($name);
+
+        if (\count($this->getPrimaryKeys())) {
+            $repr .= 'PRIMARY KEY(`' 
+                . \implode('`, `', $this->getPrimaryKeys())
+                . '`)';
+        } else if (\substr($repr, -2) === ', ')
+            $repr = \substr($repr, 0, -2);
+
+        $repr .= ')';
+        return $repr;
     }
 }

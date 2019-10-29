@@ -2,42 +2,49 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Db\TableDefinition;
-use BeAmado\OjsMigrator\StubInterface;
-use BeAmado\OjsMigrator\TestStub;
 use BeAmado\OjsMigrator\WorkWithXmlSchema;
 
-class TableDefinitionTest extends TestCase implements StubInterface
+class TableDefinitionTest extends TestCase
 {
-    public function getStub()
-    {
-        return new class extends TableDefinition {
-            use TestStub;
-            use WorkWithXmlSchema;
-        };
-    }
+    use WorkWithXmlSchema;
 
     public function testCreateOjsJournalTableDefinition()
     {
         $def = new TableDefinition(
-            $this->getStub()->schemaArray()['journals']
+            $this->schemaArray()['journals']
         );
 
         $this->assertTrue(
             $def->hasColumn('journal_id') &&
-            $def->isPrimaryKey('journal_id') &&
-            !$def->isNullable('journal_id')
+            $def->getColumn('journal_id')->isPrimaryKey() &&
+            $def->getColumn('journal_id')->isNullable() &&
+            $def->getColumn('journal_id')->isAutoIncrement()
         );
     }
 
     public function testGetJournalsTablePrimaryKeys()
     {
         $def = new TableDefinition(
-            $this->getStub()->schemaArray()['journals']
+            $this->schemaArray()['journals']
         );
 
         $this->assertEquals(
             array('journal_id'),
             $def->getPrimaryKeys()
+        );
+    }
+
+    public function testSetColumnDefinitionPassingOnlyTheDef()
+    {
+        $enabled = $this->schemaArray()['journals']['columns']['enabled'];
+        $enabled['name'] = 'enabled';
+
+        $tableDef = new TableDefinition();
+
+        $tableDef->setColumnDefinition($enabled);
+
+        $this->assertTrue(
+            $tableDef->getColumn('enabled')->getDefaultValue() == 1
         );
     }
 }

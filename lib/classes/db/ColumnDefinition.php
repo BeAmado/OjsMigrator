@@ -6,10 +6,20 @@ use BeAmado\OjsMigrator\MyStringRepr;
 
 class ColumnDefinition extends MyObject implements MyStringRepr
 {
-    public function __construct($data, $name, $isPk = false)
+    public function __construct($data, $name = null, $isPk = false)
     {
         parent::__construct($data);
-        $this->setColumnName($name);
+        if ($name !== null)
+            $this->setColumnName($name);
+        else if (\is_array($data) && \array_key_exists('name', $data))
+            $this->setColumnName($data['name']);
+        else if (
+            \is_a($data, \BeAmado\OjsMigrator\MyObject::class) && 
+            $data->hasAttribute('name')
+        )
+            $this->setColumnName($data->get('name')->getValue());
+
+
         if ($isPk)
             $this->markAsPrimaryKey();
     }
@@ -21,13 +31,13 @@ class ColumnDefinition extends MyObject implements MyStringRepr
 
     public function setColumnName($name)
     {
-        $this->set('columnName', $name);
+        $this->set('name', $name);
     }
 
     public function getColumnName()
     {
-        if ($this->hasAttribute('columnName'))
-            return $this->get('columnName')->getValue();
+        if ($this->hasAttribute('name'))
+            return $this->get('name')->getValue();
     }
 
     protected function is($attr)
@@ -79,7 +89,8 @@ class ColumnDefinition extends MyObject implements MyStringRepr
 
     public function toString()
     {
-        $repr = '`' . $this->getColumnName() . '` ' . $this->getSqlType();
+        $repr = '`' . $this->getColumnName() . '` ';
+        $repr .= strtoupper($this->getSqlType());
         
         if (!$this->isNullable())
             $repr .= ' NOT NULL';
@@ -96,5 +107,25 @@ class ColumnDefinition extends MyObject implements MyStringRepr
             $repr .= ' ' . $this->autoIncrement();
 
         return $repr;
+    }
+
+    public function getSize()
+    {
+        if (\strtolower($this->getDataType()) !== 'string')
+            return;
+
+        $openParens = \strpos($this->getDataType(), '(');
+        $closeParens = \strpos($this->getDataType(), ')');
+
+        $size = \substr(
+            $this->getDataType(),
+            $openParens + 1,
+            $closeParens - $openParens
+        );
+
+        unset($closeParens);
+        unset($openParens);
+
+        return (int) $size;
     }
 }

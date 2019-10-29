@@ -90,14 +90,14 @@ class QueryHandler
     {
         if (
             !\method_exists($tableDefinition, 'getPrimaryKeys') ||
-            !\method_exists($tableDefinition, 'getName')
+            !\method_exists($tableDefinition, 'getTableName')
         ) {
             return;
         }
 
         return 'SELECT '
           . \implode(', ', $tableDefinition->getPrimaryKeys())
-          . ' FROM ' . $tableDefinition->getName()
+          . ' FROM ' . $tableDefinition->getTableName()
           . ' ORDER BY ' . \implode(', ', $tableDefinition->getPrimaryKeys())
           . ' DESC LIMIT 1';
     }
@@ -109,51 +109,16 @@ class QueryHandler
         return 'AUTO_INCREMENT';
     }
 
+    /**
+     * Generates a query to create a table as specified in the given 
+     * TableDefinition.
+     *
+     * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
+     * @return string
+     */
     public function generateQueryCreateTable($td)
     {
-        if (
-            !\method_exists($td, 'getPrimaryKeys') ||
-            !\method_exists($td, 'getName')
-        ) {
-            return;
-        }
-
-        $query = 'CREATE TABLE ' . $td->getName() . ' (';
-        
-        foreach ($td->getColumnNames() as $column) {
-            $query .= '`' . $column . '` ' . \strtoupper($td->getSqlType($column));
-
-            if (!$td->isNullable($column))
-                $query .= ' NOT NULL';
-
-            if ($td->getDefaultValue($column) !== null) {
-                $query .= ' DEFAULT ';
-                if ($td->getDefaultValue($column) === '')
-                    $query .= '""';
-                else
-                    $query .= $td->getDefaultValue($column);
-            }
-
-            if ($td->isAutoIncrement($column))
-                $query .= $this->autoIncrement();
-
-            $query .= ', ';
-        }
-        unset($column);
-
-        $pks = $td->getPrimaryKeys();
-
-        if (\count($pks))
-            $query .= 'PRIMARY KEY(`' . \implode('`, `', $pks) . '`)';
-        else if (\substr($query, -2) === ', ')
-            $query = \substr($query, 0, -2);
-
-        Registry::get('MemoryManager')->destroy($pks);
-        unset($pks);
-
-        $query .= ')';
-
-        return $query;
+        return 'CREATE TABLE ' . $td->toString();
     }
 
     public function generateQueryInsert($tableDefinition) {}

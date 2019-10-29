@@ -99,7 +99,7 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
     public function testGetTheQueryForCreatingUserSettingsTable()
     {
         $expected = ''
-          . 'CREATE TABLE user_settings ('
+          . 'CREATE TABLE `user_settings` ('
           .     '`user_id` BIGINT NOT NULL, '
           .     '`locale` VARCHAR(5) NOT NULL DEFAULT "", '
           .     '`setting_name` VARCHAR(255) NOT NULL, '
