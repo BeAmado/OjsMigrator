@@ -115,7 +115,7 @@ class TableDefinition extends MyObject implements MyStringRepr
         }
         unset($name);
 
-        if (\count($this->getPrimaryKeys())) {
+        if (!empty($this->getPrimaryKeys())) {
             $repr .= 'PRIMARY KEY(`' 
                 . \implode('`, `', $this->getPrimaryKeys())
                 . '`)';

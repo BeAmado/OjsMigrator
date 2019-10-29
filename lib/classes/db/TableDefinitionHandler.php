@@ -7,12 +7,15 @@ class TableDefinitionHandler extends AbstractDefinitionHandler
 {
     protected function getUniqueColumns($obj)
     {
-        $uniques = array();
         $indexes = $this->getIndexesRaw($obj);
+        if (!$indexes || empty($indexes))
+            return array();
+            
+        $uniques = array();
         $idefHandler = Registry::get('IndexDefinitionHandler');
         foreach ($indexes as $index) {
             if ($idefHandler->isUniqueColumnIndex($index))
-                $uniques[] = $idefHandler->getIndexColumns[0];
+                $uniques[] = $idefHandler->getIndexColumns($index)[0];
         }
         unset($index);
         unset($idefHandler);
@@ -89,11 +92,8 @@ class TableDefinitionHandler extends AbstractDefinitionHandler
                 $pks[] = $column['name'];
         }
 
-        foreach (
-            Registry::get('MemoryManager')->create($this->getIndexesRaw($obj)) 
-            as $index
-        ) {
-            if (Registry::get('IndexDefinitionHandler')->isIndexPk($index)) {
+        foreach ($this->getIndexesRaw($obj) ?: array() as $index) {
+            if (Registry::get('IndexDefinitionHandler')->isPkIndex($index)) {
                 $pks = \array_merge(
                     $pks,
                     Registry::get('IndexDefinitionHandler')->getIndexColumns(
