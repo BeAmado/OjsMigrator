@@ -121,6 +121,44 @@ class QueryHandler
         return 'CREATE TABLE ' . $td->toString();
     }
 
+    /**
+     * Generates the name of the parameter. 
+     * For example generateParameterName(
+     *     'insert', 
+     *     'user_settings', 
+     *     'setting_value'
+     * ) -> would return ':insertUsersSettings_settingValue
+     *
+     * @param string $op
+     * @param string $tableName
+     * @param string $columnName
+     * @return string
+     */
+    protected function generateParameterName($op, $tableName, $columnName)
+    {
+        return ':' . $op
+        . Registry::get('CaseHandler')->transformCaseTo(
+            'PascalCase',
+            $tableName
+          )
+        . '_'
+        . Registry::get('CaseHandler')->transformCaseTo(
+            'camelCase',
+            $columnName
+        );
+    }
+
+    /**
+     * Generate the parameters for the insert query
+     *
+     * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
+     * @return array
+     */
+    protected function generateParametersInsert($td)
+    {
+        
+    }
+
     public function generateQueryInsert($tableDefinition) {}
 
     public function generateQueryUpdate($tableDefinition) {}

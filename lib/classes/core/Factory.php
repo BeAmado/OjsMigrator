@@ -10,6 +10,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\ArrayHandler();
     }
 
+    protected function createCaseHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\CaseHandler();
+    }
+
     protected function createColumnDefinitionHandler()
     {
         return new \BeAmado\OjsMigrator\Db\ColumnDefinitionHandler();

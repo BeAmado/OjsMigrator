@@ -175,4 +175,23 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
             $query
         );
     }
+
+    public function testGenerateParameterNameForInsertArticlesJournalId()
+    {
+        $expected = ':insertArticles_journalId';
+
+        $parameterName = $this->getStub()->callMethod(
+            'generateParameterName',
+            array(
+                'op' => 'insert',
+                'tableName' => 'articles',
+                'columnName' => 'journal_id',
+            )
+        );
+
+        $this->assertSame(
+            $expected,
+            $parameterName
+        );
+    }
 }
