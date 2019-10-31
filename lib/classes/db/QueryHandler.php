@@ -102,8 +102,6 @@ class QueryHandler
           . ' DESC LIMIT 1';
     }
 
-    protected function generateParameters() {}
-
     protected function autoIncrement()
     {
         return 'AUTO_INCREMENT';
@@ -305,19 +303,19 @@ class QueryHandler
 
     protected function getQueryType($query)
     {
-        if (\is_string($query))
+        if (!\is_string($query) || \strlen($query) < 6)
             return;
 
         if (\in_array(\strtolower(\substr($query, 0, 6)), array(
             'insert',
             'delete',
             'select',
-            'udpate',
+            'update',
         )))
             return \strtolower(\substr($query, 0, 6));
     }
 
-    protected function getTheDataBetweenTheParens($str)
+    protected function getDataBetweenParens($str)
     {
         $openParens = \strpos($str, '(');
         $closeParens = \strpos($str, ')');
@@ -339,16 +337,16 @@ class QueryHandler
 
         $interest1 = \substr($query, $intoPos + 6, $valuesPos - $intoPos - 6);
 
-        $columns = $this->getTheDataBetweenTheParens($interest1);
+        $columns = $this->getDataBetweenParens($interest1);
 
         $interest2 = \substr($query, $valuesPos + 8);
 
-        $names = $this->getTheDataBetweenTheParens($interest2);
+        $names = $this->getDataBetweenParens($interest2);
 
         $params = array();
 
         if (\count($columns) !== \count($names))
-            return false;
+            return;
 
         for ($i = 0; $i < \count($names); $i++) {
             $params[$columns[$i]] = $names[$i];

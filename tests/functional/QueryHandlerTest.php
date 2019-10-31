@@ -99,7 +99,9 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
     public function testGetTheQueryForCreatingAuthSourcesTableInMysql()
     {
         $connData = Registry::get('ConfigHandler')->getConnectionSettings();
-        if ($connData['driver'] !== 'mysql')
+
+        if (!\array_key_exists('driver', $connData) ||
+            $connData['driver'] !== 'mysql')
             $this->markTestSkipped('The driver is not mysql');
 
         $expected = 'CREATE TABLE `auth_sources` ('
@@ -124,7 +126,9 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
     public function testGetTheQueryForCreatingAuthSourcesTableInSqlite()
     {
         $connData = Registry::get('ConfigHandler')->getConnectionSettings();
-        if ($connData['driver'] !== 'sqlite')
+
+        if (!\array_key_exists('driver', $connData) ||
+            $connData['driver'] !== 'sqlite')
             $this->markTestSkipped('The driver is not sqlite');
         
         $expected = 'CREATE TABLE `auth_sources` ('
@@ -336,5 +340,134 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
         );
 
         $this->assertSame($expected, $query);
+    }
+
+    public function testCanSeeThatQueryTypeIsInsert()
+    {
+        $query = 'INSERT INTO articles (journal_id) VALUES (:journalId)';
+        $this->assertSame(
+            'insert',
+            $this->getStub()->callMethod('getQueryType', $query)
+        );
+    }
+
+    public function testCanSeeThatQueryTypeIsUpdate()
+    {
+        $query = 'UPdate users '
+            . 'SET first_name = :firstName, username = :username';
+        
+        $this->assertSame(
+            'update',
+            $this->getStub()->callMethod('getQueryType', $query)
+        );
+    }
+
+    public function testCanSeeThatQueryTypeIsDelete()
+    {
+        $query = 'delete from articles WHERE journal_id = :journalId';
+
+        $this->assertSame(
+            'delete',
+            $this->getStub()->callMethod('getQueryType', $query)
+        );
+    }
+
+    public function testCanSeeThatQueryTypeIsSelect()
+    {
+        $query = 'select * from users';
+
+        $this->assertSame(
+            'select',
+            $this->getStub()->callMethod('getQueryType', $query)
+        );
+    }
+
+    public function testReturnsNullWhenTheQueryIsNotAnInsertOrSelectOrDeleteOrUpdate()
+    {
+        $query = 'CREATE TABLE jackson (years_making_bs INTEGER)'; 
+
+        $this->assertNull(
+            $this->getStub()->callMethod('getQueryType', $query)
+        );
+    } 
+
+    public function testCanGetDataBetweenParentheses()
+    {
+        $str = 'Mes chansons de Helloween -> ('
+             .     'A tale that wasn\'t right, '
+             .     'Halloween, '
+             .     'How many tears, '
+             .     'Nabataea, '
+             .     'Keeper of the seven keys, '
+             .     'Time of the oath'
+             . '). Uh lala, elles sont trop cool!';
+
+        $expected = array(
+            "A tale that wasn't right",
+            'Halloween',
+            'How many tears',
+            'Nabataea',
+            'Keeper of the seven keys',
+            'Time of the oath',
+        );
+
+        $result = $this->getStub()->callMethod('getDataBetweenParens', $str);
+
+        $this->assertEquals($expected, $result);
+    }   
+
+    public function testGetParametersFromAValidInsertQuery()
+    {
+        $query = 'INSERT INTO roles (user_id, journal_id, role_id) VALUES '
+            . '(:userId, :journalId, :roleId)';
+
+        $result = $this->getStub()->callMethod(
+            'getParametersFromInsert',
+            $query
+        );
+
+        $expected = array(
+            'user_id' => ':userId',
+            'journal_id' => ':journalId',
+            'role_id' => ':roleId',
+        );
+
+        $this->assertEquals(
+            $expected,
+            $result
+        );
+    }
+
+    public function testGetParametersFromInvalidInsertQueryReturnsNull()
+    {
+        $query = 'INSERT INTO articles (journal_id, user_id) VALUES (:userId)';
+
+        $result = $this->getStub()->callMethod(
+            'getParametersFromInsert', 
+            $query
+        );
+
+        $this->assertNull($result);
+    }
+
+    public function testCanGetParametersFromInsertArticleFilesQuery()
+    {
+        $td = Registry::get('SchemaHandler')->getTableDefinition(
+            'article_files'
+        );
+
+        $parametersInsert = $this->getStub()->callMethod(
+            'generateParametersInsert',
+            $td
+        );
+
+        $query = Registry::get('QueryHandler')->generateQueryInsert($td);
+
+        $params = Registry::get('QueryHandler')->getParametersFromQuery($query);
+
+        $this->assertEquals(
+            $parametersInsert,
+            $params
+        );
     }
 }
