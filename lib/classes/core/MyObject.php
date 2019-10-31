@@ -118,6 +118,16 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
     }
 
     /**
+     * Returns an array with all the names of the object attributes.
+     *
+     * @return array
+     */
+    public function listKeys()
+    {
+        return isset($this->values) ? \array_keys($this->values) : array();
+    }
+
+    /**
      * Iterates over the values
      *
      * @param callable $callback

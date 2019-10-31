@@ -34,4 +34,12 @@ class ArrayHandler
         
         return \array_reduce($arrays, array($this, 'union'));
     }
+
+    public function isLast($elem, $arr)
+    {
+        if (!\in_array($elem, $arr))
+            return;
+
+        return \array_search($elem, $arr) === (\count($arr) - 1);
+    }
 }

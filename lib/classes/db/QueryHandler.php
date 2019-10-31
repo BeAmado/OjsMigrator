@@ -148,6 +148,21 @@ class QueryHandler
         );
     }
 
+    public function generateParameterNames($op, $tableName, $columns)
+    {
+        $parameters = array();
+
+        foreach ($columns as $column) {
+            $parameters[$column] = $this->generateParameterName(
+                $op,
+                $tableName,
+                $column
+            );
+        }
+
+        return $parameters;
+    }
+
     /**
      * Generate the parameters for the insert query
      *
@@ -156,14 +171,101 @@ class QueryHandler
      */
     protected function generateParametersInsert($td)
     {
-        
+        $columns = array();
+
+        foreach($td->getColumnNames() as $column) {
+            if (!$td->getColumn($column)->isAutoIncrement())
+                $columns[] = $column;
+        }
+        unset($column);
+
+        return $this->generateParameterNames(
+            'insert',
+            $td->getTableName(),
+            $columns
+        );
     }
 
-    public function generateQueryInsert($tableDefinition) {}
+    protected function generateWhere($table, $where, $op = null)
+    {
+        if (empty($where))
+            return '';
 
-    public function generateQueryUpdate($tableDefinition) {}
+        $columns = array();
 
-    public function generateQueryDelete($tableDefinition) {}
+        if ($op == null) {
+            $op = \str_replace(
+                '.',
+                '',
+                '' . \array_sum(explode(' ', \microtime()))
+            );
+        }
 
-    public function generateQuerySelect($tableDefinition) {}
+        $str = ' WHERE ';
+
+        foreach (
+            $this->generateParameterNames($op, $table, $columns)
+            as $column => $param
+        ) {
+            $str .= $column . ' = ' . $param;
+            if (!Registry::get()->isLast($column, $columns))
+                $str .= ' AND ';
+        }
+
+        return $str;
+    }
+
+    public function generateQueryInsert($td)
+    {
+        $parameters = $this->generateParametersInsert($td);
+
+        return 'INSERT INTO ' . $td->getTableName()
+            . '(' 
+            . \implode(', ', \array_keys($parameters))
+            . ') VALUES ('
+            . \implode(', ', \array_values($parameters))
+            . ')';
+    }
+
+    public function generateQueryUpdate($td, $where = array(), $set = array())
+    {
+        if (empty($where))
+            $where = $td->getPrimaryKeys();
+
+        $query = 'UPDATE ' . $td->getTableName() . ' SET ';
+
+        foreach (
+            $this->generateParameterNames(
+                'update',
+
+            ) as $column => $param
+        ) {
+        
+        }
+
+        $query = \substr($query, 0, -2) . $this->generateWhere(
+            $td->getTableName(),
+            $where,
+            'update'
+        );
+
+        return $query;
+    }
+
+    public function generateQueryDelete($td)
+    {
+        return 'DELETE FROM ' . $td->getTableName()
+          . $this->generateWhere(
+                $td->getTableName(), 
+                $td->getPrimaryKeys(),
+                'delete'
+            );
+    }
+
+    public function generateQuerySelect($td, $where = array())
+    {
+        return = 'SELECT ' . \implode(', ', $td->getColumnNames()) 
+            . 'FROM ' . $td->getTableName()
+            . $this->generateWhere($td->getTableName(), $where, 'select');
+    }
 }

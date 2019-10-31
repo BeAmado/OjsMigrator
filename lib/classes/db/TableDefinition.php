@@ -14,11 +14,14 @@ class TableDefinition extends MyObject implements MyStringRepr
         if (!$this->hasAttribute('columns'))
             return;
 
-        foreach ($this->get('columns')->toArray() as $name => $def) {
-            $this->setColumnDefinition($def, $name);
+        //foreach ($this->get('columns')->toArray() as $name => $def) {
+        foreach ($this->getColumnNames() as $name) {
+            $this->setColumnDefinition(
+                $this->get('columns')->get($name), 
+                $name
+            );
         }
         unset($name);
-        unset($def);
     }
 
     /**
@@ -42,6 +45,8 @@ class TableDefinition extends MyObject implements MyStringRepr
     {
         if (\is_array($def))
             $def = new ColumnDefinition($def, $name ?: $def['name']);
+        else
+            $def = new ColumnDefinition($def, $name);
 
         if (!$this->hasAttribute('columns'))
             $this->set('columns', array());
@@ -65,7 +70,8 @@ class TableDefinition extends MyObject implements MyStringRepr
         if (!$this->hasAttribute('columns'))
             return;
 
-        return \array_keys($this->get('columns')->toArray());
+        //return \array_keys($this->get('columns')->toArray());
+        return $this->get('columns')->listKeys();
     }
 
     /**

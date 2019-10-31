@@ -53,4 +53,16 @@ class ArrayHandlerTest extends TestCase
 
         $this->assertEquals($expected, $result);
     }
+
+    public function testCheckIfAnElementIsTheLastOfAnArray()
+    {
+        $arr = [1, 'goat', 'maori'];
+
+        $ah = Registry::get('ArrayHandler');
+
+        $this->assertTrue(
+            $ah->isLast('maori', $arr) && !$ah->isLast('goat', $arr) &&
+            !$ah->isLast(1, $arr) && !$ah->isLast('will', $arr)
+        );
+    }
 }
