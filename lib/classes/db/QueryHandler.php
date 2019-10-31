@@ -302,4 +302,120 @@ class QueryHandler
             . ' FROM ' . $td->getTableName()
             . $this->generateWhere($td->getTableName(), $where, 'select');
     }
+
+    protected function getQueryType($query)
+    {
+        if (\is_string($query))
+            return;
+
+        if (\in_array(\strtolower(\substr($query, 0, 6)), array(
+            'insert',
+            'delete',
+            'select',
+            'udpate',
+        )))
+            return \strtolower(\substr($query, 0, 6));
+    }
+
+    protected function getTheDataBetweenTheParens($str)
+    {
+        $openParens = \strpos($str, '(');
+        $closeParens = \strpos($str, ')');
+
+        $interest = \substr(
+            $str, 
+            $openParens + 1, 
+            $closeParens - $openParens - 1
+        );
+
+        return \array_map('trim', \explode(',', $interest));
+    }
+
+    protected function getParametersFromInsert($query)
+    {
+        $valuesPos = \strpos(\strtolower($query), ' values ');
+
+        $intoPos = \strpos(\strtolower($query), ' into ');
+
+        $interest1 = \substr($query, $intoPos + 6, $valuesPos - $intoPos - 6);
+
+        $columns = $this->getTheDataBetweenTheParens($interest1);
+
+        $interest2 = \substr($query, $valuesPos + 8);
+
+        $names = $this->getTheDataBetweenTheParens($interest2);
+
+        $params = array();
+
+        if (\count($columns) !== \count($names))
+            return false;
+
+        for ($i = 0; $i < \count($names); $i++) {
+            $params[$columns[$i]] = $names[$i];
+        }
+
+        return $params;
+    }
+
+    protected function getParamatersFromWhereClause($query)
+    {
+        $wherePos = \strpos(\strtolower($query), ' where ');
+        $whereClause = \substr($query, $wherePos + 7);
+
+        $assigns = \array_map('trim', \explode('AND', $whereClause));
+
+        $params = array();
+
+        foreach ($assigns as $assign) {
+            $parts = \array_map('trim', \explode('=', $assign));
+            $params[$parts[0]] = $parts[1];
+        }
+
+        return $params;
+    }
+
+    protected function getParametersFromSet($query)
+    {
+        $setPos = \strpos(\strtolower($query), ' set ');
+        $wherePos = \strpos(\strtolower($query), ' where ');
+
+        $length = $wherePos - $setPos + 5;
+
+        $interest = \substr($query, $setPos + 5, $length);
+
+        $assigns = \array_map('trim', \explode(',', $interest));
+        $params = array();
+
+        foreach ($assigns as $assign) {
+            $parts = \array_map('trim', \explode('=', $assign));
+            $params[$parts[0]] = $parts[1];
+        }
+
+        return $params;
+    }
+
+    /**
+     * Generates an associative array with the parameter names used in the
+     * query string.
+     * 
+     * @param string $query
+     * @return array
+     */
+    public function getParametersFromQuery($query)
+    {
+        switch($this->getQueryType($query)) {
+            case 'select':
+            case 'delete':
+                return $this->getParametersFromWhereClause($query);
+
+            case 'insert':
+                return $this->getParametersFromInsert($query);
+
+            case 'update':
+                return array_merge(
+                    $this->getParametersFromSet($query),
+                    $this->getParametersFromWhereClause($query)
+                );
+        }
+    }
 }
