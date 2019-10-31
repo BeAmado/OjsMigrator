@@ -148,6 +148,14 @@ class QueryHandler
         );
     }
 
+    /**
+     * Generates an array with the parameter names for a statement
+     *
+     * @param string $op
+     * @param string $tableName
+     * @param array $columns
+     * @return array
+     */
     public function generateParameterNames($op, $tableName, $columns)
     {
         $parameters = array();
@@ -191,8 +199,6 @@ class QueryHandler
         if (empty($where))
             return '';
 
-        $columns = array();
-
         if ($op == null) {
             $op = \str_replace(
                 '.',
@@ -204,68 +210,96 @@ class QueryHandler
         $str = ' WHERE ';
 
         foreach (
-            $this->generateParameterNames($op, $table, $columns)
+            $this->generateParameterNames($op, $table, $where)
             as $column => $param
         ) {
             $str .= $column . ' = ' . $param;
-            if (!Registry::get()->isLast($column, $columns))
+            if (!Registry::get('ArrayHandler')->isLast($column, $where))
                 $str .= ' AND ';
         }
 
         return $str;
     }
 
+    /**
+     * Generates a query string for a insert statement of the specified table.
+     *
+     * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
+     * @return string
+     */
     public function generateQueryInsert($td)
     {
         $parameters = $this->generateParametersInsert($td);
 
         return 'INSERT INTO ' . $td->getTableName()
-            . '(' 
+            . ' (' 
             . \implode(', ', \array_keys($parameters))
             . ') VALUES ('
             . \implode(', ', \array_values($parameters))
             . ')';
     }
 
-    public function generateQueryUpdate($td, $where = array(), $set = array())
+    /**
+     * Generates a query string for a statement to update a specified table.
+     *
+     * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
+     * @param array $set
+     * @param array $where
+     * @return string
+     */
+    public function generateQueryUpdate($td, $set = array(), $where = array())
     {
         if (empty($where))
             $where = $td->getPrimaryKeys();
 
+        if (empty($set)) {
+            $set = \array_diff($td->getColumnNames(), $where);
+        }
+
         $query = 'UPDATE ' . $td->getTableName() . ' SET ';
 
         foreach (
-            $this->generateParameterNames(
-                'update',
-
-            ) as $column => $param
+            $this->generateParameterNames('update', $td->getTableName(), $set) 
+            as $column => $param
         ) {
-        
+            $query .= $column . ' = ' . $param . ', ';
         }
 
-        $query = \substr($query, 0, -2) . $this->generateWhere(
-            $td->getTableName(),
-            $where,
-            'update'
-        );
+        $query = \substr($query, 0, -2) 
+          . $this->generateWhere($td->getTableName(), $where, 'update');
 
         return $query;
     }
 
-    public function generateQueryDelete($td)
+    /**
+     * Generates a query string for a statement to delete records of a 
+     * specified table.
+     * 
+     * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
+     * @param array $where
+     * @return string
+     */
+    public function generateQueryDelete($td, $where = array())
     {
+        if (empty($where))
+            $where = $td->getPrimaryKeys();
+
         return 'DELETE FROM ' . $td->getTableName()
-          . $this->generateWhere(
-                $td->getTableName(), 
-                $td->getPrimaryKeys(),
-                'delete'
-            );
+            . $this->generateWhere($td->getTableName(), $where, 'delete');
     }
 
+    /**
+     * Generate a query string for a statement to select records from a 
+     * specified table.
+     *
+     * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
+     * @param array $where
+     * @return string
+     */
     public function generateQuerySelect($td, $where = array())
     {
-        return = 'SELECT ' . \implode(', ', $td->getColumnNames()) 
-            . 'FROM ' . $td->getTableName()
+        return 'SELECT ' . \implode(', ', $td->getColumnNames()) 
+            . ' FROM ' . $td->getTableName()
             . $this->generateWhere($td->getTableName(), $where, 'select');
     }
 }

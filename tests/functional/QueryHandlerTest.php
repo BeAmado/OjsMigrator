@@ -194,4 +194,147 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
             $parameterName
         );
     }
+
+    public function testGenerateQuerySelectJournalsWithWhereConstraint()
+    {
+        $expected = 'SELECT journal_id, path, seq, primary_locale, enabled '
+            . 'FROM journals '
+            . 'WHERE enabled = :selectJournals_enabled';
+
+        $query = Registry::get('QueryHandler')->generateQuerySelect(
+            Registry::get('SchemaHandler')->getTableDefinition('journals'),
+            array('enabled')
+        );
+
+        $this->assertSame($expected, $query);
+    }
+
+    public function testGenerateQuerySelectAllRtVersions()
+    {
+        $expected = 'SELECT version_id, journal_id, version_key, locale, '
+            . 'title, description FROM rt_versions';
+
+        $query = Registry::get('QueryHandler')->generateQuerySelect(
+            Registry::get('SchemaHandler')->getTableDefinition('rt_versions')
+        );
+
+        $this->assertSame($expected, $query);
+    }
+
+    public function testGenerateQueryUpdateQueuedPayments()
+    {
+        $expected = 'UPDATE queued_payments SET '
+            . 'date_created = :updateQueuedPayments_dateCreated, '
+            . 'date_modified = :updateQueuedPayments_dateModified, '
+            . 'expiry_date = :updateQueuedPayments_expiryDate, '
+            . 'payment_data = :updateQueuedPayments_paymentData '
+            . 'WHERE queued_payment_id = :updateQueuedPayments_queuedPaymentId';
+
+        $query = Registry::get('QueryHandler')->generateQueryUpdate(
+            Registry::get('SchemaHandler')->getTableDefinition(
+                'queued_payments'
+            )
+        );
+
+        $this->assertSame(
+            $expected,
+            $query
+        );
+    }
+
+    public function testGenerateQueryUpdateArticlesFilesIds()
+    {
+        $expected = 'UPDATE articles SET '
+            . 'submission_file_id = :updateArticles_submissionFileId, '
+            . 'revised_file_id = :updateArticles_revisedFileId, '
+            . 'review_file_id = :updateArticles_reviewFileId, '
+            . 'editor_file_id = :updateArticles_editorFileId '
+            . 'WHERE article_id = :updateArticles_articleId';
+
+        $query = Registry::get('QueryHandler')->generateQueryUpdate(
+            Registry::get('SchemaHandler')->getTableDefinition('articles'),
+            array(
+                'submission_file_id', 
+                'revised_file_id', 
+                'review_file_id',
+                'editor_file_id', 
+            )
+        );
+
+        $this->assertSame(
+            $expected,
+            $query
+        );
+    }
+
+    public function testGenerateQueryUpdateSectionReviewFormAndSeqByJournal()
+    {
+        $expected = 'UPDATE sections SET '
+            . 'review_form_id = :updateSections_reviewFormId, '
+            . 'seq = :updateSections_seq '
+            . 'WHERE journal_id = :updateSections_journalId';
+
+        $query = Registry::get('QueryHandler')->generateQueryUpdate(
+            Registry::get('SchemaHandler')->getTableDefinition('sections'),
+            array('review_form_id', 'seq'),
+            array('journal_id')
+        );
+
+        $this->assertSame($expected, $query);
+    }
+
+    public function testGenerateQueryInsertSectionSettings()
+    {
+        $expected = 'INSERT INTO section_settings '
+          . '('
+          .     'section_id, '
+          .     'locale, '
+          .     'setting_name, '
+          .     'setting_value, '
+          .     'setting_type'
+          . ') VALUES ('
+          .     ':insertSectionSettings_sectionId, '
+          .     ':insertSectionSettings_locale, '
+          .     ':insertSectionSettings_settingName, '
+          .     ':insertSectionSettings_settingValue, '
+          .     ':insertSectionSettings_settingType'
+          . ')';
+
+        $query = Registry::get('QueryHandler')->generateQueryInsert(
+            Registry::get('SchemaHandler')->getTableDefinition(
+                'section_settings'
+            )
+        );
+
+        $this->assertSame($expected, $query);
+    }
+
+    public function testGenerateQueryDeleteSectionEditors()
+    {
+        $expected = 'DELETE FROM section_editors WHERE '
+            . 'journal_id = :deleteSectionEditors_journalId AND '
+            . 'section_id = :deleteSectionEditors_sectionId AND '
+            . 'user_id = :deleteSectionEditors_userId';
+
+        $query = Registry::get('QueryHandler')->generateQueryDelete(
+            Registry::get('SchemaHandler')->getTableDefinition(
+                'section_editors'
+            )
+        );
+
+        $this->assertSame($expected, $query);
+    }
+
+    public function testGenerateQueryDeleteArticlesByJournalId()
+    {
+        $expected = 'DELETE FROM articles '
+            . 'WHERE journal_id = :deleteArticles_journalId';
+
+        $query = Registry::get('QueryHandler')->generateQueryDelete(
+            Registry::get('SchemaHandler')->getTableDefinition('articles'),
+            array('journal_id')
+        );
+
+        $this->assertSame($expected, $query);
+    }
 }
