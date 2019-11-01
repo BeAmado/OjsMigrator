@@ -27,6 +27,11 @@ class Maestro
         return self::is($name, 'dir') || self::is($name, 'directory');
     }
 
+    protected static function isDao($name)
+    {
+        return self::is($name, 'dao');
+    }
+
     protected static function getDefaultDir($name)
     {
         if (!self::isDirectory($name))
@@ -39,6 +44,28 @@ class Maestro
             return Registry::get('FileSystemManager')->formPathFromBaseDir(
                 'schema'
             );
+    }
+
+    protected static function getDao($name)
+    {
+        /** @var $tablesNames array*/
+        $tablesNames = Registry::get('SchemaHandler')->getTablesNames();
+        
+        $index = \array_search(
+            Registry::get('CaseHandler')->transformCaseTo(
+                'lower', 
+                self::isDao($name) ? \substr($name, 0, -3) : $name
+            ),
+            \array_map(function($tableName) {
+                return Registry::get('CaseHandler')->transformCaseTo(
+                    'lower',
+                    $tableName
+                );
+            }, $tablesNames)
+        );
+
+        if ($index !== false)
+            return Factory::create('DAO', $tableNames[$index]);
     }
 
     /**
@@ -57,6 +84,15 @@ class Maestro
 
         if (self::isDirectory($name))
             return self::getDefaultDir($name);
+
+        if (self::isDao($name)) {
+            Registry::set($name, self::getDao($name));
+
+            if (\is_a(Registry::get($name, \BeAmado\OjsMigrator\Db\DAO)))
+                return Registry::get($name);
+            else
+                Registry::remove($name);
+        }
     }
 
     /**

@@ -41,8 +41,6 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
         $this->schema = (new XmlHandler())->createFromFile(
             $this->getOjs2XmlSchemaFilename()
         );
-
-        //var_dump($this->schema->toArray());
     }
 
     public function getStub($type = 'SchemaHandler')
@@ -302,19 +300,6 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
 
     public function testLoadSchema()
     {
-        //extract the ojs2 dir to /tests/_data/sandbox
-        /*Registry::get('ArchiveManager')->tar(
-            'xzf',
-            $this->getDataDir() . $this->sep() . 'ojs2.tar.gz',
-            $this->sandbox
-        );
-
-        $ojs2PublicHtmlDir = $this->sandbox 
-            . $this->sep() . 'ojs2' 
-            . $this->sep() . 'public_html';
-
-        Maestro::setOjsDir($ojs2PublicHtmlDir);*/
-
         Registry::get('SchemaHandler')->loadAllSchema();
 
         $tableDefinitions = array_map(
@@ -341,23 +326,32 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
 
     public function testGetUsersTableDefinition()
     {
-        /*Registry::get('ArchiveManager')->tar(
-            'xzf',
-            $this->getDataDir() . $this->sep() . 'ojs2.tar.gz',
-            $this->sandbox
-        );
-
-        $ojs2PublicHtmlDir = $this->sandbox 
-            . $this->sep() . 'ojs2' 
-            . $this->sep() . 'public_html';
-
-        Maestro::setOjsDir($ojs2PublicHtmlDir);*/
-
         $def = Registry::get('SchemaHandler')->getTableDefinition('users');
 
         $this->assertEquals(
             array('user_id'),
             $def->getPrimaryKeys()
+        );
+    }
+
+    public function testGetTablesNames()
+    {
+        $tablesNames = Registry::get('SchemaHandler')->getTablesNames();
+
+        $this->assertTrue(
+            count($tablesNames) > 100 &&
+            in_array('users', $tablesNames) &&
+            in_array('user_settings', $tablesNames) &&
+            in_array('user_interests', $tablesNames) &&
+            in_array('announcements', $tablesNames) &&
+            in_array('announcement_settings', $tablesNames) &&
+            in_array('journals', $tablesNames) &&
+            in_array('journal_settings', $tablesNames) &&
+            in_array('plugin_settings', $tablesNames) &&
+            in_array('issues', $tablesNames) &&
+            in_array('issue_settings', $tablesNames) &&
+            in_array('sections', $tablesNames) &&
+            in_array('review_forms', $tablesNames)
         );
     }
 }

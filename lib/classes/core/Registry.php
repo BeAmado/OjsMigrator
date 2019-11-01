@@ -17,17 +17,13 @@ class Registry
 
     public static function get($key)
     {
-/*'      return (self::hasKey($key)
-            ? self::$data[\strtolower($key)] 
-            : Maestro::get($key));
-            */
-            if (!self::hasKey($key))
-                self::set($key, Maestro::get($key));
+        if (!self::hasKey($key))
+            self::set($key, Maestro::get($key));
 
-            if (self::$data[\strtolower($key)] === null)
-                self::remove($key);
-            else
-                return self::$data[\strtolower($key)];
+        if (self::$data[\strtolower($key)] === null)
+            self::remove($key);
+        else
+            return self::$data[\strtolower($key)];
     }
 
     public static function set($key, $value)

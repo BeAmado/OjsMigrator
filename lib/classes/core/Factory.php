@@ -96,22 +96,35 @@ class Factory
     protected function fixCase($classname)
     {
         switch (\strtolower($classname)) {
+            //////////// HANDLERS ///////////////
+            case \strtolower('ArrayHandler'):
+                return 'ArrayHandler';
+            case \strtolower('CaseHandler'):
+                return 'CaseHandler';
+            case \strtolower('ColumnDefinitionHandler'):
+                return 'ColumnDefinitionHandler';
             case \strtolower('ConfigHandler'):
                 return 'ConfigHandler';
             case \strtolower('DbHandler'):
                 return 'DbHandler';
             case \strtolower('FileHandler'):
                 return 'FileHandler';
+            case \strtolower('IndexDefinitionHandler'):
+                return 'IndexDefinitionHandler';
             case \strtolower('JsonHandler'):
                 return 'JsonHandler';
             case \strtolower('QueryHandler'):
                 return 'QueryHandler';
             case \strtolower('SchemaHandler'):
                 return 'SchemaHandler';
+            case \strtolower('TableDefinitionHandler'):
+                return 'TableDefinitionHandler';
             case \strtolower('XmlHandler'):
                 return 'XmlHandler';
             case \strtolower('ZipHandler'):
                 return 'ZipHandler';
+
+            ///////////// MANAGERS //////////////
             case \strtolower('ArchiveManager'):
                 return 'ArchiveManager';
             case \strtolower('ConnectionManager'):
@@ -120,9 +133,18 @@ class Factory
                 return 'FileSystemManager';
             case \strtolower('MemoryManager'):
                 return 'MemoryManager';
+
+            ////////////// DAO //////////////////
+            case \strtolower('DAO'):
+                return 'Dao';
         }
 
         return $classname;
+    }
+
+    protected function createDao($tableName)
+    {
+        return new \BeAmado\OjsMigrator\Db\DAO($tableName);
     }
 
     /**
