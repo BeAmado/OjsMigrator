@@ -470,4 +470,66 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
             $params
         );
     }
+
+    public function testCanGetParametersFromUpdateJournalSettingsQuery()
+    {
+        $td = Registry::get('SchemaHandler')->getTableDefinition(
+            'journal_settings'
+        );
+        
+        $expected = array(
+            'journal_id'    => ':updateJournalSettings_journalId',
+            'locale'        => ':updateJournalSettings_locale',
+            'setting_name'  => ':updateJournalSettings_settingName',
+            'setting_value' => ':updateJournalSettings_settingValue',
+        );
+
+        $query = Registry::get('QueryHandler')->generateQueryUpdate(
+            $td,
+            array('setting_value')
+        );
+        
+        $params = Registry::get('QueryHandler')->getParametersFromQuery($query);
+
+        $this->assertEquals($expected, $params);
+    }
+
+    public function testCanGetParametersFromQuerySelectUsersByJournal()
+    {
+        $td = Registry::get('SchemaHandler')->getTableDefinition('users');
+
+        $expected = array(
+            'journal_id' => ':selectUsers_journalId',
+        );
+
+        $query = Registry::get('QueryHandler')->generateQuerySelect(
+            $td,
+            array('journal_id')
+        );
+
+        $params = Registry::get('QueryHandler')->getParametersFromQuery($query);
+
+
+        $this->assertEquals($expected, $params);
+    }
+
+    public function testCanGetParametersFromQueryDeletePluginSettingsByJournal()
+    {
+        $td = Registry::get('SchemaHandler')->getTableDefinition(
+            'plugin_settings'
+        );
+
+        $query = Registry::get('QueryHandler')->generateQueryDelete(
+            $td,
+            array('journal_id')
+        );
+
+        $params = Registry::get('QueryHandler')->getParametersFromQuery($query);
+
+        $expected = array(
+            'journal_id' => ':deletePluginSettings_journalId',
+        );
+
+        $this->assertEquals($expected, $params);
+    }
 }

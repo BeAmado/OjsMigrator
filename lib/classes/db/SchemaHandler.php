@@ -261,6 +261,24 @@ class SchemaHandler implements FiletypeHandler
         );
     }
 
+    public function getTablesNames()
+    {
+        if (
+            !$this->schemaDirExists() ||
+            false
+        )
+            $this->loadAllSchema();
+
+        return \array_map(
+            function($filename) {
+                return \substr(\basename($filename), 0, -5); // removes the .json extension
+            }, 
+            Registry::get('FileSystemManager')->listdir(
+                Registry::get('SchemaDir')
+            )
+        );
+    }
+
     public function destroy()
     {
         Registry::remove('hasChild');

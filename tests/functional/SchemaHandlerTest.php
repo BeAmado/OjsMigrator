@@ -339,7 +339,6 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
         $tablesNames = Registry::get('SchemaHandler')->getTablesNames();
 
         $this->assertTrue(
-            count($tablesNames) > 100 &&
             in_array('users', $tablesNames) &&
             in_array('user_settings', $tablesNames) &&
             in_array('user_interests', $tablesNames) &&

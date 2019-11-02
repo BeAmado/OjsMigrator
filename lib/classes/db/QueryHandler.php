@@ -355,7 +355,7 @@ class QueryHandler
         return $params;
     }
 
-    protected function getParamatersFromWhereClause($query)
+    protected function getParametersFromWhereClause($query)
     {
         $wherePos = \strpos(\strtolower($query), ' where ');
         $whereClause = \substr($query, $wherePos + 7);
@@ -377,7 +377,7 @@ class QueryHandler
         $setPos = \strpos(\strtolower($query), ' set ');
         $wherePos = \strpos(\strtolower($query), ' where ');
 
-        $length = $wherePos - $setPos + 5;
+        $length = $wherePos - $setPos - 5;
 
         $interest = \substr($query, $setPos + 5, $length);
 

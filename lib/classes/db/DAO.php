@@ -24,6 +24,21 @@ class DAO
         $this->tableName = $name;
     }
 
+    protected function beginTransaction()
+    {
+
+    }
+
+    protected function commit()
+    {
+
+    }
+
+    protected function rollback()
+    {
+
+    }
+
     /**
      * Inserts the entity's data into the corresponding database table.
      *
