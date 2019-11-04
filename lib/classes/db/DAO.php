@@ -52,15 +52,12 @@ class DAO
         $commitOnSuccess = false, 
         $rollbackOnError = false
     ) {
-        //if (!Registry::has)
-        
-        $tbDef = Registry::get('SchemaHandler')->getTableDefinition(
-            $entity->getTableName()
-        );
+        // form the statement name
 
-        $query = Registry::get('QueryHandler')->generateQueryInsert($tbDef);
+        // execute the statement
+            // map the new id
 
-
+        // return the data with the new id
     }
 
     /**
@@ -72,7 +69,14 @@ class DAO
      */
     public function read($conditions = array())
     {
+        // form the statement name
 
+        // remove the Registry entry to make way for the new data
+
+        // execute the statement
+            // fetch the data into the Registry
+
+        // return a clone of the data in the Registry
     }
 
     /**

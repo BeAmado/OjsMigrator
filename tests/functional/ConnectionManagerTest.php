@@ -4,8 +4,36 @@ use BeAmado\OjsMigrator\Db\ConnectionManager;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\FunctionalTest;
 
-class ConnectionManagerTest extends FunctionalTest
+// interfaces
+use BeAmado\OjsMigrator\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\WorkWithSqlite;
+
+class ConnectionManagerTest extends FunctionalTest implements StubInterface
 {
+    use WorkWithSqlite;
+
+    public static function setUpBeforeClass() : void
+    {
+        parent::setUpBeforeClass();
+        (new class { use WorkWithSqlite; })->createDbSandbox();
+    }
+
+    public static function tearDownAfterClass() : void
+    {
+        parent::tearDownAfterClass();
+        (new class { use WorkWithSqlite; })->removeDbSandbox();
+    }
+
+    public function getStub()
+    {
+        return new class extends ConnectionManager {
+            use TestStub;
+        };
+    }
+
     public function testSetConnection()
     {
         if (
@@ -41,5 +69,70 @@ class ConnectionManagerTest extends FunctionalTest
     {
         (new ConnectionManager())->closeConnection();
         $this->assertFalse(Registry::hasKey('connection'));
+    }
+
+    /**
+     * @requires extension pdo_mysql
+     */
+    public function testConnectToMysql()
+    {
+        if (array_search('pdo_sqlite', get_loaded_extensions())) {
+            $this->markTestSkipped('The driver used is sqlite');
+        }
+
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+
+        $this->assertInstanceOf(
+            \PDO::class,
+            $this->getStub()->callMethod(
+                'createMySqlConnection',
+                array('args' => $connData)
+            )
+        );
+    }
+
+    /**
+     * @requires extension pdo_mysql
+     */
+    public function testCreateMysqlConnection()
+    {
+        if (array_search('pdo_sqlite', get_loaded_extensions())) {
+            $this->markTestSkipped('The driver used is sqlite');
+        }
+
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        
+        $this->assertInstanceOf(
+            \PDO::class,
+            Registry::get('ConnectionManager')->createConnection($connData)
+        );
+    }
+
+    /**
+     * @requires extension pdo_sqlite
+     */
+    public function testConnectToSqlite()
+    {
+        $this->assertInstanceOf(
+            \PDO::class,
+            $this->getStub()->callMethod(
+                'createSqliteConnection',
+                $this->getSqliteDbFilename()
+            )
+        );
+    }
+
+    /**
+     * @requires extension pdo_sqlite
+     */
+    public function testCreateSqliteConnection()
+    {
+        $this->assertInstanceOf(
+            \PDO::class,
+            Registry::get('ConnectionManager')->createConnection(array(
+                'driver' => 'sqlite',
+                'name' => $this->getSqliteDbFilename(),
+            ))
+        );
     }
 }

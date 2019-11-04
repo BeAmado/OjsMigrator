@@ -32,10 +32,18 @@ class Maestro
         return self::is($name, 'dao');
     }
 
+    protected static function isStmt($name)
+    {
+        return self::is($name, 'stmt') || self::is($name, 'statement');
+    }
+
     protected static function getDefaultDir($name)
     {
         if (!self::isDirectory($name))
             return;
+
+        if (\strtolower(\substr($name, -9)) === 'directory')
+            $name = \substr($name, 0, -6);
 
         if (\strtolower($name) === 'ojsdir')
             return Registry::get('FileSystemManager')->parentDir(BASE_DIR);
@@ -68,6 +76,10 @@ class Maestro
             return Factory::create('DAO', $tableNames[$index]);
     }
 
+    protected static function getStatement($name)
+    {
+    }
+
     /**
      *
      *
@@ -88,10 +100,23 @@ class Maestro
         if (self::isDao($name)) {
             Registry::set($name, self::getDao($name));
 
-            if (\is_a(Registry::get($name, \BeAmado\OjsMigrator\Db\DAO)))
+            if (\is_a(Registry::get($name), \BeAmado\OjsMigrator\Db\DAO))
                 return Registry::get($name);
             else
                 Registry::remove($name);
+        }
+
+        if (self::isStatement($name)) {
+            Registry::set($name, self::getStatement($name));
+
+            if (\is_a(
+                Registry::get($name), 
+                \BeAmado\OjsMigrator\Db\MyStatement
+            ))
+                return Registry::get($name);
+            else 
+                Registry::remove($name);
+
         }
     }
 

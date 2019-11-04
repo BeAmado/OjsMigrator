@@ -55,6 +55,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Db\SchemaHandler();
     }
 
+    protected function createStatementHandler()
+    {
+        return new \BeAmado\OjsMigrator\Db\StatementHandler();
+    }
+
     protected function createTableDefinitionHandler()
     {
         return new \BeAmado\OjsMigrator\Db\TableDefinitionHandler();
@@ -117,6 +122,8 @@ class Factory
                 return 'QueryHandler';
             case \strtolower('SchemaHandler'):
                 return 'SchemaHandler';
+            case \strtolower('StatementHandler'):
+                return 'StatementHandler';
             case \strtolower('TableDefinitionHandler'):
                 return 'TableDefinitionHandler';
             case \strtolower('XmlHandler'):
@@ -137,6 +144,11 @@ class Factory
             ////////////// DAO //////////////////
             case \strtolower('DAO'):
                 return 'Dao';
+
+            //////////// STATEMENT //////////////
+            case \strtolower('Statement'):
+            case \strtolower('Stmt'):
+                return 'Statement';
         }
 
         return $classname;
@@ -145,6 +157,49 @@ class Factory
     protected function createDao($tableName)
     {
         return new \BeAmado\OjsMigrator\Db\DAO($tableName);
+    }
+
+    /**
+     * Creates a \BeAmado\OjsMigrator\Db\MyStatement with the query specified
+     * by the arguments array.
+     *
+     * For example: if the arguments array is 
+     * ['operation' => 'insert', 'table' => 'users'] then it will return a 
+     * statement for inserting data in the users table.
+     *
+     * @param array $a
+     * @return \BeAmado\OjsMigrator
+     */
+    protected function createStatement($a)
+    {
+        if (\array_key_exists('op', $a))
+            $a['operation'] = $a['op'];
+
+        if (!\array_key_exists('operation', $a))
+            return;
+
+        switch(\strtolower($a['operation'])) {
+            case 'insert':
+            case 'update':
+            case 'select':
+            case 'delete':
+                break;
+
+            default:
+                return;
+        }
+
+        if (!\array_key_exists('table', $a))
+            return;
+
+        return Registry::get('StatementHandler')->create(
+            Registry::get('QueryHandler')->{
+                'generateQuery' . \ucfirst(\strtolower($a['operation']))
+            }(
+                Registry::get('SchemaHandler')->getTableDefinition($a['table'])
+            )
+        );
+
     }
 
     /**

@@ -126,33 +126,42 @@ class MyStatement extends MyObject
      */
     public function bindParams($params, $obj)
     {
-        if (\is_array($params)) {
-            foreach ($params as $field => $param) {
-                $this->bindParameter(
-                    $param,
-                    $obj->get($field)->getValue()
-                );
-            }
-            unset($name);
-            unset($param);
-        } elseif (\is_a($params, \BeAmado\OjsMigrator\MyObject::class)) {
-            $this->bindParams(
-                $params->toArray(),
-                $obj
+        if (\is_a($params, \BeAmado\OjsMigrator\MyObject::class))
+            return $this->bindParams($params->toArray(), $obj);
+        else if (!\is_array($params))
+            return false;
+        else if (\count($params) < 1)
+            return false;
+
+        foreach ($params as $field => $param) {
+            $bound =  $this->bindParameter(
+                $param,
+                $obj->get($field)->getValue()
             );
+
+            if (!$bound)
+                return false;
         }
+        unset($name);
+        unset($param);
+        unset($bound);
+
+        return true;
     }
 
     /**
      * Fetches each record applying the callback function passed as argument.
      *
      * @param callable $callback
-     * @return void
+     * @return boolean
      */
     public function fetch($callback)
     {
         while ($data = $this->getStmt()->fetch(\PDO::FETCH_ASSOC))
-            $callback($data);
+            if (!$callback($data))
+                return false;
+
+        return true;
     }
 
     /**
