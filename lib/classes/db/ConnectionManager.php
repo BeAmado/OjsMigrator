@@ -9,10 +9,56 @@ class ConnectionManager
     {
         Registry::set(
             'connection',
-            Registry::get('DbHandler')->createConnection(
+            $this->createConnection(
                 Registry::get('ConfigHandler')->getConnectionSettings()
             )
         );
+    }
+
+    /**
+     * Creates a connection to MySQL
+     *
+     * @param array $connData
+     */
+    protected function createMySqlConnection($connData = array())
+    {
+        $host = $connData['host'];
+        $db = $connData['name'];
+        $user = $connData['username'];
+        $pass = $connData['password'];
+        return new \PDO("mysql:host=$host;dbname=$db", $user, $pass);
+    }
+    
+    /**
+     * Creates a connectin to a Sqlite database
+     *
+     * @param string $db
+     */
+    protected function createSqliteConnection($db)
+    {
+        return new \PDO('sqlite:' . $db);
+    }
+
+    /**
+     * Creates a database connection using the specified driver
+     *
+     * @param string $driver
+     * @param array $args
+     * @return \PDO
+     */
+    public function createConnection($args = array())
+    {
+        if (!\array_key_exists('driver', $args)) {
+            return;
+        }
+
+        switch(\strtolower($args['driver'])) {
+            case 'mysql':
+                return $this->createMySqlConnection($args);
+
+            case 'sqlite':
+                return $this->createSqliteConnection($args['name']);
+        }
     }
 
     public function getConnection()
@@ -26,5 +72,28 @@ class ConnectionManager
     public function closeConnection()
     {
         Registry::remove('connection');
+    }
+
+    public function inTransaction()
+    {
+        return $this->getConnection()->inTransaction();
+    }
+
+    public function beginTransaction()
+    {
+        if (!$this->inTransaction())
+            return $this->getConnection()->beginTransaction();
+    }
+
+    public function rollbackTransaction()
+    {
+        if ($this->inTransaction())
+            return $this->getConnection()->rollback();
+    }
+
+    public function commitTransaction()
+    {
+        if ($this->inTransaction())
+            return $this->getConnection()->commit();
     }
 }

@@ -24,19 +24,19 @@ class DAO
         $this->tableName = $name;
     }
 
-    protected function beginTransaction()
+    protected function begin()
     {
-
+        Registry::get('ConnectionManager')->beginTransaction();
     }
 
     protected function commit()
     {
-
+        Registry::get('ConnectionManager')->commitTransaction();
     }
 
     protected function rollback()
     {
-
+        Registry::get('ConnectionManager')->rollbackTransaction();
     }
 
     /**
@@ -52,7 +52,15 @@ class DAO
         $commitOnSuccess = false, 
         $rollbackOnError = false
     ) {
+        //if (!Registry::has)
         
+        $tbDef = Registry::get('SchemaHandler')->getTableDefinition(
+            $entity->getTableName()
+        );
+
+        $query = Registry::get('QueryHandler')->generateQueryInsert($tbDef);
+
+
     }
 
     /**
