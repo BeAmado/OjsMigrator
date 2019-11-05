@@ -160,49 +160,6 @@ class Factory
     }
 
     /**
-     * Creates a \BeAmado\OjsMigrator\Db\MyStatement with the query specified
-     * by the arguments array.
-     *
-     * For example: if the arguments array is 
-     * ['operation' => 'insert', 'table' => 'users'] then it will return a 
-     * statement for inserting data in the users table.
-     *
-     * @param array $a
-     * @return \BeAmado\OjsMigrator
-     */
-    protected function createStatement($a)
-    {
-        if (\array_key_exists('op', $a))
-            $a['operation'] = $a['op'];
-
-        if (!\array_key_exists('operation', $a))
-            return;
-
-        switch(\strtolower($a['operation'])) {
-            case 'insert':
-            case 'update':
-            case 'select':
-            case 'delete':
-                break;
-
-            default:
-                return;
-        }
-
-        if (!\array_key_exists('table', $a))
-            return;
-
-        return Registry::get('StatementHandler')->create(
-            Registry::get('QueryHandler')->{
-                'generateQuery' . \ucfirst(\strtolower($a['operation']))
-            }(
-                Registry::get('SchemaHandler')->getTableDefinition($a['table'])
-            )
-        );
-
-    }
-
-    /**
      * Creates an instance of the specified class passing the parameters to
      * the class constructor.
      *

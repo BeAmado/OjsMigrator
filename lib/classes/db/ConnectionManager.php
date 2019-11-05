@@ -15,6 +15,12 @@ class ConnectionManager
         );
     }
 
+    public function getDbDriver()
+    {
+        return Registry::get('ConfigHandler')
+                       ->getConnectionSettings()['driver'];
+    }
+
     /**
      * Creates a connection to MySQL
      *

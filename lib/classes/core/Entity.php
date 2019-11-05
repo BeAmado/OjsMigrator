@@ -4,7 +4,7 @@ namespace BeAmado\OjsMigrator;
 
 class Entity extends MyObject
 {
-    public function __construct($tableName, $data = null)
+    public function __construct($tableName, $data)
     {
         parent::__construct($data);
         $this->setTableName($tableName);

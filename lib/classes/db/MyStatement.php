@@ -67,7 +67,7 @@ class MyStatement extends MyObject
 
     protected function setParameter($name, $value)
     {
-        if (!$this->attribute('params'))
+        if (!$this->hasAttribute('params'))
             $this->set('params', array());
         
         $this->get('params')->set(
@@ -136,7 +136,9 @@ class MyStatement extends MyObject
         foreach ($params as $field => $param) {
             $bound =  $this->bindParameter(
                 $param,
-                $obj->get($field)->getValue()
+                \is_a($obj, \BeAmado\OjsMigrator\Entity::class) 
+                    ? $obj->getData($field) 
+                    : $obj->get($field)->getValue()
             );
 
             if (!$bound)
@@ -149,6 +151,11 @@ class MyStatement extends MyObject
         return true;
     }
 
+    protected function fetchData()
+    {
+        return $this->getStmt()->fetch(\PDO::FETCH_ASSOC);
+    }
+
     /**
      * Fetches each record applying the callback function passed as argument.
      *
@@ -157,9 +164,10 @@ class MyStatement extends MyObject
      */
     public function fetch($callback)
     {
-        while ($data = $this->getStmt()->fetch(\PDO::FETCH_ASSOC))
+        while ($data = $this->fetchData()) {
             if (!$callback($data))
                 return false;
+        }
 
         return true;
     }

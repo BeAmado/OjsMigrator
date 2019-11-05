@@ -32,7 +32,7 @@ class Maestro
         return self::is($name, 'dao');
     }
 
-    protected static function isStmt($name)
+    protected static function isStatement($name)
     {
         return self::is($name, 'stmt') || self::is($name, 'statement');
     }
@@ -78,6 +78,17 @@ class Maestro
 
     protected static function getStatement($name)
     {
+        /** @var $stmtName string */
+        $stmtName = null;
+
+        if (\strtolower(\substr($name, -4)) === 'stmt')
+            $stmtName = \substr($name, 0, -4);
+        elseif (\strtolower(\substr($name, -9)) === 'statement')
+            $stmtName = \substr($name, 0, -9);
+        else
+            $stmtName = $stmt;
+
+        return Registry::get('StatementHandler')->getStatement($stmtName);
     }
 
     /**
@@ -106,18 +117,8 @@ class Maestro
                 Registry::remove($name);
         }
 
-        if (self::isStatement($name)) {
-            Registry::set($name, self::getStatement($name));
-
-            if (\is_a(
-                Registry::get($name), 
-                \BeAmado\OjsMigrator\Db\MyStatement
-            ))
-                return Registry::get($name);
-            else 
-                Registry::remove($name);
-
-        }
+        if (self::isStatement($name))
+            return self::getStatement($name);
     }
 
     /**

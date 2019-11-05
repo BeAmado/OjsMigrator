@@ -30,4 +30,87 @@ class StatementHandlerTest extends FunctionalTest
             )
         );
     }
+
+    public function testSetStatementInsertUsers()
+    {
+        Registry::get('StatementHandler')->setStatement('insertUsers');
+
+        $this->assertInstanceOf(
+            \BeAmado\OjsMigrator\Db\MyStatement::class,
+            Registry::get('insertUsers')
+        );
+    }
+
+    public function testGetStatementUpdateJournalSettings()
+    {
+        $stmt = Registry::get('StatementHandler')->getStatement(
+            'updateJournalSettings'
+        );
+
+        $expectedQuery = 'UPDATE journal_settings '
+            . 'SET '
+            .     'setting_value = :updateJournalSettings_settingValue, '
+            .     'setting_type = :updateJournalSettings_settingType '
+            . 'WHERE '
+            .     'journal_id = :updateJournalSettings_journalId AND '
+            .     'locale = :updateJournalSettings_locale AND '
+            .     'setting_name = :updateJournalSettings_settingName';
+
+        $this->assertSame($expectedQuery, $stmt->getQuery());
+    }
+
+    public function testExecuteStatementInsertJournal()
+    {
+        Registry::get('DbHandler')->createTable('journals');
+        Registry::get('StatementHandler')->execute(
+            'insertJournals',
+            new \BeAmado\OjsMigrator\Entity('journals', array(
+                'path' => 'ma_nature',
+                'primary_locale' => 'fr_CA',
+            ))
+        );
+
+        $stmt = Registry::get('StatementHandler')->create(
+            'SELECT * FROM journals'
+        );
+
+        $stmt->execute();
+
+        Registry::remove('selectData');
+
+        $stmt->fetch(function($res) {
+            if ($res === null) 
+                return;
+
+            if (!Registry::hasKey('selectData'))
+                Registry::set(
+                    'selectData', 
+                    Registry::get('MemoryManager')->create(array())
+                );
+
+            Registry::get('selectData')->push(new \BeAmado\OjsMigrator\Entity(
+                'journals',
+                $res
+            ));
+
+            return true;
+        });
+
+        $journal = Registry::get('selectData')->get(0)->cloneInstance();
+        Registry::remove('selectData');
+
+        $this->assertSame(
+            'ma_nature',
+            $journal->getData('path')
+        );
+
+    }
+
+    /**
+     * @depends testExecuteStatementInsertJournal
+     */
+    public function testExecuteStatementSelectJournals()
+    {
+        
+    }
 }

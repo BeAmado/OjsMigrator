@@ -36,7 +36,7 @@ class StatementHandler
             return;
 
         $tbDef = Registry::get('SchemaHandler')->getTableDefinition(
-            \implode('_', \array_slice($pieces))
+            \implode('_', \array_slice($pieces, 1))
         );
 
         $query = Registry::get('QueryHandler')->{
@@ -69,7 +69,7 @@ class StatementHandler
      * database.
      *
      * @param \BeAmado\OjsMigrator\Db\MyStatement | string $stmt
-     * @param mixed $data
+     * @param \BeAmado\OjsMigrator\MyObject $data
      * @param callable $callback
      * @return boolean
      */
