@@ -6,13 +6,14 @@ class EntityHandler
 {
     public function getValidData($name, $data)
     {
-        $dataObj = Registry::get('MemoryManager')->create($data);
-        $validData = Registry::get('MemoryManager')->create();
-
         $tbDef = Registry::get('SchemaHandler')->getTableDefinition($name);
+        $validData = new Entity(null, $tbDef->getTableName());
+
+        $dataObj = Registry::get('MemoryManager')->create($data);
+
         foreach ($tbDef->getColumnNames() as $field) {
             $validData->set(
-                $field
+                $field,
                 ($dataObj->attributeIsNull($field))
                     ? $tbDef->getColumn($field)->getDefaultValue()
                     : $dataObj->get($field)->getValue()
@@ -25,8 +26,8 @@ class EntityHandler
         return $validData;
     }
 
-    public function create($name, $data)
+    public function create($name, $data = null)
     {
-        return new Entity($name, $this->getValidData($name, $data));
+        return $this->getValidData($name, $data);
     }
 }

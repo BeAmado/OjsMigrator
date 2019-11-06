@@ -358,6 +358,10 @@ class QueryHandler
     protected function getParametersFromWhereClause($query)
     {
         $wherePos = \strpos(\strtolower($query), ' where ');
+        
+        if ($wherePos === false)
+            return array();
+
         $whereClause = \substr($query, $wherePos + 7);
 
         $assigns = \array_map('trim', \explode('AND', $whereClause));

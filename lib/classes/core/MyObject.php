@@ -281,7 +281,7 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
     public function attributeIsNull($attr)
     {
         return !$this->hasAttribute($attr) || 
-            $this->get($attr)->getValue === null;
+            $this->get($attr)->getValue() === null;
     }
 }
 

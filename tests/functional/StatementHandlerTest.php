@@ -64,7 +64,7 @@ class StatementHandlerTest extends FunctionalTest
         Registry::get('DbHandler')->createTable('journals');
         Registry::get('StatementHandler')->execute(
             'insertJournals',
-            new \BeAmado\OjsMigrator\Entity('journals', array(
+            Registry::get('EntityHandler')->create('journals', array(
                 'path' => 'ma_nature',
                 'primary_locale' => 'fr_CA',
             ))
@@ -89,8 +89,8 @@ class StatementHandlerTest extends FunctionalTest
                 );
 
             Registry::get('selectData')->push(new \BeAmado\OjsMigrator\Entity(
-                'journals',
-                $res
+                $res,
+                'journals'
             ));
 
             return true;
@@ -111,6 +111,47 @@ class StatementHandlerTest extends FunctionalTest
      */
     public function testExecuteStatementSelectJournals()
     {
-        
+        Registry::remove('journalId');
+        Registry::get('StatementHandler')->execute(
+            'getlastJournals',
+            null,
+            function($res) {
+                Registry::set('journalId', $res['journal_id']);
+                return true;
+            }
+        );
+
+        Registry::remove('selectData');
+
+        Registry::get('StatementHandler')->execute(
+            'selectJournals',
+            Registry::get('EntityHandler')->create('journals', array(
+                'journal_id' => Registry::get('journalId'),
+            )),
+            function ($res) {
+                if (!Registry::hasKey('selectData'))
+                    Registry::set(
+                        'selectData',
+                        Registry::get('MemoryManager')->create(array())
+                    );
+
+                Registry::get('selectData')->push(
+                    Registry::get('EntityHandler')->create('journals', $res)
+                );
+
+                return true;
+            }
+        );
+
+        $journals = Registry::get('selectData')->cloneInstance();
+
+        Registry::remove('selectData');
+
+        $this->assertTrue(
+            count($journals->listKeys()) === 1 &&
+            $journals->get(0)->getData('journal_id') == 1 &&
+            $journals->get(0)->getData('seq') == 0 &&
+            $journals->get(0)->getData('primary_locale') === 'fr_CA'
+        );
     }
 }

@@ -40,7 +40,9 @@ class StatementHandler
         );
 
         $query = Registry::get('QueryHandler')->{
-            'generateQuery' . \ucfirst(\strtolower($pieces[0]))
+            (\strtolower($pieces[0]) === 'getlast') 
+                ? 'generateQueryGetLast'
+                : 'generateQuery' . \ucfirst(\strtolower($pieces[0]))
         }($tbDef);
 
         Registry::set(
@@ -73,7 +75,7 @@ class StatementHandler
      * @param callable $callback
      * @return boolean
      */
-    public function execute($stmt, $data, $callback = null)
+    public function execute($stmt, $data = null, $callback = null)
     {
         /** @var $statement \BeAmado\OjsMigrator\Db\MyStatement */
         $statement = null;
@@ -85,14 +87,16 @@ class StatementHandler
         else 
             return;
 
-        $params = Registry::get('QueryHandler')->getParametersFromQuery(
-            $statement->getQuery()
-        );
+        $params = ($data === null ) 
+            ? null 
+            : Registry::get('QueryHandler')->getParametersFromQuery(
+                  $statement->getQuery()
+              );
 
-        if(!$statement->bindParams($params, $data));
+        if($data !== null && !$statement->bindParams($params, $data))
             return false;
 
-        if(!$statement->execute());
+        if(!$statement->execute())
             return false;
 
         if (\is_callable($callback))
