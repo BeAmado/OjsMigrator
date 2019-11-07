@@ -125,9 +125,7 @@ class StatementHandlerTest extends FunctionalTest
 
         Registry::get('StatementHandler')->execute(
             'selectJournals',
-            Registry::get('EntityHandler')->create('journals', array(
-                'journal_id' => Registry::get('journalId'),
-            )),
+            null,
             function ($res) {
                 if (!Registry::hasKey('selectData'))
                     Registry::set(

@@ -76,7 +76,7 @@ class OjsScenarioTester
         );
     }
 
-    public function prepareStage()
+    public function setUpStage()
     {
         if (!Registry::hasKey('OjsDir'))
             Registry::set('OjsDir', $this->getOjsPublicHtmlDir());
@@ -96,6 +96,12 @@ class OjsScenarioTester
         Registry::get('FileSystemManager')->removeWholeDir(
             $this->getSandboxDir()
         );
+    }
+
+    public function tearDownStage()
+    {
+        $this->removeSandbox();
+        Registry::get('SchemaHandler')->removeSchemaDir();
     }
     
     public function getOjs2XmlSchemaFilename()

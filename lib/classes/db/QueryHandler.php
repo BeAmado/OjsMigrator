@@ -116,7 +116,11 @@ class QueryHandler
      */
     public function generateQueryCreateTable($td)
     {
-        return 'CREATE TABLE ' . $td->toString();
+        return 'CREATE TABLE ' . (
+            (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+                ? \str_replace('BIGINT', 'INTEGER', $td->toString())
+                : $td->toString()
+        );
     }
 
     /**

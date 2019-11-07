@@ -11,12 +11,6 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
 {
     use WorkWithFiles;
 
-    public static function tearDownAfterClass() : void
-    {
-        parent::tearDownAfterClass();
-        Registry::get('SchemaHandler')->removeSchemaDir();
-    }
-
     public function getStub()
     {
         return new class extends QueryHandler {
@@ -132,7 +126,7 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
             $this->markTestSkipped('The driver is not sqlite');
         
         $expected = 'CREATE TABLE `auth_sources` ('
-        . '`auth_id` BIGINT , '
+        . '`auth_id` INTEGER , '
         . '`title` VARCHAR(60) NOT NULL, '
         . '`plugin` VARCHAR(32) NOT NULL, '
         . '`auth_default` TINYINT NOT NULL DEFAULT 0, '
@@ -175,7 +169,9 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
         );
 
         $this->assertSame(
-            $expected,
+            (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+                ? str_replace('BIGINT', 'INTEGER', $expected)
+                : $expected,
             $query
         );
     }

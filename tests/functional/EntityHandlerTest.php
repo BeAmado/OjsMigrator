@@ -1,10 +1,10 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+use BeAmado\OjsMigrator\FunctionalTest;
 use BeAmado\OjsMigrator\EntityHandler;
 use BeAmado\OjsMigrator\Registry;
 
-class EntityHandlerTest extends TestCase
+class EntityHandlerTest extends FunctionalTest
 {
     public function testCreateJournalPassingNoData()
     {

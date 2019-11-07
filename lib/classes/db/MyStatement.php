@@ -88,7 +88,8 @@ class MyStatement extends MyObject
         return $this->get('params')->get($name)->getValue();
     }
 
-    protected function getParameters()
+    //protected function getParameters()
+    public function getParameters()
     {
         if (!$this->hasAttribute('params'))
             return;
