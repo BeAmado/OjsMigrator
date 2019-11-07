@@ -20,9 +20,10 @@ class StatementHandler
      * Sets the statement specified by the name.
      *
      * @param string $name
+     * @param mixed $data
      * @return void
      */
-    public function setStatement($name)
+    public function setStatement($name, $data = null)
     {
         if (Registry::hasKey($name))
             Registry::remove($name);
@@ -39,11 +40,14 @@ class StatementHandler
             \implode('_', \array_slice($pieces, 1))
         );
 
+        $where = null;
+        $set = null;
+
         $query = Registry::get('QueryHandler')->{
             (\strtolower($pieces[0]) === 'getlast') 
                 ? 'generateQueryGetLast'
                 : 'generateQuery' . \ucfirst(\strtolower($pieces[0]))
-        }($tbDef);
+        }($tbDef, $where, $set);
 
         Registry::set(
             $name, 
@@ -55,14 +59,30 @@ class StatementHandler
      * Gets the statement specified by the name.
      *
      * @param string $name
+     * @param mixed $data
      * @return \BeAmado\OjsMigrator\Db\MyStatement
      */
-    public function getStatement($name)
+    public function getStatement($name, $data = null)
     {
         if (!Registry::hasKey($name))
-            $this->setStatement($name);
+            $this->setStatement($name, $data);
 
         return Registry::get($name);
+    }
+
+    /**
+     * Removes the specified statement from the Registry.
+     *
+     * @param string $name
+     * @return boolean
+     */
+    public function removeStatement($name)
+    {
+        if (\is_a(
+            Registry::get($name), 
+            \BeAmado\OjsMigrator\Db\MyStatement::class
+        ))
+            return Registry::remove($name);
     }
 
     /**
@@ -77,11 +97,14 @@ class StatementHandler
      */
     public function execute($stmt, $data = null, $callback = null)
     {
+        if (\is_array($data))
+            $data = Registry::get('MemoryManager')->create($data);
+
         /** @var $statement \BeAmado\OjsMigrator\Db\MyStatement */
         $statement = null;
 
         if (\is_string($stmt))
-            $statement = $this->getStatement($stmt);
+            $statement = $this->getStatement($stmt, $data);
         else if (\is_a($stmt, \BeAmado\OjsMigrator\Db\MyStatement::class))
             $statement = $stmt;
         else 

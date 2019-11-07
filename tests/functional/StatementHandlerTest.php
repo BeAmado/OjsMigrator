@@ -111,16 +111,6 @@ class StatementHandlerTest extends FunctionalTest
      */
     public function testExecuteStatementSelectJournals()
     {
-        Registry::remove('journalId');
-        Registry::get('StatementHandler')->execute(
-            'getlastJournals',
-            null,
-            function($res) {
-                Registry::set('journalId', $res['journal_id']);
-                return true;
-            }
-        );
-
         Registry::remove('selectData');
 
         Registry::get('StatementHandler')->execute(
@@ -151,5 +141,57 @@ class StatementHandlerTest extends FunctionalTest
             $journals->get(0)->getData('seq') == 0 &&
             $journals->get(0)->getData('primary_locale') === 'fr_CA'
         );
+    }
+
+    /**
+     * @depends testExecuteStatementInsertJournal
+     */
+    public function testExecuteStatementSelectJournalByPath()
+    {
+        $this->markTestSkipped(
+            'Still to work on the StatementHandler to make this test pass.'
+        );
+        Registry::remove('selectData');
+        Registry::get('StatementHandler')->removeStatement('selectJournals');
+
+        Registry::get('StatementHandler')->execute(
+            'selectJournals',
+            Registry::get('MemoryManager')->create(array(
+                'path' => 'ma_nature',
+            )),
+            function($res) {
+                if (!Registry::hasKey('selectData'))
+                    Registry::set(
+                        'selectData',
+                        Registry::get('MemoryManager')->create(array())
+                    );
+                Registry::get('selectData')->push(
+                    Registry::get('EntityHandler')->create('journals', $res)
+                );
+            }
+        );
+
+        $journals = Registry::get('selectData')->cloneInstance();
+
+        Registry::remove('selectData');
+
+        $this->assertTrue(
+            count($journals->listKeys()) === 1 &&
+            $journals->get(0)->getData('journal_id') === 1 &&
+            $journals->get(0)->getData('seq') == 0 &&
+            $journals->get(0)->getData('path') === 'ma_nature' &&
+            $journals->get(0)->getData('primary_locale') === 'fr_CA' &&
+            $journals->get(0)->getData('enabled') == 1
+        );
+        $this->assertTrue(true);
+    }
+
+    /**
+     * @depends testExecuteStatementInsertJournal
+     * @depends testExecuteStatementSelectJournalByPath
+     */
+    public function testExecuteStatementUpdateJournal()
+    {
+        $this->markTestSkipped('pending');
     }
 }

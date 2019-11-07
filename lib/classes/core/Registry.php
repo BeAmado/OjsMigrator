@@ -39,6 +39,7 @@ class Registry
 
         (new MemoryManager())->destroy(self::$data[\strtolower($key)]);
         unset(self::$data[\strtolower($key)]);
+        return true;
     }
 
     public static function clear()
