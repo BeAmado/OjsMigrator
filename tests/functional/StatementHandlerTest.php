@@ -236,4 +236,183 @@ class StatementHandlerTest extends FunctionalTest
             $journals->get(0)->getData('enabled') == 0
         );
     }
+
+    public function testInsert3JournalSettings()
+    {
+        Registry::get('DbHandler')->createTable('journal_settings');
+
+        // insert 3 journal_settings for the journal with id 1
+        $settings = array(
+            Registry::get('EntityHandler')->create('journal_settings', array(
+                'journal_id' => 1,
+                'locale' => 'fr_CA',
+                'setting_name' => 'title',
+                'setting_value' => 'Tous les animaux',
+                'setting_type' => 'string',
+            )),
+            Registry::get('EntityHandler')->create('journal_settings', array(
+                'journal_id' => 1,
+                'locale' => 'en_NZ',
+                'setting_name' => 'title',
+                'setting_value' => 'All the animals',
+                'setting_type' => 'string',
+            )),
+            Registry::get('EntityHandler')->create('journal_settings', array(
+                'journal_id' => 1,
+                'locale' => 'es_AR',
+                'setting_name' => 'title',
+                'setting_value' => 'Todos los animales',
+                'setting_type' => 'string',
+            )),
+        );
+
+        foreach ($settings as $setting) {
+            Registry::get('StatementHandler')->execute(
+                'insertJournalSettings', 
+                $setting
+            );
+        }
+
+        Registry::remove('selectData');
+        Registry::get('StatementHandler')->execute(
+            'selectJournalSettings',
+            null,
+            function($res) {
+                if (!Registry::hasKey('selectData'))
+                    Registry::set(
+                        'selectData',
+                        Registry::get('MemoryManager')->create(array())
+                    );
+
+                Registry::get('selectData')->push(
+                    Registry::get('EntityHandler')->create(
+                        'journal_settings',
+                        $res
+                    )
+                );
+
+                return true;
+            }
+        );
+
+        $journalSettings = Registry::get('selectData')->cloneInstance();
+        Registry::remove('selectData');
+
+        $this->assertTrue(
+            count($journalSettings->listKeys()) === 3 &&
+            in_array(
+                $journalSettings->get(0)->getData('locale'),
+                array('es_AR', 'en_NZ', 'fr_CA')
+            ) &&
+            in_array(
+                $journalSettings->get(1)->getData('setting_value'),
+                array(
+                    'Tous les animaux',
+                    'All the animals',
+                    'Todos los animales',
+                )
+            ) &&
+            $journalSettings->get(0)->getData('setting_name') === 'title' &&
+            $journalSettings->get(1)->getData('setting_type') === 'string' &&
+            $journalSettings->get(2)->getData('journal_id') == 1
+        );
+    }
+
+    /**
+     * @depends testInsert3JournalSettings
+     */
+    public function testExecuteStatementDeleteJournalTitleInSpanish()
+    {
+        //$this->markTestSkipped('pending');
+        Registry::get('StatementHandler')->execute(
+            'deleteJournalSettings',
+            array(
+                'payload' => array(
+                    'journal_id' => 1,
+                    'locale' => 'es_AR',
+                    'setting_name' => 'title',
+                ),
+            )
+        );
+
+        Registry::remove('selectData');
+        Registry::get('StatementHandler')->execute(
+            'selectJournalSettings',
+            null,
+            function($res) {
+                if (!Registry::hasKey('selectData'))
+                    Registry::set(
+                        'selectData',
+                        Registry::get('MemoryManager')->create(array())
+                    );
+
+                Registry::get('selectData')->push(
+                    Registry::get('EntityHandler')->create(
+                        'journal_settings',
+                        $res
+                    )
+                );
+
+                return true;
+            }
+        );
+
+        $journalSettings = Registry::get('selectData')->cloneInstance();
+        Registry::remove('selectData');
+
+        $this->assertTrue(
+            count($journalSettings->listKeys()) === 2 &&
+            in_array(
+                $journalSettings->get(0)->getData('setting_value'),
+                array(
+                    'All the animals',
+                    'Tous les animaux',
+                )
+            ) &&
+            in_array(
+                $journalSettings->get(1)->getData('setting_value'),
+                array(
+                    'All the animals',
+                    'Tous les animaux',
+                )
+            )
+        );
+    }
+
+    /**
+     * @depends testInsert3JournalSettings
+     */
+    public function testDeleteAllJournalSettingsFromJournalId1()
+    {
+        Registry::get('StatementHandler')->removeStatement(
+            'deleteJournalSettings'
+        );
+
+        Registry::get('StatementHandler')->execute(
+            'deleteJournalSettings',
+            array(
+                'where' => array(
+                    'journal_id'
+                ),
+                'payload' => array(
+                    'journal_id' => 1
+                ),
+            )
+        );
+
+        $statement = Registry::get('StatementHandler')->create(
+            'SELECT COUNT(1) AS count FROM journal_settings'
+        );
+
+        Registry::remove('count');
+        Registry::get('StatementHandler')->execute(
+            $statement,
+            null,
+            function($res) {
+                Registry::set('count', $res['count']);
+            }
+        );
+
+        $this->assertSame('0', Registry::get('count'));
+    }
 }
