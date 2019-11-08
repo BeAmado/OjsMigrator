@@ -17,13 +17,45 @@ class StatementHandler
     }
 
     /**
+     * Forms an array with the fields to go in the where clause.
+     *
+     * @param array $args
+     * @param string $op
+     * @return mixed
+     */
+    protected function formWhereFields($args, $op)
+    {
+        if (!\is_array($args) || !\array_key_exists('where', $args))
+            return null;
+
+        return (\in_array(
+            \strtolower($op), 
+            array('select', 'delete'))
+        ) ? $args['where'] : null;
+    }
+
+    /**
+     * Forms an array with the fields to go in the set part of an insert query.
+     *
+     * @param array $args
+     * @return mixed
+     */
+    protected function formSetFields($args, $op)
+    {
+        if (!\is_array($args) || !\array_key_exists('set', $args))
+            return null;
+
+        return (\strtolower($op) === 'insert') ? $args['set'] : null;
+    }
+
+    /**
      * Sets the statement specified by the name.
      *
      * @param string $name
-     * @param mixed $data
+     * @param array $args
      * @return void
      */
-    public function setStatement($name, $data = null)
+    public function setStatement($name, $args = array())
     {
         if (Registry::hasKey($name))
             Registry::remove($name);
@@ -36,18 +68,17 @@ class StatementHandler
         if (\count($pieces) < 2)
             return;
 
-        $tbDef = Registry::get('SchemaHandler')->getTableDefinition(
-            \implode('_', \array_slice($pieces, 1))
-        );
-
-        $where = null;
-        $set = null;
-
         $query = Registry::get('QueryHandler')->{
             (\strtolower($pieces[0]) === 'getlast') 
                 ? 'generateQueryGetLast'
                 : 'generateQuery' . \ucfirst(\strtolower($pieces[0]))
-        }($tbDef, $where, $set);
+        }(
+            Registry::get('SchemaHandler')->getTableDefinition(
+                \implode('_', \array_slice($pieces, 1))
+            ),
+            $this->formWhereFields($args, $pieces[0]),
+            $this->formSetFields($args, $pieces[0])
+        );
 
         Registry::set(
             $name, 
@@ -59,13 +90,13 @@ class StatementHandler
      * Gets the statement specified by the name.
      *
      * @param string $name
-     * @param mixed $data
+     * @param array $args
      * @return \BeAmado\OjsMigrator\Db\MyStatement
      */
-    public function getStatement($name, $data = null)
+    public function getStatement($name, $args = null)
     {
         if (!Registry::hasKey($name))
-            $this->setStatement($name, $data);
+            $this->setStatement($name, $args);
 
         return Registry::get($name);
     }
@@ -86,6 +117,62 @@ class StatementHandler
     }
 
     /**
+     * Binds the parameters to the statement.
+     *
+     * @param \BeAmado\OjsMigrator\Db\MyStatement $statement
+     * @param \BeAmado\OjsMigrator\MyObject $data
+     * @return boolean
+     */
+    protected function bindParameters($statement, $data)
+    {
+        if (
+            !\is_a($data, \BeAmado\OjsMigrator\MyObject::class) ||
+            !\is_a($statement, \BeAmado\OjsMigrator\Db\MyStatement::class)
+        )
+            return;
+
+
+        return $statement->bindParams(
+            Registry::get('QueryHandler')->getParametersFromQuery(
+                $statement->getQuery()
+            ),
+            $data->hasAttribute('payload') ? $data->get('payload') : $data
+        );
+    }
+
+    /**
+     * Gets the statement identified by the name and contrained by the "where"
+     * and/or "set" data
+     *
+     * @param string $stmtName
+     * @param \BeAmado\OjsMigrator\MyObject | array
+     * @return \BeAmado\OjsMigrator\Db\MyStatement
+     */
+    protected function getProperStatement($stmtName, $data)
+    {
+        if ($data === null)
+            return $this->getStatement($stmtName);
+
+        if (\is_array($data))
+            $data = Registry::get('MemoryManager')->create($data);
+        
+        if (!\is_a($data, \BeAmado\OjsMigrator\MyObject::class))
+            return;
+
+        $args = ($data->hasAttribute('where') || $data->hasAttribute('set'))
+            ? array() 
+            : null;
+
+        if ($data->hasAttribute('where'))
+            $args['where'] = $data->get('where')->toArray();
+
+        if ($data->hasAttribute('set'))
+            $args['set'] = $data->get('set')->toArray();
+
+        return $this->getStatement($stmtName, $args);
+    }
+
+    /**
      * Executes the statement identified by the name passing the data to be 
      * bound and a callback to be executed for each record returned by the 
      * database.
@@ -100,26 +187,22 @@ class StatementHandler
         if (\is_array($data))
             $data = Registry::get('MemoryManager')->create($data);
 
-        /** @var $statement \BeAmado\OjsMigrator\Db\MyStatement */
-        $statement = null;
-
-        if (\is_string($stmt))
-            $statement = $this->getStatement($stmt, $data);
-        else if (\is_a($stmt, \BeAmado\OjsMigrator\Db\MyStatement::class))
-            $statement = $stmt;
-        else 
+        if (
+            $data !== null && 
+            !\is_a($data, \BeAmado\OjsMigrator\MyObject::class)
+        )
             return;
+            //TODO: treat better
+        
+        /** @var $statement \BeAmado\OjsMigrator\Db\Statement */
+        $statement = \is_a($stmt, \BeAmado\OjsMigrator\Db\MyStatement::class)
+            ? $stmt
+            : $this->getProperStatement($stmt, $data);
 
-        $params = ($data === null ) 
-            ? null 
-            : Registry::get('QueryHandler')->getParametersFromQuery(
-                  $statement->getQuery()
-              );
-
-        if($data !== null && !$statement->bindParams($params, $data))
+        if ($data !== null && !$this->bindParameters($statement, $data))
             return false;
 
-        if(!$statement->execute())
+        if (!$statement->execute())
             return false;
 
         if (\is_callable($callback))

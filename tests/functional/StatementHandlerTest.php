@@ -148,16 +148,16 @@ class StatementHandlerTest extends FunctionalTest
      */
     public function testExecuteStatementSelectJournalByPath()
     {
-        $this->markTestSkipped(
-            'Still to work on the StatementHandler to make this test pass.'
-        );
         Registry::remove('selectData');
         Registry::get('StatementHandler')->removeStatement('selectJournals');
 
         Registry::get('StatementHandler')->execute(
             'selectJournals',
             Registry::get('MemoryManager')->create(array(
-                'path' => 'ma_nature',
+                'where' => array('path'),
+                'payload' => array(
+                    'path' => 'ma_nature',
+                )
             )),
             function($res) {
                 if (!Registry::hasKey('selectData'))
@@ -168,6 +168,8 @@ class StatementHandlerTest extends FunctionalTest
                 Registry::get('selectData')->push(
                     Registry::get('EntityHandler')->create('journals', $res)
                 );
+
+                return true;
             }
         );
 
@@ -177,13 +179,12 @@ class StatementHandlerTest extends FunctionalTest
 
         $this->assertTrue(
             count($journals->listKeys()) === 1 &&
-            $journals->get(0)->getData('journal_id') === 1 &&
+            $journals->get(0)->getData('journal_id') == 1 &&
             $journals->get(0)->getData('seq') == 0 &&
             $journals->get(0)->getData('path') === 'ma_nature' &&
             $journals->get(0)->getData('primary_locale') === 'fr_CA' &&
             $journals->get(0)->getData('enabled') == 1
         );
-        $this->assertTrue(true);
     }
 
     /**
@@ -192,6 +193,47 @@ class StatementHandlerTest extends FunctionalTest
      */
     public function testExecuteStatementUpdateJournal()
     {
-        $this->markTestSkipped('pending');
+        Registry::get('StatementHandler')->execute(
+            'updateJournals',
+            Registry::get('EntityHandler')->create('journals',array(
+                'journal_id' => 1,
+                'path' => 'my_nature',
+                'primary_locale' => 'en_NZ',
+                'enabled' => 0
+            ))
+        );
+
+        Registry::remove('selectData');
+        Registry::get('StatementHandler')->removeStatement('selectJournals');
+
+        Registry::get('StatementHandler')->execute(
+            'selectJournals',
+            null,
+            function($res) {
+                if (!Registry::hasKey('selectData'))
+                    Registry::set(
+                        'selectData',
+                        Registry::get('MemoryManager')->create(array())
+                    );
+
+                Registry::get('selectData')->push(
+                    Registry::get('EntityHandler')->create('journals', $res)
+                );
+
+                return true;
+            }
+        );
+
+        $journals = Registry::get('selectData')->cloneInstance();
+        Registry::remove('selectData');
+
+        $this->assertTrue(
+            count($journals->listKeys()) === 1 &&
+            $journals->get(0)->getData('journal_id') == 1 &&
+            $journals->get(0)->getData('seq') == 0 &&
+            $journals->get(0)->getData('path') === 'my_nature' &&
+            $journals->get(0)->getData('primary_locale') === 'en_NZ' &&
+            $journals->get(0)->getData('enabled') == 0
+        );
     }
 }
