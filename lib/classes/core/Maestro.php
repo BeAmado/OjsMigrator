@@ -73,7 +73,7 @@ class Maestro
         );
 
         if ($index !== false)
-            return Factory::create('DAO', $tableNames[$index]);
+            return (new Factory())->create('DAO', $tablesNames[$index]);
     }
 
     protected static function getStatement($name)
@@ -111,7 +111,7 @@ class Maestro
         if (self::isDao($name)) {
             Registry::set($name, self::getDao($name));
 
-            if (\is_a(Registry::get($name), \BeAmado\OjsMigrator\Db\DAO))
+            if (\is_a(Registry::get($name), \BeAmado\OjsMigrator\Db\DAO::class))
                 return Registry::get($name);
             else
                 Registry::remove($name);

@@ -76,6 +76,9 @@ abstract class AbstractObject
      */
     public function destroy()
     {
+        if (!isset($this->value))
+            return;
+
         if (\is_object($this->value)) {
             $this->destroyObject($this->value);
         }

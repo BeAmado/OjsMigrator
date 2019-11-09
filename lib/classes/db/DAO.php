@@ -33,7 +33,7 @@ class DAO
     /**
      * Inserts the entity's data into the corresponding database table.
      *
-     * @param \BeAmado\OjsMigrator\Entity $entity
+     * @param \BeAmado\OjsMigrator\Entity | array $entity
      * @param boolean $commitOnSucess
      * @param boolean $rollbackOnError
      * @return \BeAmado\OjsMigrator\Entity
@@ -43,12 +43,21 @@ class DAO
         $commitOnSuccess = false, 
         $rollbackOnError = false
     ) {
+        Registry::remove('entityToInsert');
+        Registry::set(
+            'entityToInsert',
+            Registry::get('EntityHandler')->getValidData(
+                $this->getTableName(),
+                $entity
+            )
+        );
+
         Registry::get('StatementHandler')->execute(
             'insert' . Registry::get('CaseHandler')->transformCaseTo(
                 'PascalCase',
                 $this->getTableName()
             ),
-            $entity
+            Registry::get('entityToInsert')
         );
         
         Registry::remove('selectLastInserted');
@@ -77,6 +86,39 @@ class DAO
     public function read($conditions = array())
     {
         Registry::remove('selectData');
+        if (
+            \is_array($conditions) && 
+            !\array_key_exists('where', $conditions) &&
+            !empty($conditions)
+        )
+            $conditions = array('where' => $conditions);
+
+        $stmtName = 'select' . Registry::get('CaseHandler')->transformCaseTo(
+            'PascalCase',
+            $this->getTableName()
+        );
+        /////// checking if need to remove the statement and make a new ///////
+
+        $query = Registry::get('StatementHandler')->getStatement($stmtName)
+                                                  ->getQuery();
+
+        if (
+            \is_array($conditions) && 
+            \array_key_exists('where', $conditions) &&
+            \strpos(\strtolower($query), ' where ') === false
+        ) {
+            Registry::get('StatementHandler')->removeStatement($stmtName);
+        }
+
+        if (
+            (!\is_array($conditions) ||
+            !\array_key_exists('where', $conditions)) &&
+            \strpos(\strtolower($query), ' where ') !== false
+        ) {
+            Registry::get('StatementHandler')->removeStatement($stmtName);
+        }  
+        ///////////////////////////////////////////////////////////////////////
+
 
         Registry::get('StatementHandler')->execute(
             'select' . Registry::get('CaseHandler')->transformCaseTo(
