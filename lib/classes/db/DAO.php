@@ -1,6 +1,7 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Db;
+use BeAmado\OjsMigrator\Registry;
 
 class DAO
 {
@@ -43,17 +44,17 @@ class DAO
         $rollbackOnError = false
     ) {
         Registry::get('StatementHandler')->execute(
-            'insert' . Registry::get()->transformCaseTo(
+            'insert' . Registry::get('CaseHandler')->transformCaseTo(
                 'PascalCase',
                 $this->getTableName()
             ),
-            $entity,
+            $entity
         );
         
         Registry::remove('selectLastInserted');
 
         Registry::get('StatementHandler')->execute(
-            'insert' . Registry::get()->transformCaseTo(
+            'getlast' . Registry::get('CaseHandler')->transformCaseTo(
                 'PascalCase',
                 $this->getTableName()
             ),

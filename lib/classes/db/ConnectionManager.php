@@ -13,6 +13,11 @@ class ConnectionManager
                 Registry::get('ConfigHandler')->getConnectionSettings()
             )
         );
+
+        Registry::get('connection')->setAttribute(
+            \PDO::ATTR_ERRMODE, 
+            \PDO::ERRMODE_EXCEPTION
+        );
     }
 
     public function getDbDriver()

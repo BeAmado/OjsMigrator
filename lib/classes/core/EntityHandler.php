@@ -4,6 +4,36 @@ namespace BeAmado\OjsMigrator;
 
 class EntityHandler
 {
+    protected function formDefaultValue($colDef)
+    {
+        if (!\is_a($colDef, \BeAmado\OjsMigrator\Db\ColumnDefinition::class))
+            return;
+
+        if ($colDef->getDefaultValue() !== null)
+            return $colDef->getDefaultValue();
+
+        if ($colDef->isNullable() || $colDef->isAutoIncrement())
+            return null;
+
+        switch(\strtolower($colDef->getSqlType())) {
+            case 'date':
+                return \date('Y-m-d');
+            case 'timestamp':
+                return \date('Y-m-d H:i:s');
+        }
+
+        switch(\strtolower($colDef->getDataType())) {
+            case 'string':
+                return '';
+            case 'integer':
+            case 'float':
+            case 'double':
+                return 0;
+        }
+
+        return '0';
+    }
+
     public function getValidData($name, $data)
     {
         $tbDef = Registry::get('SchemaHandler')->getTableDefinition($name);
@@ -15,7 +45,7 @@ class EntityHandler
             $validData->set(
                 $field,
                 ($dataObj->attributeIsNull($field))
-                    ? $tbDef->getColumn($field)->getDefaultValue()
+                    ? $this->formDefaultValue($tbDef->getColumn($field))//$tbDef->getColumn($field)->getDefaultValue()
                     : $dataObj->get($field)->getValue()
             );
         }

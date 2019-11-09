@@ -19,7 +19,9 @@ class MyStatementTest extends FunctionalTest
             $this->markTestSkipped('None of the database drivers available');
         }
 
-        $query = 'SELECT * FROM users WHERE name = "Edil" AND level = "superstar"';
+        Registry::get('DbHandler')->createTableIfNotExists('users');
+        $query = 'SELECT * FROM users '
+            . 'WHERE first_name = "Bernardo" AND last_name = "Amado"';
         $stmt = new MyStatement($query);
 
         $this->assertInstanceOf(

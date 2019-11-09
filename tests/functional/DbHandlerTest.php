@@ -50,27 +50,6 @@ class DbHandlerTest extends FunctionalTest implements StubInterface
 
         $queryInsert = 'INSERT INTO user_interests '
             . '(user_id, controlled_vocab_entry_id) VALUES (1, 5), (10, 28)';
-            //. '(user_id, controlled_vocab_entry_id) Values (:u, :c)';
-
-        /*$insertStmt = Registry::get('StatementHandler')->create($queryInsert);
-
-        $insertStmt->bindParams(
-            array('user_id' => ':u', 'controlled_vocab_entry_id' => ':c'),
-            Registry::get('MemoryManager')->create(array(
-                'user_id' => 1,
-                'controlled_vocab_entry_id' => 5,
-            ))
-        );
-        $insertStmt->execute();
-
-        $insertStmt->bindParams(
-            array('user_id' => ':u', 'controlled_vocab_entry_id' => ':c'),
-            Registry::get('MemoryManager')->create(array(
-                'user_id' => 10,
-                'controlled_vocab_entry_id' => 28,
-            ))
-        );
-        $insertStmt->execute();*/
 
         Registry::get('StatementHandler')->create($queryInsert)->execute();
 
@@ -106,6 +85,45 @@ class DbHandlerTest extends FunctionalTest implements StubInterface
             ),
             $data
         );
+    }
+
+    /**
+     * @depends testCanCreateTableUserInterests
+     */
+    public function testCanSeeThatTableUserInterestsExists()
+    {
+        $this->assertTrue(
+            Registry::get('DbHandler')->tableExists('user_interests')
+        );
+    }
+
+    public function testCreateTableAuthSourcesWithCreateIfTableNotExists()
+    {
+        $existedBefore = Registry::get('DbHandler')->tableExists(
+            'auth_sources'
+        );
+
+        Registry::get('DbHandler')->createTableIfNotExists('auth_sources');
+
+        $existsNow = Registry::get('DbHandler')->tableExists('auth_sources');
+
+        $this->assertTrue(!$existedBefore && $existsNow);
+    }
+
+    /**
+     * @depends testCreateTableAuthSourcesWithCreateIfTableNotExists
+     */
+    public function testDoesNotCreateAgainATableThatExistsNorThrowsAnyError()
+    {
+        $existedBefore = Registry::get('DbHandler')->tableExists(
+            'auth_sources'
+        );
+
+        Registry::get('DbHandler')->createTableIfNotExists('auth_sources');
+
+        $existsNow = Registry::get('DbHandler')->tableExists('auth_sources');
+
+        $this->assertTrue($existedBefore && $existsNow);
     }
 
 }

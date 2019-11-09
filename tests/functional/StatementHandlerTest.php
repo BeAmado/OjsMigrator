@@ -33,6 +33,7 @@ class StatementHandlerTest extends FunctionalTest
 
     public function testSetStatementInsertUsers()
     {
+        Registry::get('DbHandler')->createTableIfNotExists('users');
         Registry::get('StatementHandler')->setStatement('insertUsers');
 
         $this->assertInstanceOf(
@@ -43,6 +44,7 @@ class StatementHandlerTest extends FunctionalTest
 
     public function testGetStatementUpdateJournalSettings()
     {
+        Registry::get('DbHandler')->createTableIfNotExists('journal_settings');
         $stmt = Registry::get('StatementHandler')->getStatement(
             'updateJournalSettings'
         );
@@ -61,7 +63,7 @@ class StatementHandlerTest extends FunctionalTest
 
     public function testExecuteStatementInsertJournal()
     {
-        Registry::get('DbHandler')->createTable('journals');
+        Registry::get('DbHandler')->createTableIfNotExists('journals');
         Registry::get('StatementHandler')->execute(
             'insertJournals',
             Registry::get('EntityHandler')->create('journals', array(
@@ -238,7 +240,7 @@ class StatementHandlerTest extends FunctionalTest
 
     public function testInsert3JournalSettings()
     {
-        Registry::get('DbHandler')->createTable('journal_settings');
+        Registry::get('DbHandler')->createTableIfNotExists('journal_settings');
 
         // insert 3 journal_settings for the journal with id 1
         $settings = array(

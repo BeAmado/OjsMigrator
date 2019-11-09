@@ -12,10 +12,10 @@ class EntityHandlerTest extends FunctionalTest
 
         $this->assertTrue(
             $journal->getData('journal_id') === null &&
-            $journal->getData('path') === null &&
+            $journal->getData('path') === '' &&
             $journal->getData('seq') === '0' &&
             $journal->getData('enabled') === '1' &&
-            $journal->getData('primary_locale') === null
+            $journal->getData('primary_locale') === ''
         );
     }
 

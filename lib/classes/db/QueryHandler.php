@@ -374,7 +374,8 @@ class QueryHandler
 
         foreach ($assigns as $assign) {
             $parts = \array_map('trim', \explode('=', $assign));
-            $params[$parts[0]] = $parts[1];
+            if (\substr($parts[1], 0, 1) === ':')
+                $params[$parts[0]] = $parts[1];
         }
 
         return $params;

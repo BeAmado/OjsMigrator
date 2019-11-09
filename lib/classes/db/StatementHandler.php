@@ -220,11 +220,13 @@ class StatementHandler
             return;
             //TODO: treat better
         
+        try {
         /** @var $statement \BeAmado\OjsMigrator\Db\Statement */
         $statement = \is_a($stmt, \BeAmado\OjsMigrator\Db\MyStatement::class)
             ? $stmt
             : $this->getProperStatement($stmt, $data);
 
+        //echo "\n\nJe fairez le bind des parametres du query: "; var_dump($statement->getQuery()); echo "\n\n";
         if ($data !== null && !$this->bindParameters($statement, $data)) {
             Registry::get('MemoryManager')->destroy($data);
             return false;
@@ -232,12 +234,19 @@ class StatementHandler
 
         Registry::get('MemoryManager')->destroy($data);
 
+        //echo "\n\nLes parametres sont: "; var_dump($statement->getParameters()); echo "\n\n";
         if (!$statement->execute())
             return false;
 
+        //echo "\n\nJ'appelle le callback\n\n";
         if (\is_callable($callback))
             return $statement->fetch($callback);
 
+        //echo "pas callable\n\n\n";
         return true;
+        } catch (\PDOException $e) {
+            echo "\n\n\nEXCEPTION: ";
+            echo "\n\nMessage: " . $e->getMessage() . "\n\n";
+        }
     }
 }
