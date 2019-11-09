@@ -17,35 +17,59 @@ class StatementHandler
     }
 
     /**
-     * Forms an array with the fields to go in the where clause.
+     * Forms an array with the fields to go in the set part of an insert query.
      *
-     * @param array $args
-     * @param string $op
+     * @param string $name
+     * @param \BeAmado\OjsMigrator\MyObject $args
      * @return mixed
      */
-    protected function formWhereFields($args, $op)
+    protected function formFields($name, $args)
     {
-        if (!\is_array($args) || !\array_key_exists('where', $args))
-            return null;
+        if (!\is_string($name))
+            return;
 
-        return (\in_array(
-            \strtolower($op), 
-            array('select', 'delete'))
-        ) ? $args['where'] : null;
+        if (\is_array($args))
+            return $this->formFields(
+                $name,
+                Registry::get('MemoryManager')->create($args)
+            );
+
+        if (
+            $args === null || 
+            !\is_a($args, \BeAmado\OjsMigrator\MyObject::class) ||
+            !$args->hasAttribute($name)
+        )
+            return;
+
+        return $args->get($name)->listKeys();
     }
 
     /**
-     * Forms an array with the fields to go in the set part of an insert query.
+     * Forms the query as specified by the operation (insert, select, update,
+     * delete or getlast), the table's name and the constraints present in the
+     * $args array.
      *
-     * @param array $args
-     * @return mixed
+     * @param string $operation
+     * @param string $tableName
+     * @param \BeAmado\OjsMigrator\MyObject $args
+     * @return string
      */
-    protected function formSetFields($args, $op)
+    protected function formQuery($operation, $tableName, $args = null)
     {
-        if (!\is_array($args) || !\array_key_exists('set', $args))
-            return null;
+        if (!\is_string($operation) || !\is_string($tableName))
+            return;
 
-        return (\strtolower($op) === 'insert') ? $args['set'] : null;
+        return Registry::get('QueryHandler')->{'generateQuery' . (
+            \strtolower($operation) === 'getlast'
+                ? 'GetLast'
+                : \ucfirst(\strtolower($operation))
+        )}(
+            Registry::get('SchemaHandler')->getTableDefinition($tableName),
+            $this->formFields('where', $args),
+            \strtolower($operation) === 'insert' 
+                ? $this->formFields('set', $args) 
+                : null
+        );
     }
 
     /**
@@ -68,21 +92,15 @@ class StatementHandler
         if (\count($pieces) < 2)
             return;
 
-        $query = Registry::get('QueryHandler')->{
-            (\strtolower($pieces[0]) === 'getlast') 
-                ? 'generateQueryGetLast'
-                : 'generateQuery' . \ucfirst(\strtolower($pieces[0]))
-        }(
-            Registry::get('SchemaHandler')->getTableDefinition(
-                \implode('_', \array_slice($pieces, 1))
-            ),
-            $this->formWhereFields($args, $pieces[0]),
-            $this->formSetFields($args, $pieces[0])
-        );
-
         Registry::set(
             $name, 
-            $this->create($query)
+            $this->create(
+                $this->formQuery(
+                    $pieces[0],
+                    \implode('_', \array_slice($pieces, 1)),
+                    $args
+                )
+            )
         );
     }
 
@@ -130,7 +148,15 @@ class StatementHandler
             !\is_a($statement, \BeAmado\OjsMigrator\Db\MyStatement::class)
         )
             return;
-
+    
+        if ($data->hasAttribute('where') || $data->hasAttribute('set'))
+            $data->set(
+                'payload',
+                Registry::get('ArrayHandler')->union(
+                    $data->get('set'),
+                    $data->get('where')
+                )
+            );
 
         return $statement->bindParams(
             Registry::get('QueryHandler')->getParametersFromQuery(
@@ -199,8 +225,12 @@ class StatementHandler
             ? $stmt
             : $this->getProperStatement($stmt, $data);
 
-        if ($data !== null && !$this->bindParameters($statement, $data))
+        if ($data !== null && !$this->bindParameters($statement, $data)) {
+            Registry::get('MemoryManager')->destroy($data);
             return false;
+        }
+
+        Registry::get('MemoryManager')->destroy($data);
 
         if (!$statement->execute())
             return false;

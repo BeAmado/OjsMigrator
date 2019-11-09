@@ -24,19 +24,9 @@ class DAO
         $this->tableName = $name;
     }
 
-    protected function begin()
+    public function getTableName()
     {
-        Registry::get('ConnectionManager')->beginTransaction();
-    }
-
-    protected function commit()
-    {
-        Registry::get('ConnectionManager')->commitTransaction();
-    }
-
-    protected function rollback()
-    {
-        Registry::get('ConnectionManager')->rollbackTransaction();
+        return $this->tableName;
     }
 
     /**
@@ -52,12 +42,28 @@ class DAO
         $commitOnSuccess = false, 
         $rollbackOnError = false
     ) {
-        // form the statement name
+        Registry::get('StatementHandler')->execute(
+            'insert' . Registry::get()->transformCaseTo(
+                'PascalCase',
+                $this->getTableName()
+            ),
+            $entity,
+        );
+        
+        Registry::remove('selectLastInserted');
 
-        // execute the statement
-            // map the new id
+        Registry::get('StatementHandler')->execute(
+            'insert' . Registry::get()->transformCaseTo(
+                'PascalCase',
+                $this->getTableName()
+            ),
+            null,
+            function($res) {
+                Registry::set('selectLastInserted', $res);
+            }
+        );
 
-        // return the data with the new id
+        return Registry::get('selectLastInserted');
     }
 
     /**
@@ -65,18 +71,39 @@ class DAO
      * entities.
      *
      * @param array $conditions
-     * @return array
+     * @return \BeAmado\OjsMigrator\MyObject
      */
     public function read($conditions = array())
     {
-        // form the statement name
+        Registry::remove('selectData');
 
-        // remove the Registry entry to make way for the new data
+        Registry::get('StatementHandler')->execute(
+            'select' . Registry::get('CaseHandler')->transformCaseTo(
+                'PascalCase',
+                $this->getTableName()
+            ),
+            (\is_array($conditions) && !empty($conditions)) 
+                ? $conditions 
+                : null,
+            function($res) {
+                if (!Registry::hasKey('selectData'))
+                    Registry::set(
+                        'selectData',
+                        Registry::get('MemoryManager')->create(array())
+                    );
 
-        // execute the statement
-            // fetch the data into the Registry
+                Registry::get('selectData')->push(
+                    Registry::get('EntityHandler')->create(
+                        $this->getTableName(),
+                        $res
+                    )
+                );
 
-        // return a clone of the data in the Registry
+                return true; // returning true continues the iteration
+            }
+        );
+
+        return Registry::get('selectData')->cloneInstance();
     }
 
     /**

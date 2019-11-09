@@ -9,11 +9,17 @@ class ArrayHandler
         if ($arr1 === null)
             return $this->union(array(), $arr2);
 
+        if (\is_a($arr1, \BeAmado\OjsMigrator\MyObject::class))
+            return $this->union($arr1->toArray(), $arr2);
+
         if (!\is_array($arr1))
             return $this->union(array($arr1), $arr2);
 
         if ($arr2 === null)
             return $this->union($arr1, array());
+
+        if (\is_a($arr2, \BeAmado\OjsMigrator\MyObject::class))
+            return $this->union($arr1, $arr2->toArray());
 
         if (!\is_array($arr2))
             return $this->union($arr1, array($arr2));

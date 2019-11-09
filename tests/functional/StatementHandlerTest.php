@@ -154,10 +154,9 @@ class StatementHandlerTest extends FunctionalTest
         Registry::get('StatementHandler')->execute(
             'selectJournals',
             Registry::get('MemoryManager')->create(array(
-                'where' => array('path'),
-                'payload' => array(
+                'where' => array(
                     'path' => 'ma_nature',
-                )
+                ),
             )),
             function($res) {
                 if (!Registry::hasKey('selectData'))
@@ -327,11 +326,9 @@ class StatementHandlerTest extends FunctionalTest
         Registry::get('StatementHandler')->execute(
             'deleteJournalSettings',
             array(
-                'payload' => array(
-                    'journal_id' => 1,
-                    'locale' => 'es_AR',
-                    'setting_name' => 'title',
-                ),
+                'journal_id' => 1,
+                'locale' => 'es_AR',
+                'setting_name' => 'title',
             )
         );
 
@@ -392,9 +389,6 @@ class StatementHandlerTest extends FunctionalTest
             'deleteJournalSettings',
             array(
                 'where' => array(
-                    'journal_id'
-                ),
-                'payload' => array(
                     'journal_id' => 1
                 ),
             )
