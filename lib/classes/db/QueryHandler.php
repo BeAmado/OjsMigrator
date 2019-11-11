@@ -86,7 +86,7 @@ class QueryHandler
      * @param \BeAmado\OjsMigrator\Db\TableDefinition $tableDefinition
      * @return string
      */
-    public function generateQueryGetLast($tableDefinition)
+    public function generateQueryGetLast($tableDefinition, $amount = 1)
     {
         if (
             !\method_exists($tableDefinition, 'getPrimaryKeys') ||
@@ -95,11 +95,17 @@ class QueryHandler
             return;
         }
 
+        if (!\is_int($amount))
+            $amount = (int) $amount;
+
+        if ($amount < 1 || $amount > 20)
+            $amount = 20;
+
         return 'SELECT '
           . \implode(', ', $tableDefinition->getColumnNames())
           . ' FROM ' . $tableDefinition->getTableName()
           . ' ORDER BY ' . \implode(', ', $tableDefinition->getPrimaryKeys())
-          . ' DESC LIMIT 1';
+          . ' DESC LIMIT ' . $amount;
     }
 
     protected function autoIncrement()

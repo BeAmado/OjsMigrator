@@ -26,7 +26,7 @@ class CaseHandler
         $upperChars = array();
 
         foreach (\str_split($str) as $char) {
-            if (\strtoupper($char) === $char)
+            if (!\is_numeric($char) && \strtoupper($char) === $char)
                 $upperChars[] = $char;
         }
 

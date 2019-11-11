@@ -106,29 +106,47 @@ class DAO
                 'PascalCase',
                 $this->getTableName()
             ),
-            Registry::get('entityToInsert')
+            Registry::get('entityToInsert')->cloneInstance()
         );
-        
-        Registry::remove('selectLastInserted');
+
+        Registry::remove('insertedEntity');
 
         Registry::get('StatementHandler')->execute(
-            'getlast' . Registry::get('CaseHandler')->transformCaseTo(
+            'getlast10' . Registry::get('CaseHandler')->transformCaseTo(
                 'PascalCase',
                 $this->getTableName()
             ),
             null,
             function($res) {
-                Registry::set(
-                    'selectLastInserted', 
-                    Registry::get('EntityHandler')->create(
-                        $this->getTableName(),
-                        $res
-                    )
-                );
+                if (Registry::get('EntityHandler')->areEqual(
+                    Registry::get('entityToInsert'),
+                    $res
+                )) {
+                    Registry::set(
+                        'insertedEntity', 
+                        Registry::get('EntityHandler')->create(
+                            $this->getTableName(),
+                            $res
+                        )
+                    );
+                    return;
+                }
+
+                return true;
             }
         );
 
-        return Registry::get('selectLastInserted')->cloneInstance();
+        Registry::remove('entityToInsert');
+
+        if (!\is_a(
+            Registry::get('insertedEntity'), 
+            \BeAmado\OjsMigrator\MyObject::class)
+        ) {
+            Registry::remove('insertedEntity');
+            return;
+        }
+
+        return Registry::get('insertedEntity')->cloneInstance();
     }
 
     /**

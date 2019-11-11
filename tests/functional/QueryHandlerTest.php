@@ -540,4 +540,17 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
 
         $this->assertEquals($expected, $params);
     }
+
+    public function testGenerateQueryToGetLast10InsertedJournals()
+    {
+        $expected = 'SELECT journal_id, path, seq, primary_locale, enabled '
+            . 'FROM journals ORDER BY journal_id DESC LIMIT 10';
+
+        $query = Registry::get('QueryHandler')->generateQueryGetLast(
+            Registry::get('SchemaHandler')->getTableDefinition('journals'),
+            10
+        );
+
+        $this->assertSame($expected, $query);
+    }
 }

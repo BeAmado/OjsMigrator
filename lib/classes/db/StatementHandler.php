@@ -59,11 +59,16 @@ class StatementHandler
         if (!\is_string($operation) || !\is_string($tableName))
             return;
 
-        return Registry::get('QueryHandler')->{'generateQuery' . (
-            \strtolower($operation) === 'getlast'
-                ? 'GetLast'
-                : \ucfirst(\strtolower($operation))
-        )}(
+        if (\strtolower(\substr($operation, 0, 7)) === 'getlast') {
+            return Registry::get('QueryHandler')->generateQueryGetLast(
+                Registry::get('SchemaHandler')->getTableDefinition($tableName),
+                ((int) \substr($operation, 7)) ?: 1
+            );
+        }
+
+        return Registry::get('QueryHandler')->{
+            'generateQuery' . \ucfirst(\strtolower($operation))
+        }(
             Registry::get('SchemaHandler')->getTableDefinition($tableName),
             $this->formFields('where', $args),
             \strtolower($operation) === 'insert' 

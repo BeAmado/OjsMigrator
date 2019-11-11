@@ -199,7 +199,7 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
      */
     public function hasAttribute($name)
     {
-        return \is_array($this->values) &&
+        return isset($this->values) && \is_array($this->values) &&
             \array_key_exists(\strtolower($name), $this->values);
     }
 
