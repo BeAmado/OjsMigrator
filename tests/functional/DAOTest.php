@@ -23,21 +23,9 @@ class DAOTest extends FunctionalTest
             )
         );
 
-        $this->assertTrue(
-            $user['user_id'] == 1
-        );
-    }
-
-    /**
-     * @depends testCreateUser
-     */
-    public function testSelectUserByUsername()
-    {
-        $users = Registry::get('UsersDAO')->read(array('username' => 'be'));
-
-        $this->assertSame(
-            'Bernardo',
-            $users->get(0)->getData('first_name')
+        $this->assertEquals(
+            1,
+            $user->getData('user_id')
         );
     }
 
@@ -54,7 +42,10 @@ class DAOTest extends FunctionalTest
             'password' => 'I like the rain',
         ));
 
-        $this->assertTrue($user['user_id'] == 2);
+        $this->assertEquals(
+            2,
+            $user->getData('user_id')
+        );
     }
 
     /**
@@ -89,6 +80,77 @@ class DAOTest extends FunctionalTest
         $this->assertSame(
             4,
             count($users->listKeys())
+        );
+    }
+
+    /**
+     * @depends testCreateUser
+     */
+    public function testSelectUserByUsername()
+    {
+        $users = Registry::get('UsersDAO')->read(array('username' => 'be'));
+
+        $this->assertTrue(
+            $users->length() === 1 &&
+            $users->get(0)->getData('first_name') === 'Bernardo'
+        );
+    }
+
+    /**
+     * @depends testSelectAllUsers
+     * @depends testSelectUserByUsername
+     */
+    public function testDeleteUserByUsername()
+    {
+        $deletions = Registry::get('UsersDAO')->delete(array(
+            'username' => 'be'
+        ));
+
+        $users = Registry::get('UsersDAO')->read();
+
+        $this->assertTrue(
+            $users->length() === 3 &&
+            $deletions === 1
+        );
+    }
+
+    /**
+     * @depends testDeleteUserByUsername
+     */
+    public function testCannotDeleteAllUsers()
+    {
+        $deletions = Registry::get('UsersDAO')->delete();
+
+        $users = Registry::get('UsersDAO')->read();
+
+        $this->assertTrue(
+            $users->length() === 3 &&
+            $deletions === 0
+        );
+    }
+
+    public function testDeleteUserPassingEntity()
+    {
+        $user = Registry::get('UsersDAO')->create(array(
+            'username' => 'mastercroc',
+            'first_name' => 'Jean-Claude',
+            'last_name' => 'Van Damme',
+            'email' => 'master@martialarts.com',
+            'password' => 'full split kick',
+        ));
+
+        $usersBeforeDeletion = Registry::get('UsersDAO')->read();
+
+        $deletions = Registry::get('UsersDAO')->delete($user);
+
+        $usersAfterDeletion = Registry::get('UsersDAO')->read();
+
+        $this->assertTrue(
+            $usersBeforeDeletion->length() === 4 &&
+            $usersBeforeDeletion->get(-1)
+                                ->getData('first_name') === 'Jean-Claude' &&
+            $deletions === 1 &&
+            $usersAfterDeletion->length() === 3
         );
     }
 }

@@ -96,7 +96,7 @@ class QueryHandler
         }
 
         return 'SELECT '
-          . \implode(', ', $tableDefinition->getPrimaryKeys())
+          . \implode(', ', $tableDefinition->getColumnNames())
           . ' FROM ' . $tableDefinition->getTableName()
           . ' ORDER BY ' . \implode(', ', $tableDefinition->getPrimaryKeys())
           . ' DESC LIMIT 1';

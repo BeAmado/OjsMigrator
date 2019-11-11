@@ -48,4 +48,15 @@ class ArrayHandler
 
         return \array_search($elem, $arr) === (\count($arr) - 1);
     }
+
+    public function equals($arr1, $arr2)
+    {
+        if (!\is_array($arr1) || !\is_array($arr2))
+            return false;
+
+        if (\count($arr1) !== \count($arr2))
+            return false;
+
+        return \count(\array_intersect($arr1, $arr2)) === \count($arr1);
+    }
 }

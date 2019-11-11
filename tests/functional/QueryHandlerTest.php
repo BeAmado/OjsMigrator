@@ -77,11 +77,23 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
         );
     }
 
-    public function testGetTheLastInsertedIdQueryForUsers()
+    public function testGetTheLastInsertedQueryForQueuedPayments()
     {
-        $expected = 'SELECT user_id FROM users ORDER BY user_id DESC LIMIT 1';
+        $expected = ''
+          . 'SELECT '
+          .     'queued_payment_id, '
+          .     'date_created, '
+          .     'date_modified, '
+          .     'expiry_date, '
+          .     'payment_data ' 
+          . 'FROM queued_payments '
+          . 'ORDER BY queued_payment_id DESC '
+          . 'LIMIT 1';
+
         $query = Registry::get('QueRYhanDLer')->generateQueryGetLast(
-            Registry::get('ScHEMAhANDler')->getTableDefinition('users')
+            Registry::get('ScHEMAhANDler')->getTableDefinition(
+                'queued_payments'
+            )
         );
 
         $this->assertSame(

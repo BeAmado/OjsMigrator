@@ -18,7 +18,7 @@ class EntityHandler
         switch(\strtolower($colDef->getSqlType())) {
             case 'date':
                 return \date('Y-m-d');
-            case 'timestamp':
+            case 'datetime':
                 return \date('Y-m-d H:i:s');
         }
 

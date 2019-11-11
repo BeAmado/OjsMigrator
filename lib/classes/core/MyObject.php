@@ -283,5 +283,15 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
         return !$this->hasAttribute($attr) || 
             $this->get($attr)->getValue() === null;
     }
+
+    /**
+     * Returns the length of the values array
+     *
+     * @return integer
+     */
+    public function length()
+    {
+        return \count($this->listValues());
+    }
 }
 

@@ -30,6 +30,55 @@ class DAO
         return $this->tableName;
     }
 
+    protected function formStatementName($operation)
+    {
+        return \strtolower($operation) 
+          . Registry::get('CaseHandler')->transformCaseTo(
+                'PascalCase', 
+                $this->getTableName()
+            );
+    }
+
+    protected function getQuery($operation)
+    {
+        return Registry::get('StatementHandler')->getStatement(
+            $this->formStatementName($operation)
+        )->getQuery();
+    }
+
+    protected function getFieldsFromConditions($conditions)
+    {
+        return Registry::get('ArrayHandler')->union(
+            \array_key_exists('where', $conditions) 
+                ? \array_keys($conditions['where'])
+                : array(),
+            \array_key_exists('set', $conditions) 
+                ? \array_keys($conditions['set'])
+                : array()
+        );
+    }
+
+    protected function getQueryParameters($operation)
+    {
+        return Registry::get('QueryHandler')->getParametersFromQuery(
+            $this->getQuery($operation)
+        );
+    }
+
+    protected function statementOk($operation, $conditions)
+    {
+        if (!\in_array(
+            \strtolower($operation),
+            array('update', 'select', 'delete')
+        ))
+            return true;
+
+        return Registry::get('ArrayHandler')->equals(
+            $this->getFieldsFromConditions($conditions),
+            \array_keys($this->getQueryParameters($operation))
+        );
+    }
+
     /**
      * Inserts the entity's data into the corresponding database table.
      *
@@ -69,11 +118,17 @@ class DAO
             ),
             null,
             function($res) {
-                Registry::set('selectLastInserted', $res);
+                Registry::set(
+                    'selectLastInserted', 
+                    Registry::get('EntityHandler')->create(
+                        $this->getTableName(),
+                        $res
+                    )
+                );
             }
         );
 
-        return Registry::get('selectLastInserted');
+        return Registry::get('selectLastInserted')->cloneInstance();
     }
 
     /**
@@ -93,39 +148,14 @@ class DAO
         )
             $conditions = array('where' => $conditions);
 
-        $stmtName = 'select' . Registry::get('CaseHandler')->transformCaseTo(
-            'PascalCase',
-            $this->getTableName()
-        );
-        /////// checking if need to remove the statement and make a new ///////
-
-        $query = Registry::get('StatementHandler')->getStatement($stmtName)
-                                                  ->getQuery();
-
-        if (
-            \is_array($conditions) && 
-            \array_key_exists('where', $conditions) &&
-            \strpos(\strtolower($query), ' where ') === false
-        ) {
-            Registry::get('StatementHandler')->removeStatement($stmtName);
-        }
-
-        if (
-            (!\is_array($conditions) ||
-            !\array_key_exists('where', $conditions)) &&
-            \strpos(\strtolower($query), ' where ') !== false
-        ) {
-            Registry::get('StatementHandler')->removeStatement($stmtName);
-        }  
-        ///////////////////////////////////////////////////////////////////////
-
+        if (!$this->statementOk('select', $conditions))
+            Registry::get('StatementHandler')->removeStatement(
+                $this->formStatementName('select')
+            );
 
         Registry::get('StatementHandler')->execute(
-            'select' . Registry::get('CaseHandler')->transformCaseTo(
-                'PascalCase',
-                $this->getTableName()
-            ),
-            (\is_array($conditions) && !empty($conditions)) 
+            $this->formStatementName('select'),
+            (\is_array($conditions) && \array_key_exists('where', $conditions)) 
                 ? $conditions 
                 : null,
             function($res) {
@@ -149,6 +179,13 @@ class DAO
         return Registry::get('selectData')->cloneInstance();
     }
 
+    protected function getRowCount($operation)
+    {
+        return Registry::get('StatementHandler')->getStatement(
+            $this->formStatementName($operation)
+        )->rowCount();
+    }
+
     /**
      * Updates the corresponding database table using the given entity's data.
      *
@@ -157,32 +194,60 @@ class DAO
      * @param array $conditions
      * @param boolean $commitOnSuccess
      * @param boolean $rollbackOnError
-     * @return boolean
+     * @return integer
      */
     public function update(
         $entity, 
-        $columns = array(), 
         $conditions = array(),
         $commitOnSuccess = false,
         $rollbackOnError = false
     ) {
-
     }
 
     /**
      * Deletes the data of the corresponding database table using the given
      * conditions.
      *
-     * @param array $conditions
+     * @param mixed $conditions
      * @param boolean $commitOnSuccess
      * @param boolean $rollbackOnError
-     * @return boolean
+     * @return mixed
      */
     public function delete(
         $conditions = array(),
         $commitOnSuccess = false,
         $rollbackOnError = false
     ) {
+        if (
+            \is_array($conditions) && 
+            !\array_key_exists('where', $conditions) &&
+            !empty($conditions)
+        )
+            $conditions = array('where' => $conditions);
 
+        if (
+            !\is_array($conditions) &&
+            !\is_a($conditions, \BeAmado\OjsMigrator\MyObject::class)
+        )
+            return;
+
+        if (!$this->statementOk('delete', $conditions))
+            Registry::get('StatementHandler')->removeStatement(
+                $this->formStatementName('delete')
+            );
+
+        $executed = Registry::get('StatementHandler')->execute(
+            $this->formStatementName('delete'),
+            (\is_array($conditions) && empty($conditions))
+                ? null
+                : $conditions
+        );
+
+        if (!$executed) {
+            unset($executed);
+            return false;
+        }
+
+        return $this->getRowCount('delete');
     }
 }

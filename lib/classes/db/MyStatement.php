@@ -182,4 +182,14 @@ class MyStatement extends MyObject
     {
         return $this->getStmt()->execute();
     }
+
+    /**
+     * Wrapper for the PDOStatement::rowCount method
+     *
+     * @return integer
+     */
+    public function rowCount()
+    {
+        return $this->getStmt()->rowCount();
+    }
 }
