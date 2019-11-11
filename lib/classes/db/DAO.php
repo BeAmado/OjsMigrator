@@ -207,19 +207,50 @@ class DAO
     /**
      * Updates the corresponding database table using the given entity's data.
      *
-     * @param \BeAmado\OjsMigrator\Entity $entity
-     * @param array $columns
-     * @param array $conditions
+     * @param mixed $data
      * @param boolean $commitOnSuccess
      * @param boolean $rollbackOnError
      * @return integer
      */
     public function update(
-        $entity, 
-        $conditions = array(),
+        $data, 
         $commitOnSuccess = false,
         $rollbackOnError = false
     ) {
+        $validEntity = \is_a($data, \BeAmado\OjsMigrator\Entity::class) &&
+            $data->getTableName() === $this->getTableName();
+        
+        $validConditions = \is_array($data) &&
+            \array_key_exists('set', $data) &&
+            \array_key_exists('where', $data);
+
+        if (!$validEntity && !$validConditions) {
+            return;
+        }
+
+        if (!$this->statementOk(
+            'update', 
+            \is_a($data, \BeAmado\OjsMigrator\Entity::class) ? array() : $data
+        ))
+            Registry::get('StatementHandler')->removeStatement(
+                $this->formStatementName('update')
+            );
+
+        $updated = Registry::get('StatementHandler')->execute(
+            $this->formStatementName('update'),
+            $data
+        );
+
+        echo "\n\nPassed the update\n\n";
+
+        if (!$updated) {
+            unset($updated);
+            return false;
+        }
+
+        echo "\n\nGot to the row count\n\n";
+
+        return $this->getRowCount('update');
     }
 
     /**

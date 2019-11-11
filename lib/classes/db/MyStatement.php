@@ -135,6 +135,9 @@ class MyStatement extends MyObject
             return false;
 
         foreach ($params as $field => $param) {
+            if (!$obj->hasAttribute($field))
+                return false;
+
             $bound =  $this->bindParameter(
                 $param,
                 \is_a($obj, \BeAmado\OjsMigrator\Entity::class) 

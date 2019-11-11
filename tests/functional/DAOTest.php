@@ -97,6 +97,71 @@ class DAOTest extends FunctionalTest
     }
 
     /**
+     * @depends testSelectUserByUsername
+     */
+    public function testUpdateUserPassingEntity()
+    {
+        $user = Registry::get('UsersDAO')->read(array('username' => 'be'))
+                                         ->get(0);
+
+        $userBefore = $user->cloneInstance();
+
+        $user->set('initials', 'BA');
+
+        $rowsUpdated = Registry::get('UsersDAO')->update($user);
+
+        $userAfter = Registry::get('UsersDAO')->read(array('username' => 'be'))
+                                              ->get(0);
+
+        $this->assertTrue(
+            $rowsUpdated === 1 &&
+            !Registry::get('EntityHandler')->areEqual(
+                $userBefore, 
+                $userAfter
+            ) &&
+            $userBefore->getData('initials') === null &&
+            $userAfter->getData('initials') === 'BA'
+        );
+    }
+
+    /**
+     * @depends testSelectUserByUsername
+     * @depends testCreateUserPassingAnArray
+     */
+    public function testUpdateUserPassingConditions()
+    {
+        $conditions = array(
+            'where' => array(
+                'username' => 'satch',
+            ),
+            'set' => array(
+                'initials' => 'JS',
+                'country' => 'Outer Space',
+            ),
+        );
+
+        $userBefore = Registry::get('UsersDAO')->read(array(
+            'username' => 'satch'
+        ));
+        
+        $updatedRows = Registry::get('UsersDao')->update($conditions);
+
+        $userAfter = Registry::get('UsersDAO')->read(array(
+            'username' => 'satch'
+        ));
+
+        $this->assertSame(1, $updatedRows);
+
+        $this->assertTrue(
+            $updatedRows === 1 &&
+            !Registry::get('EntityHandler')->areEqual(
+                $userBefore,
+                $userAfter
+            )
+        );
+    }
+
+    /**
      * @depends testSelectAllUsers
      * @depends testSelectUserByUsername
      */
