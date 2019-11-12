@@ -71,7 +71,7 @@ class StatementHandler
         }(
             Registry::get('SchemaHandler')->getTableDefinition($tableName),
             $this->formFields('where', $args),
-            \strtolower($operation) === 'insert' 
+            \strtolower($operation) === 'update' 
                 ? $this->formFields('set', $args) 
                 : null
         );
@@ -238,7 +238,7 @@ class StatementHandler
                 Registry::get('MemoryManager')->destroy($data);
                 return false;
             }
-    
+
             Registry::get('MemoryManager')->destroy($data);
     
             if (!$statement->execute())

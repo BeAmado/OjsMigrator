@@ -265,7 +265,8 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
 
         $query = Registry::get('QueryHandler')->generateQueryUpdate(
             Registry::get('SchemaHandler')->getTableDefinition('articles'),
-            array(
+            null, // where
+            array( //set
                 'submission_file_id', 
                 'revised_file_id', 
                 'review_file_id',
@@ -288,8 +289,8 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
 
         $query = Registry::get('QueryHandler')->generateQueryUpdate(
             Registry::get('SchemaHandler')->getTableDefinition('sections'),
-            array('review_form_id', 'seq'),
-            array('journal_id')
+            array('journal_id'), // where
+            array('review_form_id', 'seq') // set
         );
 
         $this->assertSame($expected, $query);
@@ -494,6 +495,7 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
 
         $query = Registry::get('QueryHandler')->generateQueryUpdate(
             $td,
+            null,
             array('setting_value')
         );
         

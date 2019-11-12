@@ -251,11 +251,11 @@ class QueryHandler
      * Generates a query string for a statement to update a specified table.
      *
      * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
-     * @param array $set
      * @param array $where
+     * @param array $set
      * @return string
      */
-    public function generateQueryUpdate($td, $set = array(), $where = array())
+    public function generateQueryUpdate($td, $where = array(), $set = array())
     {
         if (empty($where))
             $where = $td->getPrimaryKeys();

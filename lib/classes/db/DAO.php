@@ -231,24 +231,21 @@ class DAO
         if (!$this->statementOk(
             'update', 
             \is_a($data, \BeAmado\OjsMigrator\Entity::class) ? array() : $data
-        ))
+        )) {
             Registry::get('StatementHandler')->removeStatement(
                 $this->formStatementName('update')
             );
+        }
 
         $updated = Registry::get('StatementHandler')->execute(
             $this->formStatementName('update'),
             $data
         );
 
-        echo "\n\nPassed the update\n\n";
-
         if (!$updated) {
             unset($updated);
             return false;
         }
-
-        echo "\n\nGot to the row count\n\n";
 
         return $this->getRowCount('update');
     }

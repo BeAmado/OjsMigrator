@@ -142,22 +142,22 @@ class DAOTest extends FunctionalTest
 
         $userBefore = Registry::get('UsersDAO')->read(array(
             'username' => 'satch'
-        ));
+        ))->get(0);
         
         $updatedRows = Registry::get('UsersDao')->update($conditions);
 
         $userAfter = Registry::get('UsersDAO')->read(array(
             'username' => 'satch'
-        ));
-
-        $this->assertSame(1, $updatedRows);
+        ))->get(0);
 
         $this->assertTrue(
             $updatedRows === 1 &&
             !Registry::get('EntityHandler')->areEqual(
                 $userBefore,
                 $userAfter
-            )
+            ) &&
+            $userBefore->getData('initials') === null &&
+            $userAfter->getData('initials') === 'JS'
         );
     }
 
