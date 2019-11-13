@@ -1,8 +1,8 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Entity;
 
-class Entity extends MyObject
+class Entity extends \BeAmado\OjsMigrator\MyObject
 {
     public function __construct($data, $tableName = null)
     {

@@ -1,6 +1,7 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Entity;
+use \BeAmado\OjsMigrator\Registry;
 
 class EntityHandler
 {

@@ -32,7 +32,7 @@ class Factory
 
     protected function createEntityHandler()
     {
-        return new \BeAmado\OjsMigrator\EntityHandler();
+        return new \BeAmado\OjsMigrator\Entity\EntityHandler();
     }
 
     protected function createFileHandler()

@@ -49,6 +49,14 @@ class ArrayHandler
         return \array_search($elem, $arr) === (\count($arr) - 1);
     }
 
+    /**
+     * Checks if the arrays are equal, i.e. have the same data, not taking into 
+     * consideration the order
+     *
+     * @param array $arr1
+     * @param array $arr2
+     * @return boolean
+     */
     public function equals($arr1, $arr2)
     {
         if (!\is_array($arr1) || !\is_array($arr2))

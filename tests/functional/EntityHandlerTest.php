@@ -1,7 +1,7 @@
 <?php
 
 use BeAmado\OjsMigrator\FunctionalTest;
-use BeAmado\OjsMigrator\EntityHandler;
+use BeAmado\OjsMigrator\Entity\EntityHandler;
 use BeAmado\OjsMigrator\Registry;
 
 class EntityHandlerTest extends FunctionalTest

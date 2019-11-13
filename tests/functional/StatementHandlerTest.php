@@ -4,6 +4,7 @@ use BeAmado\OjsMigrator\FunctionalTest;
 use BeAmado\OjsMigrator\Db\StatementHandler;
 use BeAmado\OjsMigrator\Db\ConnectionManager;
 use BeAmado\OjsMigrator\Registry;
+use BeAmado\OjsMigrator\Entity\Entity;
 use BeAmado\OjsMigrator\WorkWithOjsDir;
 
 class StatementHandlerTest extends FunctionalTest
@@ -90,7 +91,7 @@ class StatementHandlerTest extends FunctionalTest
                     Registry::get('MemoryManager')->create(array())
                 );
 
-            Registry::get('selectData')->push(new \BeAmado\OjsMigrator\Entity(
+            Registry::get('selectData')->push(new Entity(
                 $res,
                 'journals'
             ));

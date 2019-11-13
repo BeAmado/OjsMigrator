@@ -2,6 +2,7 @@
 
 namespace BeAmado\OjsMigrator\Db;
 use BeAmado\OjsMigrator\Registry;
+use BeAmado\OjsMigrator\Entity\Entity;
 
 class DAO
 {
@@ -65,6 +66,13 @@ class DAO
         );
     }
 
+    /**
+     * Checks if the statement is what it is suposed to be.
+     * 
+     * @param string $operation
+     * @param array $conditions
+     * @return boolean
+     */
     protected function statementOk($operation, $conditions)
     {
         if (!\in_array(
@@ -82,10 +90,10 @@ class DAO
     /**
      * Inserts the entity's data into the corresponding database table.
      *
-     * @param \BeAmado\OjsMigrator\Entity | array $entity
+     * @param \BeAmado\OjsMigrator\Entity\Entity | array $entity
      * @param boolean $commitOnSucess
      * @param boolean $rollbackOnError
-     * @return \BeAmado\OjsMigrator\Entity
+     * @return \BeAmado\OjsMigrator\Entity\Entity
      */
     public function create(
         $entity, 
@@ -217,7 +225,7 @@ class DAO
         $commitOnSuccess = false,
         $rollbackOnError = false
     ) {
-        $validEntity = \is_a($data, \BeAmado\OjsMigrator\Entity::class) &&
+        $validEntity = \is_a($data, Entity::class) &&
             $data->getTableName() === $this->getTableName();
         
         $validConditions = \is_array($data) &&
@@ -230,7 +238,7 @@ class DAO
 
         if (!$this->statementOk(
             'update', 
-            \is_a($data, \BeAmado\OjsMigrator\Entity::class) ? array() : $data
+            \is_a($data, Entity::class) ? array() : $data
         )) {
             Registry::get('StatementHandler')->removeStatement(
                 $this->formStatementName('update')
