@@ -233,7 +233,7 @@ class EntityHandler
         Registry::get('entitiesDataDir')->set(
             $this->entityTableName($entity),
             Registry::get('FileSystemManager')->formPathFromBaseDir(array(
-                'json_data', $this->entityTableName($entity)
+                '_data', $this->entityTableName($entity)
             ))
         );
     }

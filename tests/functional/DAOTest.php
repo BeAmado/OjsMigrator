@@ -6,6 +6,14 @@ use BeAmado\OjsMigrator\Db\DAO;
 
 class DAOTest extends FunctionalTest
 {
+    public static function tearDownAfterClass() : void
+    {
+        parent::tearDownAfterClass();
+        Registry::get('FileSystemManager')->removeWholeDir(
+            Registry::get('FileSystemManager')->formPathFromBaseDir('_data')
+        );
+    }
+
     public function testCreateUser()
     {
         Registry::get('DbHandler')->createTableIfNotExists('users');
@@ -236,10 +244,46 @@ class DAOTest extends FunctionalTest
         );
 
         $expected = \BeAmado\OjsMigrator\BASE_DIR 
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'json_data'
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . '_data'
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'sections'
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . '14.json';
 
         $this->assertSame($expected, $filename);
+    }
+
+    protected function insertSections()
+    {
+        Registry::get('DbHandler')->createTableIfNotExists('sections');
+
+        for ($i = 0; $i < 5; $i++) {
+            Registry::get('SectionsDAO')->create(array(
+                'journal_id' => 12,
+                'review_form_id' => rand(1, 10),
+            ));
+        }
+
+        for ($i = 0; $i < 5; $i++) {
+            Registry::get('SectionsDAO')->create(array(
+                'journal_id' => 41,
+                'review_form_id' => rand(1, 3),
+            ));
+        }
+    }
+
+    public function testDumpSectionsFromJournal41ToJson()
+    {
+        $this->insertSections();
+        Registry::get('SectionsDAO')->dumpToJson(array(
+            'journal_id' => 41
+        ));
+
+        $this->assertSame(
+            5,
+            count(Registry::get('FileSystemManager')->listdir(
+                Registry::get('FileSystemManager')->formPathFromBaseDir(array(
+                    '_data', 'sections',
+                ))
+            ))
+        );
     }
 }

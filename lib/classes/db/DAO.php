@@ -313,6 +313,20 @@ class DAO
             . '.json';
     }
 
+    protected function prepareEntityDataDir()
+    {
+        if (!Registry::get('FileSystemManager')->dirExists(
+            Registry::get('EntityHandler')->getEntityDataDir(
+                $this->getTableName()
+            )
+        ))
+            Registry::get('FileSystemManager')->createDir(
+                Registry::get('EntityHandler')->getEntityDataDir(
+                    $this->getTableName()
+                )
+            );
+    }
+
     public function dumpToJson($conditions)
     {
         if (
@@ -326,6 +340,8 @@ class DAO
             Registry::get('StatementHandler')->removeStatement(
                 $this->formStatementName('select')
             );
+
+        $this->prepareEntityDataDir();
 
         Registry::get('StatementHandler')->execute(
             $this->formStatementName('select'),

@@ -119,7 +119,7 @@ class EntityHandlerTest extends FunctionalTest
     {
         $dir = Registry::get('EntityHandler')->getEntityDataDir('users');
         $expected = \BeAmado\OjsMigrator\BASE_DIR
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'json_data'
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . '_data'
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'users';
         
         $this->assertSame($expected, $dir);
@@ -136,7 +136,7 @@ class EntityHandlerTest extends FunctionalTest
 
         $dir = Registry::get('EntityHandler')->getEntityDataDir($user);
         $expected = \BeAmado\OjsMigrator\BASE_DIR
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'json_data'
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . '_data'
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'users';
         
         $this->assertSame($expected, $dir);
