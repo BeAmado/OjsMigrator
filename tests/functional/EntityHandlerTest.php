@@ -88,4 +88,57 @@ class EntityHandlerTest extends FunctionalTest
             Registry::get('EntityHandler')->areEqual($user1, $user2)
         );
     }
+
+    public function testGetReviewFormIdFieldPassingAString()
+    {
+        $field = Registry::get('EntityHandler')->getIdField('review_forms');
+        $this->assertSame(
+            'review_form_id',
+            $field
+        );
+    }
+
+    public function testGetReviewFormIdFieldPassingAnEntity()
+    {
+        $reviewForm = Registry::get('EntityHandler')->create(
+            'review_forms', 
+            array(
+                'assoc_id' => 23,
+            )
+        );
+
+        $field = Registry::get('EntityHandler')->getIdField($reviewForm);
+
+        $this->assertSame(
+            'review_form_id',
+            $field
+        );
+    }
+
+    public function testGetUsersDataDirPassingAString()
+    {
+        $dir = Registry::get('EntityHandler')->getEntityDataDir('users');
+        $expected = \BeAmado\OjsMigrator\BASE_DIR
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'json_data'
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'users';
+        
+        $this->assertSame($expected, $dir);
+    }
+
+    public function testGetUsersDataDirPassingAnEntity()
+    {
+        $user = Registry::get('EntityHandler')->create('users', array(
+            'user_id' => 12,
+            'email' => 'chuck@masterkick.com',
+            'first_name' => 'Charles',
+            'password' => 'Dontmesswithme',
+        ));
+
+        $dir = Registry::get('EntityHandler')->getEntityDataDir($user);
+        $expected = \BeAmado\OjsMigrator\BASE_DIR
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'json_data'
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'users';
+        
+        $this->assertSame($expected, $dir);
+    }
 }

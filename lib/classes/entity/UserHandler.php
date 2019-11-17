@@ -236,4 +236,18 @@ class UserHandler
 
         return $interests;
     }
+
+    public function getUsersFromJournal($journal)
+    {
+        if (
+            !\is_numeric($journal) &&
+            (
+                !\is_a($journal, Entity::class) ||
+                !$journal->hasAttribute('journal_id')
+            )
+        )
+            return;
+
+
+    }
 }

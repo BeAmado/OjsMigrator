@@ -218,4 +218,28 @@ class DAOTest extends FunctionalTest
             $usersAfterDeletion->length() === 3
         );
     }
+
+    public function testCanFormSectionJsonFilename()
+    {
+        $section = Registry::get('EntityHandler')->create('sections', array(
+            'section_id' => 14,
+            'journal_id' => 5,
+        ));
+
+        $stub = new class('sections') extends DAO {
+            use \BeAmado\OjsMigrator\TestStub;
+        };
+
+        $filename = $stub->callMethod(
+            'formJsonFilename',
+            $section
+        );
+
+        $expected = \BeAmado\OjsMigrator\BASE_DIR 
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'json_data'
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'sections'
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . '14.json';
+
+        $this->assertSame($expected, $filename);
+    }
 }

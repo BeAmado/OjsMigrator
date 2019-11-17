@@ -138,4 +138,121 @@ class EntityHandler
 
         return true;
     }
+    
+    protected function setIdField($tableName)
+    {
+        if (!\is_a(
+            Registry::get('idFields'), 
+            \BeAmado\OjsMigrator\MyObject::class
+        )) {
+            Registry::remove('idFields');
+            Registry::set(
+                'idFields',
+                Registry::get('MemoryManager')->create()
+            );
+        }
+
+        $vars = Registry::get('MemoryManager')->create();
+        $vars->set(
+            'tbDef',
+            Registry::get('SchemaHandler')->getTableDefinition(
+                $tableName
+            )
+        );
+
+        foreach ($vars->get('tbDef')->getColumnNames() as $field) {
+            $vars->set(
+                'column',
+                $vars->get('tbDef')->getColumn($field)
+            );
+
+            if (
+                $vars->get('column')->isPrimaryKey() &&
+                $vars->get('column')->isAutoIncrement()
+            ) {
+                Registry::get('idFields')->set($tableName, $field);
+            }
+
+            $vars->remove('column');
+        }
+
+        Registry::get('MemoryManager')->destroy($vars);
+        unset($vars);
+        
+        if (isset($field))
+            unset($field);
+    }
+
+    protected function entityTableName($entity)
+    {
+        if (
+            !\is_string($entity) &&
+            !\is_a($entity, Entity::class)
+        )
+            return;
+
+        return \is_string($entity) ? $entity : $entity->getTableName();
+    }
+
+    public function getIdField($entity)
+    {
+        if (
+            !\is_string($entity) &&
+            !\is_a($entity, Entity::class)
+        )
+            return;
+
+        if (
+            !\is_a(
+                Registry::get('idFields'), 
+                \BeAmado\OjsMigrator\MyObject::class
+            ) ||
+            !Registry::get('idFields')->hasAttribute(
+                $this->entityTableName($entity)
+            )
+        )
+            $this->setIdField($this->entityTableName($entity));
+
+        return Registry::get('idFields')->get($this->entityTableName($entity))
+                                        ->getValue();
+    }
+
+    protected function setEntityDataDir($entity)
+    {
+        if (!\is_a(
+            Registry::get('entitiesDataDir'), 
+            \BeAmado\OjsMigrator\MyObject::class
+        )) {
+            Registry::remove('entitiesDataDir');
+            Registry::set(
+                'entitiesDataDir', 
+                Registry::get('MemoryManager')->create()
+            );
+        }
+
+        Registry::get('entitiesDataDir')->set(
+            $this->entityTableName($entity),
+            Registry::get('FileSystemManager')->formPathFromBaseDir(array(
+                'json_data', $this->entityTableName($entity)
+            ))
+        );
+    }
+
+    public function getEntityDataDir($entity)
+    {
+        if (
+            !\is_a(
+                Registry::get('entitiesDataDir'),
+                \BeAmado\OjsMigrator\MyObject::class
+            ) ||
+            !Registry::get('entitiesDataDir')->hasAttribute(
+                $this->entityTableName($entity)
+            )
+        )
+            $this->setEntityDataDir($entity);
+
+        return Registry::get('entitiesDataDir')->get(
+            $this->entityTableName($entity)
+        )->getValue();
+    }
 }

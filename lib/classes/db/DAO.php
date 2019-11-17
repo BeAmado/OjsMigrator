@@ -304,4 +304,44 @@ class DAO
 
         return $this->getRowCount('delete');
     }
+
+    protected function formJsonFilename($entity)
+    {
+        return Registry::get('EntityHandler')->getEntityDataDir($entity)
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR            
+            . $entity->getId()
+            . '.json';
+    }
+
+    public function dumpToJson($conditions)
+    {
+        if (
+            \is_array($conditions) && 
+            !\array_key_exists('where', $conditions) &&
+            !empty($conditions)
+        )
+            $conditions = array('where' => $conditions);
+
+        if (!$this->statementOk('select', $conditions))
+            Registry::get('StatementHandler')->removeStatement(
+                $this->formStatementName('select')
+            );
+
+        Registry::get('StatementHandler')->execute(
+            $this->formStatementName('select'),
+            $conditions,
+            function($res) {
+                $entity = Registry::get('EntityHandler')->create(
+                    $this->getTableName(),
+                    $res
+                );
+                Registry::get('JsonHandler')->dumpToFile(
+                    $this->formJsonFilename($entity),
+                    $entity
+                );
+                Registry::get('MemoryManager')->destroy($entity);
+                return true;
+            }
+        );
+    }
 }

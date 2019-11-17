@@ -1,6 +1,7 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Entity;
+use \BeAmado\OjsMigrator\Registry;
 
 class Entity extends \BeAmado\OjsMigrator\MyObject
 {
@@ -37,5 +38,13 @@ class Entity extends \BeAmado\OjsMigrator\MyObject
     {
         if ($this->hasAttribute('__tableName_'))
             return $this->get('__tableName_')->getValue();
+    }
+
+
+    public function getId()
+    {
+        return $this->getData(
+            Registry::get('EntityHandler')->getIdField($this->getTableName())
+        );
     }
 }

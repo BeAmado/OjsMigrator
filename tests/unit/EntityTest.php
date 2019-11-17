@@ -78,4 +78,20 @@ class EntityTest extends TestCase
 
         $this->assertCount(3, $entity->getData('settings'));
     }
+
+    public function testGetUserId()
+    {
+        $stageMaster = new \BeAmado\OjsMigrator\OjsScenarioTester();
+        $stageMaster->setUpStage();
+        $entity = Registry::get('EntityHandler')->create('users', array(
+            'user_id' => 312,
+            'first_name' => 'Bruce',
+            'last_name' => 'Wayne',
+            'email' => 'bruce@batcave.com',
+            'password' => 'intheshadow',
+        ));
+
+        $this->assertSame(312, $entity->getId());
+        $stageMaster->tearDownStage();
+    }
 }
