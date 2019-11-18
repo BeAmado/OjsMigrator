@@ -81,13 +81,18 @@ class StatementHandler
      * Sets the statement specified by the name.
      *
      * @param string $name
-     * @param array $args
+     * @param mixed $args
      * @return void
      */
     public function setStatement($name, $args = array())
     {
         if (Registry::hasKey($name))
             Registry::remove($name);
+
+        if (\is_a($args, \BeAmado\OjsMigrator\Db\MyStatement::class)) {
+            Registry::set($name, $args);
+            return;
+        }
 
         $pieces = \explode(
             '_',

@@ -78,6 +78,10 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
      */
     public function remove($key)
     {
+        if (\is_numeric($key) && $key < 0) {
+            $key += count($this->values);
+        }
+
         if (!$this->hasAttribute($key))
             return;
         

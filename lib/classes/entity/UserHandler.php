@@ -6,44 +6,6 @@ use \BeAmado\OjsMigrator\Registry;
 class UserHandler
 {
     /**
-     * Checks if the data in the user is valid (enough) to search for it in 
-     * the database.
-     *
-     * @param \BeAmado\OjsMigrator\Entity\Entity $user
-     * @return boolean
-     */
-    protected function userIsValidForSearch($user, $validAttributes = array())
-    {
-        /*
-        if (!\is_a($user, Entity::class))
-            return false;
-
-        $valids = array();
-
-        foreach ($validAttributes as $attr) {
-            if (!$user->hasAttribute)
-                $valids[] = false;
-        }
-
-        return true;
-        */
-    }
-
-    protected function getTheBestConditionToSearch(
-        $user, 
-        $order = array('user_id', 'email', 'username')
-    ) {
-        /*
-        foreach ($order as $field) {
-            if ($user->getData($field) != null)
-                return array(
-                    $field => $user->getData($field),
-                );
-        }
-        */
-    }
-
-    /**
      * Gets the settings for the specified user
      *
      * @param \BeAmado\OjsMigrator\Entity\Entity $user
@@ -237,6 +199,41 @@ class UserHandler
         return $interests;
     }
 
+    protected function formJsonFilename($userId)
+    {
+        return Registry::get('EntityHandler')->getEntityDataDir('users')
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . $userId . '.json';
+    }
+
+    protected function setUser($res)
+    {
+        Registry::remove('user');
+        Registry::set(
+            'user', 
+            Registry::get('EntityHandler')->create('users', $res)
+        );
+        Registry::get('user')->set('roles', array());
+    }
+
+    protected function getUserSettingsAndInterests()
+    {
+        Registry::get('user')->set(
+            'settings',
+            $this->getUserSettings(Registry::get('user')->getId())
+        );
+
+        Registry::get('user')->set(
+            'interests',
+            $this->getUserInterests(Registry::get('user')->getId())
+        );
+    }
+
+    /**
+     * Gets the users from the journal and saves the data as json files.
+     *
+     * @param mixed $journal
+     * @return void
+     */
     public function getUsersFromJournal($journal)
     {
         if (
@@ -248,6 +245,55 @@ class UserHandler
         )
             return;
 
+        $query = 'SELECT u.*, r.journal_id, r.role_id '
+            . 'FROM roles r '
+            . 'INNER JOIN users u '
+            .     'ON u.user_id = r.user_id '
+            . 'WHERE journal_id = :selectUsersFromJournal_journalId'
+            . 'ORDER BY r.user_id';
 
+        $stmt = Registry::get('StatementHandler')->create($query);
+
+        $bound = $stmt->bindParams(
+            array('journal_id' => ':selectUsersFromJournal_journalId'),
+            \is_numeric($journal)
+                ? Registry::get('MemoryManager')->create(array(
+                    'journal_id' => $journal
+                ))
+                : $journal
+        );
+
+        $executed = $stmt->execute();
+
+        Registry::remove('user');
+        Registry::set('user', null);
+
+        $stmt->fetch(function($res) {
+             
+            if (Registry::get('user') === null) {
+                $this->setUser($res);
+            } else if (Registry::get('user')->getId() != $res['user_id']) {
+                // save the previous user data in the json data dir
+                $this->getUserSettingsAndInterests();
+                Registry::get('JsonHandler')->dumpToFile(
+                    $this->formJsonFilename(Registry::get('user')->getId()),
+                    Registry::get('user')
+                );
+
+                // replace the previous user data with the new one
+                $this->setUser($res);
+            }
+
+            Registry::get('user')->get('roles')->push(
+                Registry::get('EntityHandler')->create('roles', $res)
+            );
+            
+        });
+        
+        $this->getUserSettingsAndInterests();
+        Registry::get('JsonHandler')->dumpToFile(
+            $this->formJsonFilename(Registry::get('user')->getId()),
+            Registry::get('user')
+        );
     }
 }
