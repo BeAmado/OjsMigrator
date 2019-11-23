@@ -360,6 +360,9 @@ class FileSystemManager
         )
             return false;
 
+        if (!$this->dirExists($this->parentDir($new)))
+            $this->createDir($this->parentDir($new));
+
         return \rename($old, $new);
     }
 }

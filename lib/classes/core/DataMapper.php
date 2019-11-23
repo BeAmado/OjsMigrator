@@ -13,15 +13,12 @@ class DataMapper
     protected function formMappingFilename($entityName, $id)
     {
         $mappingDir = $this->getEntityMappingDir($entityName);
-        $mappingRange = Registry::get('FileSystemManager')->dirExists($mappingDir) 
-            ? Registry::get('FileSystemManager')->listdir(
-                $mappingDir
-            )[0] 
-            : null;
+        $mappingRange = $this->mappingRange($entityName);
         $baseRange = Registry::get('RangeHandler')->baseRange($id);
 
         if (
-            $mappingRange !== null &&
+            $mappingRange != null &&
+            $baseRange != $mappingRange &&
             Registry::get('RangeHandler')->smallestRange(
                 $mappingRange,
                 $baseRange
@@ -67,6 +64,16 @@ class DataMapper
         return true;
     }
 
+    protected function mappingRange($entityName)
+    {
+        if (Registry::get('FileSystemManager')->dirExists(
+            $this->getEntityMappingDir($entityName)
+        ))
+            return \basename(Registry::get('FileSystemManager')->listdir(
+                $this->getEntityMappingDir($entityName)
+            )[0]);
+    }
+
     public function getMapping($entityName, $id)
     {
         if ($this->isMapped($entityName, $id))
@@ -77,8 +84,11 @@ class DataMapper
 
     protected function restructMappingDir($entityName)
     {
-        $ranges = Registry::get('FileSystemManager')->listdir(
-            $this->getEntityMappingDir($entityName)
+        $ranges = \array_map(
+            'basename', 
+            Registry::get('FileSystemManager')->listdir(
+                $this->getEntityMappingDir($entityName)
+            )
         );
 
         $smallest = Registry::get('RangeHandler')->smallestRange(
@@ -90,6 +100,7 @@ class DataMapper
             $ranges[0],
             $ranges[1]
         );
+
 
         return Registry::get('FileSystemManager')->move(
             Registry::get('FileSystemManager')->formPath(array(

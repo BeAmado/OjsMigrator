@@ -140,19 +140,13 @@ class DataMapperTest extends TestCase implements StubInterface
         
         $mapping = Registry::get('DataMapper')->getMapping('sections', 8467);
 
-        /*$this->assertTrue(
+        $this->assertTrue(
             $mapped === true &&
             $mapping === '267' &&
             count(Registry::get('FileSystemManager')->listdir(
                 Registry::get('DataMapper')->getEntityMappingDir('sections')
             )) === 1
-        );*/
-
-        $this->assertTrue($mapped);
-        $this->assertSame('267', $mapping);
-        $this->assertSame(1, count(Registry::get('FileSystemManager')->listdir(
-            Registry::get('DataMapper')->getEntityDataDir('sections')
-        )));
+        );
     }
 
     /**
@@ -161,6 +155,19 @@ class DataMapperTest extends TestCase implements StubInterface
      */
     public function testCanGetTheMappingsForSections23And8467()
     {
+        $section23NewId = Registry::get('DataMapper')->getMapping(
+            'sections',
+            23
+        );
 
+        $section8467NewId = Registry::get('DataMapper')->getMapping(
+            'sections',
+            8467
+        );
+
+        $this->assertTrue(
+            $section23NewId === '2735' &&
+            $section8467NewId === '267'
+        );
     }
 }
