@@ -37,6 +37,11 @@ class Maestro
         return self::is($name, 'stmt') || self::is($name, 'statement');
     }
 
+    protected static function isMapper($name)
+    {
+        return self::is($name, 'mapper');
+    }
+
     protected static function getDefaultDir($name)
     {
         if (!self::isDirectory($name))
@@ -102,7 +107,11 @@ class Maestro
         if (Registry::hasKey($name))
             return Registry::get($name);
 
-        if (self::isManager($name) || self::isHandler($name))
+        if (
+            self::isManager($name) || 
+            self::isHandler($name) || 
+            self::isMapper($name)
+        )
             return (new Factory())->create($name);
 
         if (self::isDirectory($name))

@@ -55,6 +55,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Db\QueryHandler();
     }
 
+    protected function createRangeHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\RangeHandler();
+    }
+
     protected function createSchemaHandler()
     {
         return new \BeAmado\OjsMigrator\Db\SchemaHandler();
@@ -106,6 +111,10 @@ class Factory
     protected function fixCase($classname)
     {
         switch (\strtolower($classname)) {
+            ////////////// DAO //////////////////
+            case \strtolower('DAO'):
+                return 'Dao';
+
             //////////// HANDLERS ///////////////
             case \strtolower('ArrayHandler'):
                 return 'ArrayHandler';
@@ -127,6 +136,8 @@ class Factory
                 return 'JsonHandler';
             case \strtolower('QueryHandler'):
                 return 'QueryHandler';
+            case \strtolower('RangeHandler'):
+                return 'RangeHandler';
             case \strtolower('SchemaHandler'):
                 return 'SchemaHandler';
             case \strtolower('StatementHandler'):
@@ -148,9 +159,9 @@ class Factory
             case \strtolower('MemoryManager'):
                 return 'MemoryManager';
 
-            ////////////// DAO //////////////////
-            case \strtolower('DAO'):
-                return 'Dao';
+            //////////// MAPPERS ////////////////
+            case \strtolower('DataMapper'):
+                return 'DataMapper';
 
             //////////// STATEMENT //////////////
             case \strtolower('Statement'):
@@ -164,6 +175,11 @@ class Factory
     protected function createDao($tableName)
     {
         return new \BeAmado\OjsMigrator\Db\DAO($tableName);
+    }
+
+    protected function createDataMapper()
+    {
+        return new \BeAmado\OjsMigrator\DataMapper();
     }
 
     /**

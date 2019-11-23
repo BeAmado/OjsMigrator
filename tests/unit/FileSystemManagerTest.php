@@ -3,9 +3,21 @@
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
 use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Registry;
 
 class FileSystemManagerTest extends TestCase implements StubInterface
 {
+    public static function tearDownAfterClass() : void
+    {
+        Registry::get('FileSystemManager')->removeWholeDir(
+            Registry::get('FileSystemManager')->formPathFromBaseDir(array(
+                'tests',
+                '_data',
+                'sandbox',
+            ))
+        );
+    }
+
     public function getStub()
     {
         return new class extends FileSystemManager {
@@ -284,5 +296,53 @@ class FileSystemManagerTest extends TestCase implements StubInterface
         if ((new FileSystemManager())->fileExists($copiedFilename)) {
             (new FileSystemManager())->removeFile($copiedFilename);
         }
+    }
+
+    protected function sandbox()
+    {
+        return $this->getStub()->formPath(array(
+            $this->getStub()->getDataDir(),
+            'sandbox'
+        ));
+    }
+
+    protected function createSandbox()
+    {
+        if (!Registry::get('FileSystemManager')->dirExists($this->sandbox()))
+            Registry::get('FileSystemManager')->createDir($this->sandbox());
+    }
+
+    protected function removeSandbox()
+    {
+        $this->getStub()->removeWholeDir($this->sandbox());
+    }
+
+    public function testMoveDirectory()
+    {
+        $this->createSandbox();
+        $from = $this->getStub()->formPath(array($this->sandbox(), 'lala'));
+        $to = $this->getStub()->formPath(array($this->sandbox(), 'lele'));
+
+        $this->getStub()->createDir($from);
+
+        $filename = 'ratata';
+        $fromFilename = $from . \BeAmado\OjsMigrator\DIR_SEPARATOR . $filename;
+
+        Registry::get('FileHandler')->write(
+            $fromFilename,
+            'Ratikate'
+        );
+
+        $toFilename = $to . \BeAmado\OjsMigrator\DIR_SEPARATOR . $filename;
+
+        $moved = $this->getStub()->move($from, $to);
+
+        $this->assertTrue(
+            $this->getStub()->fileExists($toFilename) &&
+            Registry::get('filehandler')->read($toFilename) == 'Ratikate' &&
+            !$this->getStub()->dirExists($from)
+        );
+
+        $this->removeSandbox();
     }
 }

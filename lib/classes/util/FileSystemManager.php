@@ -241,6 +241,9 @@ class FileSystemManager
      */
     public function createFile($filename)
     {
+        if (!$this->dirExists(\dirname($filename)))
+            $this->createDir(\dirname($filename));
+
         return \touch($filename);
     }
 
@@ -347,5 +350,16 @@ class FileSystemManager
         }
 
         return \copy($originalFilename, $newFilename);
+    }
+
+    public function move($old, $new)
+    {
+        if (
+            !$this->fileExists($old) &&
+            !$this->dirExists($old)
+        )
+            return false;
+
+        return \rename($old, $new);
     }
 }
