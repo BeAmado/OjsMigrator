@@ -110,6 +110,12 @@ class CaseHandler
         );
     }
 
+    /**
+     * Identifies in which case the string is.
+     *
+     * @param string $str
+     * @return string
+     */
     protected function identifyCase($str)
     {
         if (\strpos($str, '_') !== false)
@@ -129,6 +135,13 @@ class CaseHandler
         return 'lowercase';
     }
 
+    /**
+     * Transforms the given string to the specified case.
+     *
+     * @param string $to
+     * @param string $str
+     * @return string
+     */
     public function transformCaseTo($to, $str)
     {
         return $this->transformCaseFromTo(

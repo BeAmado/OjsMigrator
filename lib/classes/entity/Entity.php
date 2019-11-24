@@ -47,4 +47,12 @@ class Entity extends \BeAmado\OjsMigrator\MyObject
             Registry::get('EntityHandler')->getIdField($this->getTableName())
         );
     }
+
+    public function setId($id)
+    {
+        return $this->setData(
+            Registry::get('EntityHandler')->getIdField($this->getTableName()),
+            $id
+        );
+    }
 }

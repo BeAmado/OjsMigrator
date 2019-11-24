@@ -139,6 +139,12 @@ class EntityHandler
         return true;
     }
     
+    /**
+     * Sets the id field in the Registry for the given table
+     *
+     * @param string $tableName
+     * @return void
+     */
     protected function setIdField($tableName)
     {
         if (!\is_a(
@@ -183,8 +189,20 @@ class EntityHandler
             unset($field);
     }
 
+    /**
+     * Gets the name of the table that the entity represents
+     *
+     * @param mixed $entity
+     * @return string
+     */
     protected function entityTableName($entity)
     {
+        if (
+            \is_array($entity) &&
+            \array_key_exists('__tableName_', $entity)
+        )
+            return $entity['__tableName_'];
+
         if (
             !\is_string($entity) &&
             !\is_a($entity, Entity::class)
@@ -194,6 +212,13 @@ class EntityHandler
         return \is_string($entity) ? $entity : $entity->getTableName();
     }
 
+    /**
+     * Gets the if of the given entity. The id is the primary key field that is
+     * auto_increment.
+     *
+     * @param \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return integer | string
+     */
     public function getIdField($entity)
     {
         if (
@@ -217,6 +242,13 @@ class EntityHandler
                                         ->getValue();
     }
 
+    /**
+     * Sets in the Registry the location where the data of the given entity 
+     * must be.
+     *
+     * @param string | \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return void
+     */ 
     protected function setEntityDataDir($entity)
     {
         if (!\is_a(
@@ -238,6 +270,12 @@ class EntityHandler
         );
     }
 
+    /**
+     * Gets the location where the data of the given entity must be.
+     * 
+     * @param string | \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return string
+     */
     public function getEntityDataDir($entity)
     {
         if (
@@ -254,5 +292,108 @@ class EntityHandler
         return Registry::get('entitiesDataDir')->get(
             $this->entityTableName($entity)
         )->getValue();
+    }
+
+    /**
+     * Gets the DAO for the specified entity.
+     * 
+     * @param string | \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return \BeAmado\OjsMigrator\Db\DAO
+     */
+    public function getEntityDAO($entity)
+    {
+        return Registry::get(
+            Registry::get('CaseHandler')->transformCaseTo(
+                'PascalCase',
+                $this->entityTableName($entity) 
+            ) . 'DAO'
+        );
+    }
+
+    /**
+     * Inserts the entity in the database and maps the id.
+     *
+     * @param \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return boolean
+     */
+    protected function createInDatabase($entity)
+    {
+        $createdEntity = $this->getEntityDao($entity)->create($entity);
+        
+        if (
+            !\is_a($createdEntity, \BeAmado\OjsMigrator\Entity\Entity::class) ||
+            $createdEntity->getTableName() == null ||
+            $createdEntity->getId() == null
+        ) {
+            Registry::get('MemoryManager')->destroy($createdEntity);
+            unset($createdEntity);
+            return false;
+        }
+
+        $tableName = $createdEntity->getTableName();
+        $id = $createdEntity->getId();
+
+        Registry::get('MemoryManager')->destroy($createdEntity);
+        unset($createdEntity);
+
+        return Registry::get('DataMapper')->mapData($tableName, array(
+            'old' => $entity->getId(),
+            'new' => $id,
+        ));
+    }
+
+    /**
+     * Updates the database table represented by the entity.
+     *
+     * @param \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return boolean
+     */
+    protected function updateInDatabase($entity)
+    {
+        if ($this->getEntityDAO($entity)->update($entity))
+            return true;
+
+        return false;
+    }
+
+    /**
+     * Creates a new registry in the database, mapping its id if necessary, or
+     * updates it if already created.
+     *
+     * @param \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return boolean
+     */
+    public function createOrUpdateInDatabase($entity)
+    {
+        if (
+            $entity->getId() != null &&
+            !Registry::get('DataMapper')->isMapped(
+                $entity->getTableName(),
+                $entity->getId()
+            )
+       )
+            return $this->createInDatabase($entity);
+
+        $entity->setId(
+            Registry::get('DataMapper')->getMapping(
+                $entity->getTableName(),
+                $entity->getId()
+            )
+        );
+
+        $option = 'update';
+        $entityFromDb = $this->getEntityDAO($entity)->read($entity);
+
+        if (!\is_a($entityFromDb, \BeAmado\OjsMigrator\Entity\Entity::class))
+            $option = 'create';
+        else if (!$this->areEqual($entity, $entityFromDb))
+            $option = 'none';
+
+        Registry::get('MemoryManager')->destroy($entityFromDb);
+            
+        if ($option === 'update')
+            return $this->updateInDatabase($entity);
+        else if ($option === 'create')
+            return $this->createInDatabase($entity);
     }
 }
