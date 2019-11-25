@@ -3,7 +3,7 @@
 namespace BeAmado\OjsMigrator\Entity;
 use \BeAmado\OjsMigrator\Registry;
 
-class UserHandler
+class UserHandler extends 
 {
     /**
      * Gets the settings for the specified user

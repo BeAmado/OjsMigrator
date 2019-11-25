@@ -353,7 +353,7 @@ class EntityHandler
         if ($this->getEntityDAO($entity)->update($entity))
             return true;
 
-        return false;
+       return false;
     }
 
     /**
@@ -366,7 +366,7 @@ class EntityHandler
     public function createOrUpdateInDatabase($entity)
     {
         if (
-            $entity->getId() != null &&
+            $entity->getId() == null ||
             !Registry::get('DataMapper')->isMapped(
                 $entity->getTableName(),
                 $entity->getId()
@@ -382,14 +382,18 @@ class EntityHandler
         );
 
         $option = 'update';
-        $entityFromDb = $this->getEntityDAO($entity)->read($entity);
+        $entities = $this->getEntityDAO($entity)->read($entity);
 
-        if (!\is_a($entityFromDb, \BeAmado\OjsMigrator\Entity\Entity::class))
+        if (
+            !\is_a($entities, \BeAmado\OjsMigrator\MyObject::class) ||
+            !\is_a($entities->get(0), \BeAmado\OjsMigrator\Entity\Entity::class)
+        )
             $option = 'create';
-        else if (!$this->areEqual($entity, $entityFromDb))
+        else if ($this->areEqual($entity, $entities->get(0)))
             $option = 'none';
 
-        Registry::get('MemoryManager')->destroy($entityFromDb);
+        Registry::get('MemoryManager')->destroy($entities);
+        unset($entities);
             
         if ($option === 'update')
             return $this->updateInDatabase($entity);
