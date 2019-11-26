@@ -310,36 +310,53 @@ class EntityHandler
         );
     }
 
+    protected function entityIsOk($entity)
+    {
+        return \is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class) &&
+            $entity->getTableName() != null &&
+            $entity->getId() != null;
+    }
+
     /**
-     * Inserts the entity in the database and maps the id.
+     * Inserts the entity in the database and maps the id if possible.
      *
      * @param \BeAmado\OjsMigrator\Entity\Entity $entity
      * @return boolean
      */
     protected function createInDatabase($entity)
     {
-        $createdEntity = $this->getEntityDao($entity)->create($entity);
+        $vars = Registry::get('MemoryManager')->create();
+        if (Registry::get('DataMapper')->isMappable($entity)) {
+            $vars->set('oldId', $entity->getId());
+            $vars->set('tableName', $entity->getTableName());
+        }
+
+        $vars->set(
+            'createdEntity',
+            $this->getEntityDao($entity)->create($entity)
+        );
         
-        if (
-            !\is_a($createdEntity, \BeAmado\OjsMigrator\Entity\Entity::class) ||
-            $createdEntity->getTableName() == null ||
-            $createdEntity->getId() == null
-        ) {
-            Registry::get('MemoryManager')->destroy($createdEntity);
-            unset($createdEntity);
+        if ($this->entityIsOk($vars->get('createdEntity'))) {
+            Registry::get('MemoryManager')->destroy($vars);
+            unset($vars);
+
             return false;
         }
 
-        $tableName = $createdEntity->getTableName();
-        $id = $createdEntity->getId();
+        if (Registry::get('DataMapper')->isMappable($vars->get('createdEntity'))
+            Registry::get('DataMapper')->mapData(
+                $vars->get('tableName'), 
+                array(
+                    'old' => $vars->get('oldId')->getValue(),
+                    'new' => $vars->get('createdEntity')->getId(),
+                )
+            );
+            // TODO: treat better if did not map the id
 
-        Registry::get('MemoryManager')->destroy($createdEntity);
-        unset($createdEntity);
+        Registry::get('MemoryManager')->destroy($vars);
+        unset($vars);
 
-        return Registry::get('DataMapper')->mapData($tableName, array(
-            'old' => $entity->getId(),
-            'new' => $id,
-        ));
+        return true;
     }
 
     /**
@@ -399,5 +416,17 @@ class EntityHandler
             return $this->updateInDatabase($entity);
         else if ($option === 'create')
             return $this->createInDatabase($entity);
+    }
+
+    /**
+     * Forms the filename of the entity data to be exported.
+     * 
+     * @param \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return string
+     */
+    protected function formJsonFilename($entity)
+    {
+        return $this->getEntityDataDir($entity) 
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . $entity->getId() . '.json';
     }
 }

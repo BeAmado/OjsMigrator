@@ -114,4 +114,35 @@ class DataMapper
             ))
         );
     }
+
+    /**
+     * Checks if the given entity can have its id mapped.
+     *
+     * @param \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return boolean
+     */
+    public function isMappable($entity)
+    {
+        if (\is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class))
+            return false;
+
+        $tbDef = Registry::get('SchemaHandler')->getTableDefintion(
+            $entity->getTableName()
+        );
+
+        if (!\is_a($tbDef, \BeAmado\OjsMigrator\Db\TableDefinition::class))
+            return false;
+
+        foreach ($tbDef->getColumnNames() as $column) {
+            if ($tbDef->getColumn($column)->isAutoIncrement) {
+                Registry::get('MemoryManager')->destroy($tbDef);
+                unset($tbDef);
+                return true;
+            }
+        }
+
+        Registry::get('MemoryManager')->destroy($tbDef);
+        unset($tbDef);
+        return false;
+    }
 }

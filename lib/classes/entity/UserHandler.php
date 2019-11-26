@@ -3,7 +3,7 @@
 namespace BeAmado\OjsMigrator\Entity;
 use \BeAmado\OjsMigrator\Registry;
 
-class UserHandler extends 
+class UserHandler extends EntityHandler
 {
     /**
      * Gets the settings for the specified user
@@ -13,11 +13,6 @@ class UserHandler extends
      */
     public function getUserSettings($user)
     {
-        /*
-        if (!$this->userIsValidForSearch($user))
-            return;
-        */
-
         if (
             !\is_numeric($user) &&
             (
@@ -86,7 +81,7 @@ class UserHandler extends
         ));
     }
 
-    protected function getControlledVocabEntry($entry)
+    protected function getControlledVocabs($entry)
     {
         if (
             !\is_numeric($entry) &&
@@ -94,67 +89,57 @@ class UserHandler extends
                 !\is_a($entry, Entity::class) ||
                 !$entry->hasAttribute('controlled_vocab_entry_id') ||
                 $entry->getData('controlled_vocab_entry_id') == null
+            )
+        )
+            return;
+
+        return Registry::get('ControlledVocabsDAO')->read(array(
+            'controlled_vocab_id' => \is_numeric($entry)
+                ? $entry
+                : $entry->getData('controlled_vocab_id')
+        ));
+    }
+
+    protected function getControlledVocabEntries($ent)
+    {
+        if (
+            !\is_numeric($ent) &&
+            (
+                !\is_a($ent, Entity::class) ||
+                !$ent->hasAttribute('controlled_vocab_entry_id') ||
+                $ent->getData('controlled_vocab_entry_id') == null
             )
         )
             return;
 
         $entries = Registry::get('ControlledVocabEntriesDAO')->read(array(
-            'controlled_vocab_entry_id' => \is_numeric($entry)
-                ? (int) $entry
-                : $entry->getData($entry->getData('controlled_vocab_entry_id'))
+            'controlled_vocab_entry_id' => \is_numeric($ent)
+                ? (int) $ent
+                : $ent->getData($ent->getData('controlled_vocab_entry_id'))
         ));
 
-        if ($entries->length() !== 1) {
+        if (
+            !\is_a($entries, \BeAmado\OjsMigrator\MyObject::class) ||
+            $entries->length() < 1
+        ) {
             Registry::get('MemoryManager')->destroy($entries);
             unset($entries);
             return;
         }
 
-        $entry = $entries->get(0)->cloneInstance();
-        Registry::get('MemoryManager')->destroy($entries);
-        unset($entries);
+        $entries->forEachValue(function($entry) {
+            $entry->set(
+                'settings',
+                $this->getControlledVocabEntrySettings($entry)
+            );
 
-        $entry->set(
-            'settings',
-            $this->getControlledVocabEntrySettings($entry)
-        );
+            $entry->set(
+                'controlled_vocabs',
+                $this->getControlledVocabs($entry)
+            );
+        });
 
-        return $entry;
-    }
-
-    protected function getControlledVocab($entry)
-    {
-        if (
-            !\is_numeric($entry) &&
-            (
-                !\is_a($entry, Entity::class) ||
-                !$entry->hasAttribute('controlled_vocab_entry_id') ||
-                $entry->getData('controlled_vocab_entry_id') == null
-            )
-        )
-            return;
-
-        $controlledVocabEntry = $this->getControlledVocabEntry($entry);
-
-        if (!$controlledVocabEntry == null)
-            return;
-
-        $vocabs = Registry::get('ControlledVocabsDAO')->read(array(
-            'controlled_vocab_id' => 
-                $controlledVocabEntry->getData('controlled_vocab_id')
-        ));
-
-        if ($vocabs->length() !== 1) {
-            Registry::get('MemoryManager')->destroy($vocabs);
-            unset($vocabs);
-            return;
-        }
-
-        $vocab = $vocabs->get(0)->cloneInstance();
-        Registry::get('MemoryManager')->destroy($vocabs);
-        unset($vocabs);
-
-        return $vocab;
+        return $entries;
     }
 
     /**
@@ -181,28 +166,23 @@ class UserHandler extends
                 : $user->getData('user_id')
         ));
 
-        if ($interests == null) {
+        if (
+            !\is_a($interests, \BeAmado\OjsMigrator\MyObject::class) ||
+            $interests->length() < 1
+        ) {
             Registry::get('MemoryManager')->destroy($interests);
             unset($interests);
             return;
         }
 
-        for ($i = 0; $i < $interests->length(); $i++) {
-            $interests->get(0)->set(
-                'controlled_vocab',
-                $this->getControlledVocab(
-                    $interests->get(0)->getData('controlled_vocab_entry_id')
-                )
+        $interests->forEachValue(function($interest) {
+            $interest->set(
+                'controlled_vocab_entries',
+                $this->getControlledVocabEntries($interest)
             );
-        }
+        });
 
         return $interests;
-    }
-
-    protected function formJsonFilename($userId)
-    {
-        return Registry::get('EntityHandler')->getEntityDataDir('users')
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . $userId . '.json';
     }
 
     protected function setUser($res)
@@ -210,7 +190,7 @@ class UserHandler extends
         Registry::remove('user');
         Registry::set(
             'user', 
-            Registry::get('EntityHandler')->create('users', $res)
+            $this->create('users', $res)
         );
         Registry::get('user')->set('roles', array());
     }
@@ -276,7 +256,7 @@ class UserHandler extends
                 // save the previous user data in the json data dir
                 $this->getUserSettingsAndInterests();
                 Registry::get('JsonHandler')->dumpToFile(
-                    $this->formJsonFilename(Registry::get('user')->getId()),
+                    $this->formJsonFilename(Registry::get('user')),
                     Registry::get('user')
                 );
 
@@ -285,14 +265,16 @@ class UserHandler extends
             }
 
             Registry::get('user')->get('roles')->push(
-                Registry::get('EntityHandler')->create('roles', $res)
+                $this->create('roles', $res)
             );
             
         });
         
+        // the last iteration will not dump the user to json, so it must be
+        // done now.
         $this->getUserSettingsAndInterests();
         Registry::get('JsonHandler')->dumpToFile(
-            $this->formJsonFilename(Registry::get('user')->getId()),
+            $this->formJsonFilename(Registry::get('user')),
             Registry::get('user')
         );
     }
