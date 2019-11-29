@@ -1,8 +1,0 @@
-CREATE TABLE testable (
-    `id` INTEGER NOT NULL  AUTO_INCREMENT,
-    `message` VARCHAR(255)
-);
-
-CREATE TABLE bands (
-    `id` INTEGER PRIMARY KEY AUTO_INCREMENT
-)
