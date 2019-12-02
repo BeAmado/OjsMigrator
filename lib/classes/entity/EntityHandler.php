@@ -336,16 +336,19 @@ class EntityHandler
             $this->getEntityDao($entity)->create($entity)
         );
         
-        if ($this->entityIsOk($vars->get('createdEntity'))) {
+        if (!$this->entityIsOk($vars->get('createdEntity'))) {
+            //var_dump($vars->get('createdEntity'));
             Registry::get('MemoryManager')->destroy($vars);
             unset($vars);
 
             return false;
         }
 
-        if (Registry::get('DataMapper')->isMappable($vars->get('createdEntity'))
+        if (Registry::get('DataMapper')->isMappable(
+            $vars->get('createdEntity')
+        ))
             Registry::get('DataMapper')->mapData(
-                $vars->get('tableName'), 
+                $vars->get('tableName')->getValue(), 
                 array(
                     'old' => $vars->get('oldId')->getValue(),
                     'new' => $vars->get('createdEntity')->getId(),
@@ -353,7 +356,6 @@ class EntityHandler
             );
             // TODO: treat better if did not map the id
 
-        Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
 
         return true;

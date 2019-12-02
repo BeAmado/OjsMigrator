@@ -6,5 +6,4 @@ use BeAmado\OjsMigrator\Entity\UserHandler;
 
 class UserHandlerTest extends FunctionalTest
 {
-    protected function usersArray()
-    {
+}
