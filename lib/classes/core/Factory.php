@@ -75,6 +75,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Db\TableDefinitionHandler();
     }
 
+    protected function createUserHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\UserHandler();
+    }
+
     protected function createXmlHandler()
     {
         return new \BeAmado\OjsMigrator\Util\XmlHandler();
@@ -142,6 +147,8 @@ class Factory
                 return 'SchemaHandler';
             case \strtolower('StatementHandler'):
                 return 'StatementHandler';
+            case \strtolower('UserHandler'):
+                return 'UserHandler';
             case \strtolower('TableDefinitionHandler'):
                 return 'TableDefinitionHandler';
             case \strtolower('XmlHandler'):

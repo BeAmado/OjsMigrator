@@ -20,12 +20,18 @@ class UserMock
 
     public function getUser($name)
     {
-        /** @var $filename string */
-        $filename = null;
-        switch(\strtolower($name)) {
-            case 'batman':
-                $filename = $this->formFilename('wayne');
-                break;
-        }
+        $filename = $this->formFilename(\strtr(
+            \strtolower($name),
+            array(
+                'batman' => 'wayne',
+                'ironman' => 'stark',
+                'hulk' => 'banner',
+                'hawkeye' => 'barton',
+                'greenlantern' => 'jordan',
+            )
+        ));
+
+        if (Registry::get('FileSystemManager')->fileExists($filename))
+            return Registry::get('MemoryManager')->create(include($filename));
     }
 }

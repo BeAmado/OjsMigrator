@@ -202,7 +202,9 @@ class DAO
             }
         );
 
-        return Registry::get('selectData')->cloneInstance();
+        return Registry::get('selectData') !== null
+            ? Registry::get('selectData')->cloneInstance()
+            : null;
     }
 
     protected function getRowCount($operation)

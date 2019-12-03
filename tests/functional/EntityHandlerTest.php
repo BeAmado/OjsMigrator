@@ -10,23 +10,8 @@ use BeAmado\OjsMigrator\StubInterface;
 // traits
 use BeAmado\OjsMigrator\TestStub;
 
-// classes
-use BeAmado\OjsMigrator\DataMappingTester;
-
 class EntityHandlerTest extends FunctionalTest implements StubInterface
 {
-    public static function setUpBeforeClass() : void
-    {
-        parent::setUpBeforeClass();
-        (new DataMappingTester())->setUpDataMappingStage();
-    }
-
-    public static function tearDownAfterClass() : void
-    {
-        (new DataMappingTester())->tearDownDataMappingStage();
-        parent::tearDownAfterClass();
-    }
-
     public function getStub()
     {
         return new class extends EntityHandler {

@@ -10,11 +10,13 @@ abstract class FunctionalTest extends TestCase
     {
         Registry::clear();
         (new OjsScenarioTester())->setUpStage();
+        (new DataMappingTester())->setUpDataMappingStage();
     }
 
     public static function tearDownAfterClass() : void
     {
         //(new OjsScenarioTester())->removeSandbox();
+        (new DataMappingTester())->tearDownDataMappingStage();
         (new OjsScenarioTester())->tearDownStage();
         Registry::clear();
     }

@@ -5,7 +5,7 @@ use \BeAmado\OjsMigrator\Registry;
 
 class UserHandler extends EntityHandler
 {
-    public function create($data)
+    public function create($data, $extra = null)
     {
         return new Entity($data, 'users');
     }
@@ -36,7 +36,7 @@ class UserHandler extends EntityHandler
 
     protected function registerUser($user)
     {
-        return $this->createInDatabase($user);
+        return $this->createInDatabase($this->getValidData('users', $user));
     }
 
     protected function importUserSetting($data)
@@ -50,7 +50,7 @@ class UserHandler extends EntityHandler
             )
         );
 
-        return $this->createOrUpdateInDatabase($setting)
+        return $this->createOrUpdateInDatabase($setting);
     }
 
     protected function importControlledVocab($data)
@@ -180,7 +180,7 @@ class UserHandler extends EntityHandler
             !Registry::get('DataMapper')->isMapped(
                 'users',
                 $role->getData('user_id')
-            ))
+            )
         )
             return false;
 
@@ -247,7 +247,7 @@ class UserHandler extends EntityHandler
         )
             return;
         
-        return Registry::get('UserSettingsDAO')->read(array
+        return Registry::get('UserSettingsDAO')->read(array(
             'user_id' => \is_numeric($user)
                 ? (int) $user
                 : $user->getData('user_id')

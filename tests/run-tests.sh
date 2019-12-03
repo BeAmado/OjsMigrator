@@ -31,45 +31,74 @@ phpunit-run()
     phpunit-end $(basename $1)
 }
 
+form-filename()
+{
+    filename="$(echo $(dirname $0)/$1/$2)Test.php"
+}
+
 unit-tests()
 {
-    phpunit-run $(echo "$(dirname $0)/unit")
+    if [ -e $filename ]
+    then
+        phpunit-run $filename
+    else
+        phpunit-run $(echo "$(dirname $0)/unit")
+    fi
 }
 
 integration-tests()
 {
-    phpunit-run $(echo "$(dirname $0)/integration")
+    if [ -e $filename ]
+    then
+        phpunit-run $filename
+    else
+        phpunit-run $(echo "$(dirname $0)/integration")
+    fi
 }
 
 bootstrap-tests()
 {
-    phpunit-run  $(echo "$(dirname $0)/bootstrap")
+    if [ -e $filename ]
+    then
+        phpunit-run $filename
+    else
+        phpunit-run  $(echo "$(dirname $0)/bootstrap")
+    fi
 }
 
 functional-tests()
 {
-    phpunit-run $(echo "$(dirname $0)/functional")
+    if [ -e $filename ]
+    then
+        phpunit-run $filename
+    else
+        phpunit-run $(echo "$(dirname $0)/functional")
+    fi
 }
 
 run-tests()
 {
     if [[ $@ =~ '--bootstrap' ]]
     then
+        form-filename bootstrap $2
         bootstrap-tests
     fi
     
     if [[ $@ =~ '--unit' ]]
     then
+        form-filename unit $2
         unit-tests
     fi
 
     if [[ $@ =~ '--functional' ]]
     then
+        form-filename functional $2
         functional-tests
     fi
 
     if [[ $@ =~ '--integration' ]]
     then
+        form-filename integration $2
         integration-tests
     fi
 

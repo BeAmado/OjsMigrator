@@ -7,6 +7,16 @@ use BeAmado\OjsMigrator\Registry;
 
 class BootstrapTest extends TestCase
 {
+    public static function setUpBeforeClass() : void
+    {
+        (new OjsScenarioTester())->setUpStage();
+    }
+
+    public static function tearDownAfterClass() : void
+    {
+        (new OjsScenarioTester())->tearDownStage();
+    }
+
     public function testBootstrapFileExists()
     {
         $this->assertTrue(file_exists(dirname(__FILE__) . '/../../includes/bootstrap.php'));
@@ -24,8 +34,6 @@ class BootstrapTest extends TestCase
 
     public function testCreateConfigFile()
     {
-        (new OjsScenarioTester())->prepareStage();
-
         $this->assertFileExists(
             (new OjsScenarioTester())->getOjsConfigFile()
         );

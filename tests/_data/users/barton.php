@@ -54,27 +54,29 @@ return array(
             'user_id' => 9285,
             'controlled_vocab_entry_id' => 8,
             'controlled_vocab_entries' => array(
-                '__tableName_' => 'controlled_vocab_entries',
-                'controlled_vocab_entry_id' => 8,
-                'controlled_vocab_id' => 514,
-                'seq' => 0,
-                'settings' => array(
-                    array(
-                        '__tableName_' => 'controlled_vocab_entry_settings',
-                        'controlled_vocab_entry_id' => 8,
-                        'locale' => 'en',
-                        'setting_name' => 'interest',
-                        'setting_value' => 'accuracy',
-                        'setting_type' => 'string',
+                array(
+                    '__tableName_' => 'controlled_vocab_entries',
+                    'controlled_vocab_entry_id' => 8,
+                    'controlled_vocab_id' => 514,
+                    'seq' => 0,
+                    'settings' => array(
+                        array(
+                            '__tableName_' => 'controlled_vocab_entry_settings',
+                            'controlled_vocab_entry_id' => 8,
+                            'locale' => 'en',
+                            'setting_name' => 'interest',
+                            'setting_value' => 'accuracy',
+                            'setting_type' => 'string',
+                        ),
                     ),
-                ),
-                'controlled_vocabs' => array(
-                    array(
-                        '__tableName_' => 'controlled_vocabs',
-                        'controlled_vocab_id' => 514,
-                        'symbolic' => 'interest',
-                        'assoc_type' => 0,
-                        'assoc_id' => 0,
+                    'controlled_vocabs' => array(
+                        array(
+                            '__tableName_' => 'controlled_vocabs',
+                            'controlled_vocab_id' => 514,
+                            'symbolic' => 'interest',
+                            'assoc_type' => 0,
+                            'assoc_id' => 0,
+                        ),
                     ),
                 ),
             ),
@@ -84,27 +86,29 @@ return array(
             'user_id' => 9285,
             'controlled_vocab_entry_id' => 2214,
             'controlled_vocab_entries' => array(
-                '__tableName_' => 'controlled_vocab_entries',
-                'controlled_vocab_entry_id' => 2214,
-                'controlled_vocab_id' => 2698,
-                'seq' => 0,
-                'settings' => array(
-                    array(
-                        '__tableName_' => 'controlled_vocab_entry_settings',
-                        'controlled_vocab_entry_id' => 2214,
-                        'locale' => 'en',
-                        'setting_name' => 'interest',
-                        'setting_value' => 'stealth',
-                        'setting_type' => 'string',
+                array(
+                    '__tableName_' => 'controlled_vocab_entries',
+                    'controlled_vocab_entry_id' => 2214,
+                    'controlled_vocab_id' => 2698,
+                    'seq' => 0,
+                    'settings' => array(
+                        array(
+                            '__tableName_' => 'controlled_vocab_entry_settings',
+                            'controlled_vocab_entry_id' => 2214,
+                            'locale' => 'en',
+                            'setting_name' => 'interest',
+                            'setting_value' => 'stealth',
+                            'setting_type' => 'string',
+                        ),
                     ),
-                ),
-                'controlled_vocabs' => array(
-                    array(
-                        '__tableName_' => 'controlled_vocabs',
-                        'controlled_vocab_id' => 2698,
-                        'symbolic' => 'interest',
-                        'assoc_type' => 0,
-                        'assoc_id' => 0,
+                    'controlled_vocabs' => array(
+                        array(
+                            '__tableName_' => 'controlled_vocabs',
+                            'controlled_vocab_id' => 2698,
+                            'symbolic' => 'interest',
+                            'assoc_type' => 0,
+                            'assoc_id' => 0,
+                        ),
                     ),
                 ),
             ),

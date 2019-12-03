@@ -314,7 +314,9 @@ class EntityHandler
     {
         return \is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class) &&
             $entity->getTableName() != null &&
-            $entity->getId() != null;
+            Registry::get('DataMapper')->isMappable($entity) ?
+                $entity->getId() != null
+                : true;
     }
 
     /**
@@ -337,7 +339,6 @@ class EntityHandler
         );
         
         if (!$this->entityIsOk($vars->get('createdEntity'))) {
-            //var_dump($vars->get('createdEntity'));
             Registry::get('MemoryManager')->destroy($vars);
             unset($vars);
 
@@ -384,21 +385,24 @@ class EntityHandler
      */
     public function createOrUpdateInDatabase($entity)
     {
-        if (
-            $entity->getId() == null ||
-            !Registry::get('DataMapper')->isMapped(
-                $entity->getTableName(),
-                $entity->getId()
-            )
-       )
-            return $this->createInDatabase($entity);
+        if (Registry::get('DataMapper')->isMappable($entity)) {
+            
+            if (
+                $entity->getId() == null ||
+                !Registry::get('DataMapper')->isMapped(
+                    $entity->getTableName(),
+                    $entity->getId()
+                )
+            ) 
+                return $this->createInDatabase($entity);
 
-        $entity->setId(
-            Registry::get('DataMapper')->getMapping(
-                $entity->getTableName(),
-                $entity->getId()
-            )
-        );
+            $entity->setId(
+                Registry::get('DataMapper')->getMapping(
+                    $entity->getTableName(),
+                    $entity->getId()
+                )
+            );
+        }
 
         $option = 'update';
         $entities = $this->getEntityDAO($entity)->read($entity);
