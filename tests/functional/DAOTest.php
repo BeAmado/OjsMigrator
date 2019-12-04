@@ -286,4 +286,32 @@ class DAOTest extends FunctionalTest
             ))
         );
     }
+
+    public function testCanSelectUserPassingEntity()
+    {
+        Registry::get('DbHandler')->createTableIfNotExists('users');
+        Registry::get('DbHandler')->createTableIfNotExists('user_settings');
+
+        $user = Registry::get('UsersDAO')->create(array(
+            'username' => 'agent',
+            'first_name' => 'Ethan',
+            'last_name' => 'Hunt',
+            'email' => 'hunt@imf.gov',
+            'password' => 'impossible',
+        ));
+
+        $users = Registry::get('UsersDAO')->read();
+
+        $candidates = Registry::get('UsersDAO')->read($user);
+
+        $this->assertSame(
+            '1-1-Ethan-Hunt',
+            implode('-', array(
+                $users->length() > 1,
+                $candidates->length(),
+                $candidates->get(0)->getData('first_name'),
+                $candidates->get(0)->getData('last_name'),
+            ))
+        );
+    }
 }

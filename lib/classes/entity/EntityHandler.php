@@ -403,7 +403,7 @@ class EntityHandler
                 )
             );
         }
-
+ 
         $option = 'update';
         $entities = $this->getEntityDAO($entity)->read($entity);
 
@@ -434,5 +434,40 @@ class EntityHandler
     {
         return $this->getEntityDataDir($entity) 
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . $entity->getId() . '.json';
+    }
+
+    /**
+     * Get the entity's primary key values as an associative array.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $entity
+     * @param string $name
+     * @return array
+     */
+    public function getPrimaryKeys($entity, $name = null)
+    {
+        if (\is_array($entity))
+            $entity = Registry::get('MemoryManager')->create($entity);
+
+        if (!$entity->hasAttribute('__tableName_') && !\is_string($name))
+            return null;
+            // TODO: TREAT BETTER
+
+        $tbDef = Registry::get('SchemaHandler')->getTableDefinition(
+            \is_string($name) ? $name : $entity->get('__tableName_')->getValue()
+        );
+
+        if (!\is_a($tbDef, \BeAmado\OjsMigrator\Db\TableDefinition::class))
+            return;
+            // TODO: TREAT BETTER
+
+        $pks = array();
+        foreach ($tbDef->getPrimaryKeys() as $pk) {
+            if ($entity->hasAttribute($pk))
+                $pks[$pk] = $entity->get($pk)->getValue();
+            else
+                $pks[$pk] = $tbDef->getColumn($pk)->getDefaultValue();
+        }
+
+        return $pks;
     }
 }

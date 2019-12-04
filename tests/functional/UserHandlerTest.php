@@ -137,6 +137,14 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             $setting
         );
 
+        $setting->set(
+            'user_id',
+            Registry::get('DataMapper')->getMapping(
+                'users', 
+                $setting->get('user_id')->getValue()
+            )
+        );
+
         $fromDb = Registry::get('UserSettingsDAO')->read($setting)->get(0);
 
         $this->assertSame(
@@ -216,25 +224,53 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             ),
         ));
 
-        /*var_dump(array(
-            'role_id' => '' . $role->get('role_id')->getValue(),
-            'journal_id' => Registry::get('DataMapper')->getMapping(
-                'journals',
-                $role->get('journal_id')->getValue()
-            ),
-            'user_id' => Registry::get('DataMapper')->getMapping(
-                'users',
-                $role->get('user_id')->getValue()
-            ),
-        ));
-
-        var_dump($roles);
-        var_dump(Registry::get('selectRolesStmt'));*/
-
         $this->assertSame(
             '1-1', 
             implode('-', array(
                 $imported,
+                $roles->length(),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportIronManUserRole
+     */
+    public function testCanImportAnotherIronManUserRole()
+    {
+        $ironman = $this->createIronMan();
+        $role = $ironman->getData('roles')[1];
+
+        $imported = $this->getStub()->callMethod(
+            'importUserRole',
+            $role
+        );
+        
+        $role->set(
+            'journal_id',
+            Registry::get('DataMapper')->getMapping(
+                'journals',
+                $role->get('journal_id')->getValue()
+            )
+        );
+
+        $role->set(
+            'user_id',
+            Registry::get('DataMapper')->getMapping(
+                'users',
+                $role->get('user_id')->getValue()
+            )
+        );
+
+        $candidates = Registry::get('RolesDAO')->read($role);
+        $roles = Registry::get('RolesDAO')->read();
+
+        $this->assertSame(
+            '1-1-256-2', 
+            implode('-', array(
+                $imported,
+                $candidates->length(),
+                $candidates->get(0)->getData('role_id'),
                 $roles->length(),
             ))
         );
