@@ -4,6 +4,16 @@ namespace BeAmado\OjsMigrator\Util;
 
 class ArrayHandler
 {
+    protected function isAssoc($arr)
+    {
+        foreach (\array_keys($arr) as $key) {
+            if (!\is_numeric($key))
+                return true;
+        }
+
+        return false;
+    }
+
     public function union($arr1, $arr2)
     {
         if ($arr1 === null)
@@ -25,10 +35,10 @@ class ArrayHandler
             return $this->union($arr1, array($arr2));
 
         return \array_merge(
-            \array_unique($arr1),
+            $this->isAssoc($arr1) ? $arr1 : \array_unique($arr1),
             \array_diff(
-                \array_unique($arr2),
-                \array_unique($arr1)
+                $this->isAssoc($arr2) ? $arr2 : \array_unique($arr2),
+                $this->isAssoc($arr1) ? $arr1 : \array_unique($arr1)
             ) ?: array()
         );
     }

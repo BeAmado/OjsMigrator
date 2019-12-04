@@ -204,8 +204,6 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             $role
         );
 
-        $this->assertTrue($imported);
-
         $roles = Registry::get('RolesDAO')->read(array(
             'role_id' => '' . $role->get('role_id')->getValue(),
             'journal_id' => Registry::get('DataMapper')->getMapping(
@@ -218,7 +216,7 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             ),
         ));
 
-        var_dump(array(
+        /*var_dump(array(
             'role_id' => '' . $role->get('role_id')->getValue(),
             'journal_id' => Registry::get('DataMapper')->getMapping(
                 'journals',
@@ -231,8 +229,14 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
         ));
 
         var_dump($roles);
-        var_dump(Registry::get('selectRolesStmt'));
+        var_dump(Registry::get('selectRolesStmt'));*/
 
-        $this->assertSame(1, $roles->length());
+        $this->assertSame(
+            '1-1', 
+            implode('-', array(
+                $imported,
+                $roles->length(),
+            ))
+        );
     }
 }
