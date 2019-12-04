@@ -191,12 +191,22 @@ class UserHandler extends EntityHandler
                 $role->getData('user_id')
             )
         );
+
+        $role->set(
+            'journal_id',
+            Registry::get('DataMapper')->getMapping(
+                'journals',
+                $role->getData('journal_id')
+            )
+        );
+
+        return $this->createOrUpdateInDatabase($role);
     }
 
     public function importUser($user)
     {
         try {
-            if (!\is_a($user, \BeAmado\OjsMigrator\Entity\Entity))
+            if (!\is_a($user, \BeAmado\OjsMigrator\Entity\Entity::class))
                 $user = new Entity($user, 'users');
     
             if ($user->getTableName() !== 'users')

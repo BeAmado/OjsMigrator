@@ -31,9 +31,16 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             'controlled_vocab_entries',
             'controlled_vocab_entry_settings',
             'roles',
+            'journals',
         ) as $table) {
             Registry::get('DbHandler')->createTableIfNotExists($table);
         }
+
+        $eh = Registry::get('EntityHandler');
+        $eh->createOrUpdateInDatabase($eh->create('journals', array(
+            'journal_id' => 178,
+            'path' => 'test_journal',
+        )));
     }
 
     public function getStub()
@@ -125,13 +132,6 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
     {
         $ironman = $this->createIronMan();
         $setting = $ironman->getData('settings')[0];
-        $setting->set(
-            'user_id',
-            Registry::get('DataMapper')->getMapping(
-                'users', 
-                $setting->get('user_id')->getValue()
-            )
-        );
         $imported = $this->getStub()->callMethod(
             'importUserSetting',
             $setting
@@ -140,10 +140,14 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
         $fromDb = Registry::get('UserSettingsDAO')->read($setting)->get(0);
 
         $this->assertSame(
-            '1-pt_BR',
+            '1-pt_BR-' . Registry::get('DataMapper')->getMapping(
+                'users', 
+                $ironman->getId()
+            ),
             implode('-', array(
                 $imported, 
-                $fromDb->getData('locale')
+                $fromDb->getData('locale'),
+                $fromDb->getData('user_id'),
             ))
         );
 
@@ -185,5 +189,50 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             $entrySettings->length() === 1 &&
             $entrySettings->get(0)->getData('setting_value') === 'science'
         );
+    }
+
+    /**
+     * @depends testCanSeeThatIronManIsAlreadyRegistered
+     */
+    public function testCanImportIronManUserRole()
+    {
+        $ironman = $this->createIronMan();
+        $role = $ironman->getData('roles')[0];
+
+        $imported = $this->getStub()->callMethod(
+            'importUserRole',
+            $role
+        );
+
+        $this->assertTrue($imported);
+
+        $roles = Registry::get('RolesDAO')->read(array(
+            'role_id' => '' . $role->get('role_id')->getValue(),
+            'journal_id' => Registry::get('DataMapper')->getMapping(
+                'journals',
+                $role->get('journal_id')->getValue()
+            ),
+            'user_id' => Registry::get('DataMapper')->getMapping(
+                'users',
+                $role->get('user_id')->getValue()
+            ),
+        ));
+
+        var_dump(array(
+            'role_id' => '' . $role->get('role_id')->getValue(),
+            'journal_id' => Registry::get('DataMapper')->getMapping(
+                'journals',
+                $role->get('journal_id')->getValue()
+            ),
+            'user_id' => Registry::get('DataMapper')->getMapping(
+                'users',
+                $role->get('user_id')->getValue()
+            ),
+        ));
+
+        var_dump($roles);
+        var_dump(Registry::get('selectRolesStmt'));
+
+        $this->assertSame(1, $roles->length());
     }
 }
