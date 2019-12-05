@@ -34,9 +34,73 @@ class UserHandler extends EntityHandler
         return true;
     }
 
-    protected function registerUser($user)
+    protected function usernameExists($username)
     {
-        return $this->createInDatabase($this->getValidData('users', $user));
+        $users = Registry::get('UsersDAO')->read(array(
+            'username' => $username,
+        ));
+
+        if (
+            \is_a($users, \BeAmado\OjsMigrator\MyObject::class) &&
+            $users->length() === 1
+        )
+            return true;
+
+        return false;
+    }
+
+    protected function usernameHasNumber($username)
+    {
+        return \is_numeric(\substr($username, -1));
+    }
+
+    protected function formNextUsername($username)
+    {
+        if ($username == null)
+            return 'User1';
+
+        if (!$this->usernameHasNumber($username))
+            return $username . '2';
+
+        if (\is_numeric($username))
+            return '' . (((int) $username) + 1);
+        
+        $digits = null;
+        for ($digits = 1; $digits < strlen($username); $digits++) {
+            if (!\is_numeric(\substr($username, -$digits)))
+                break;
+        }
+
+        return \substr($username, 0, -$digits)
+            . (((int) \substr($username, -$digits)) + 1);
+    }
+
+    protected function formNewUsername($username, $exists = true)
+    {
+        if (!$exists)
+            return $username;
+
+        $tries = 0;
+        $newUsername = '' . $username; // copy
+        while ($exists && $tries < 1000) {
+            $tries++;
+            $newUsername = $this->formNextUsername($newUsername);
+            $exists = $this->usernameExists($newUsername);
+        }
+
+        return $newUsername;
+    }
+
+    protected function registerUser($data)
+    {
+        $user = $this->getValidData('users', $data);
+        if ($this->usernameExists($user->getData('username')))
+            $user->set(
+                'username',
+                $this->formNewUsername($user->getData('username'))
+            );
+
+        return $this->createInDatabase($user);
     }
 
     protected function importUserSetting($data)
@@ -232,6 +296,7 @@ class UserHandler extends EntityHandler
 
         } catch (\Exception $e) {
             // TODO: treat the exception
+            echo "\n\n" . $e->getMessage() . "\n\n";
             return false;
         }
 

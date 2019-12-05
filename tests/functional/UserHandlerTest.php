@@ -57,15 +57,17 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
         $batman = $this->userMock->getUser('Batman');
         $hawkeye = $this->userMock->getUser('HAWKEYE');
         $greenlantern = $this->userMock->getUser('GreenLantern');
+        $johnstewart = $this->userMock->getUser('stewart');
 
         $this->assertSame(
-            'Stark-Banner-Bruce-Clint-Jordan',
+            'Stark-Banner-Bruce-Clint-Jordan-Stewart',
             implode('-', array(
                 $ironman->get('last_name')->getValue(),
                 $hulk->get('last_name')->getValue(),
                 $batman->get('first_name')->getValue(),
                 $hawkeye->get('first_name')->getValue(),
                 $greenlantern->get('last_name')->getValue(),
+                $johnstewart->get('last_name')->getValue(),
             ))
         );
     }
@@ -89,6 +91,60 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
     {
         return Registry::get('UserHandler')->create(
             $this->userMock->getUser('IronMan')
+        );
+    }
+
+    protected function createBatman()
+    {
+        return Registry::get('UserHandler')->create(
+            $this->userMock->getUser('Batman')
+        );
+    }
+
+    protected function createHawkeye()
+    {
+        return Registry::get('UserHandler')->create(
+            $this->userMock->getUser('Hawkeye')
+        );
+    }
+
+    protected function createHulk()
+    {
+        return Registry::get('UserHandler')->create(
+            $this->userMock->getUser('Hulk')
+        );
+    }
+
+    protected function createGreenLantern()
+    {
+        return Registry::get('UserHandler')->create(
+            $this->userMock->getUser('GreenLantern')
+        );
+    }
+
+    protected function createJohnStewart()
+    {
+        return Registry::get('UserHandler')->create(
+            $this->userMock->getUser('stewart')
+        );
+    }
+
+    public function testCanCreateMockedUsers()
+    {
+        $this->assertSame(
+            'Stark-Wayne-Banner-Barton-greenlantern/Jordan-greenlantern/Stewart',
+            implode('-', array(
+                $this->createIronMan()->getData('last_name'),
+                $this->createBatman()->getData('last_name'),
+                $this->createHulk()->getData('last_name'),
+                $this->createHawkeye()->getData('last_name'),
+                ''
+                . $this->createGreenLantern()->getData('username')
+                . '/' . $this->createGreenLantern()->getData('last_name'),
+                ''
+                . $this->createJohnStewart()->getData('username')
+                . '/' . $this->createJohnStewart()->getData('last_name'),
+            ))
         );
     }
 
@@ -310,6 +366,157 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
                 $settings->length(),
                 $roles->length(),
                 $interests->length(),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportUserIronMan
+     */
+    public function testCanImportUserBatman()
+    {
+        $batman = $this->createBatman();
+
+        $imported = Registry::get('UserHandler')->importUser($batman);
+
+        $mapping = array(
+            'user_id' => Registry::get('DataMapper')->getMapping(
+                'users',
+                $batman->getId()
+            )
+        );
+
+        $batmanSettings = Registry::get('UserSettingsDAO')->read($mapping);
+        $batmanRoles = Registry::get('RolesDAO')->read($mapping);
+        $batmanInterests = Registry::get('UserInterestsDAO')->read($mapping);
+        $roles = Registry::get('RolesDAO')->read();
+        $settings = Registry::get('UserSettingsDAO')->read();
+        $interests = Registry::get('UserInterestsDAO')->read();
+        $controlledVocabs = Registry::get('ControlledVocabsDAO')->read();
+        $entries = Registry::get('ControlledVocabEntriesDAO')->read();
+
+        $this->assertSame(
+            '1-4-3-3-8-6-6-4-4',
+            implode('-', array(
+                $imported,
+                $batmanSettings->length(),
+                $batmanRoles->length(),
+                $batmanInterests->length(),
+                $settings->length(),
+                $roles->length(),
+                $interests->length(),
+                $controlledVocabs->length(),
+                $entries->length(),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportUserBatman
+     */
+    public function testCanImportUserGreenLantern()
+    {
+        $lantern = $this->createGreenLantern();
+
+        $imported = Registry::get('UserHandler')->importUser($lantern);
+
+        $mapping = array(
+            'user_id' => Registry::get('DataMapper')->getMapping(
+                'users',
+                $lantern->getId()
+            )
+        );
+
+        $lanternSettings = Registry::get('UserSettingsDAO')->read($mapping);
+        $lanternRoles = Registry::get('RolesDAO')->read($mapping);
+        $lanternInterests = Registry::get('UserInterestsDAO')->read($mapping);
+        $roles = Registry::get('RolesDAO')->read();
+        $settings = Registry::get('UserSettingsDAO')->read();
+        $interests = Registry::get('UserInterestsDAO')->read();
+        $controlledVocabs = Registry::get('ControlledVocabsDAO')->read();
+        $entries = Registry::get('ControlledVocabEntriesDAO')->read();
+
+        $this->assertSame(
+            '1-3-1-3-11-7-9-4-4',
+            implode('-', array(
+                $imported,
+                $lanternSettings->length(),
+                $lanternRoles->length(),
+                $lanternInterests->length(),
+                $settings->length(),
+                $roles->length(),
+                $interests->length(),
+                $controlledVocabs->length(),
+                $entries->length(),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportUserGreenLantern
+     */
+    public function testCanImportJohnStewartByChangingHisUsernameFromGreenlanternToGreenlantern2()
+    {
+        $johnStewart = $this->createJohnStewart();
+
+        $imported = Registry::get('UserHandler')->importUser($johnStewart);
+
+        $mapping = array(
+            'user_id' => Registry::get('DataMapper')->getMapping(
+                'users',
+                $johnStewart->getId()
+            )
+        );
+
+        $users = Registry::get('UsersDAO')->read();
+        $search = Registry::get('UsersDAO')->read(array(
+            'email' => $johnStewart->getData('email'),
+        ));
+
+        $user = $search->get(0);
+        $stewartInterests = Registry::get('UserInterestsDAO')->read($mapping);
+
+        $entry0 = Registry::get('ControlledVocabEntrySettingsDAO')->read(array(
+            'controlled_vocab_entry_id' => $stewartInterests->get(0)->getData(
+                'controlled_vocab_entry_id'
+            )
+        ))->get(0);
+        $entry1 = Registry::get('ControlledVocabEntrySettingsDAO')->read(array(
+            'controlled_vocab_entry_id' => $stewartInterests->get(1)->getData(
+                'controlled_vocab_entry_id'
+            )
+        ))->get(0);
+        $entry2 = Registry::get('ControlledVocabEntrySettingsDAO')->read(array(
+            'controlled_vocab_entry_id' => $stewartInterests->get(2)->getData(
+                'controlled_vocab_entry_id'
+            )
+        ))->get(0);
+
+        $interests = array(
+            $entry0->getData('setting_value'),
+            $entry1->getData('setting_value'),
+            $entry2->getData('setting_value'),
+        );
+
+        $equals = Registry::get('ArrayHandler')->equals(
+            array(
+                'Intergalatic security',
+                'deep space',
+                'science',
+            ),
+            $interests
+        );
+
+
+        $this->assertSame(
+            '1-4-1-greenlantern2-3-1',
+            implode('-', array(
+                $imported,
+                $users->length(),
+                $search->length(),
+                $user->getData('username'),
+                $stewartInterests->length(),
+                $equals,
             ))
         );
     }
