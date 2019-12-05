@@ -168,7 +168,7 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
     {
         $interest = $this->createIronMan()->getData('interests')[0];
         $imported = $this->getStub()->callMethod(
-            'importInterest',
+            'importUserInterest',
             $interest
         );
 
@@ -272,6 +272,44 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
                 $candidates->length(),
                 $candidates->get(0)->getData('role_id'),
                 $roles->length(),
+            ))
+        );
+    }
+
+    public function testCanImportUserIronMan()
+    {
+        $ironman = $this->createIronMan();
+
+        $imported = Registry::get('UserHandler')->importUser($ironman);
+
+        $settings = Registry::get('UserSettingsDAO')->read(array(
+            'user_id' => Registry::get('DataMapper')->getMapping(
+                'users',
+                $ironman->getId()
+             )
+        ));
+
+        $roles = Registry::get('RolesDAO')->read(array(
+            'user_id' => Registry::get('DataMapper')->getMapping(
+                'users',
+                $ironman->getId()
+             )
+        ));
+
+        $interests = Registry::get('UserInterestsDAO')->read(array(
+            'user_id' => Registry::get('DataMapper')->getMapping(
+                'users',
+                $ironman->getId()
+             )
+        ));
+
+        $this->assertSame(
+            '1-4-3-3',
+            implode('-', array(
+                $imported,
+                $settings->length(),
+                $roles->length(),
+                $interests->length(),
             ))
         );
     }

@@ -143,7 +143,7 @@ class UserHandler extends EntityHandler
         return true;
     }
 
-    protected function importInterest($data)
+    protected function importUserInterest($data)
     {
         $interest = $this->getValidData('user_interests', $data);
         if (!Registry::get('DataMapper')->isMapped(
