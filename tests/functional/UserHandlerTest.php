@@ -520,4 +520,80 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             ))
         );
     }
+
+    /**
+     * @depends testCanImportUserIronMan
+     */
+    public function testCanGetIronManUserSettingsFromDatabase()
+    {
+        $ironman = Registry::get('UsersDAO')->read(array(
+            'username' => 'ironman',
+        ))->get(0);
+
+        //$this->assertSame('Stark', $ironman->getData('last_name'));
+
+        $settings = Registry::get('UserHandler')->getUserSettings($ironman);
+
+        $this->assertSame(4, $settings->length());
+    }
+
+    /**
+     * @depends testCanImportUserIronMan
+     */
+    public function testCanGetIronManUserRolesInTheTestJournal()
+    {
+        $journal = Registry::get('JournalsDAO')->read(array(
+            'path' => 'test_journal',
+        ))->get(0);
+
+        $ironman = Registry::get('UsersDAO')->read(array(
+            'username' => 'ironman',
+        ))->get(0);
+
+        $roles = Registry::get('UserHandler')->getUserRoles($ironman, $journal);
+
+        $this->assertTrue(Registry::get('ArrayHandler')->areEquivalent(
+            $roles->toArray(),
+            array(
+                array(
+                    '__tableName_' => 'roles',
+                    'user_id' => $ironman->getId(), 
+                    'journal_id' => $journal->getId(), 
+                    'role_id' => '16'
+                ),
+                array(
+                    '__tableName_' => 'roles',
+                    'user_id' => $ironman->getId(), 
+                    'journal_id' => $journal->getId(), 
+                    'role_id' => '256'
+                ),
+                array(
+                    '__tableName_' => 'roles',
+                    'user_id' => $ironman->getId(), 
+                    'journal_id' => $journal->getId(), 
+                    'role_id' => '4096'
+                ),
+            )
+        ));
+    }
+
+    /**
+     * @depends testCanImportUserIronMan
+     */
+    public function testGetIronManUserInterestsFromDatabase()
+    {
+        $ironman = Registry::get('UsersDAO')->read(array(
+            'username' => 'ironman',
+        ))->get(0);
+
+        //$this->assertSame('Stark', $ironman->getData('last_name'));
+
+        $interests = Registry::get('UserHandler')->getUserInterests($ironman);
+
+        //$this->assertSame(3, $interests->length());
+
+        $entries = $interests->get(0)->get('controlled_vocab_entries');
+
+        $this->assertSame(1, $entries->length());
+    }
 }

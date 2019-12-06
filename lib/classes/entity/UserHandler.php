@@ -329,6 +329,13 @@ class UserHandler extends EntityHandler
         ));
     }
 
+    /**
+     * Gets the roles that the user has in the journal
+     *
+     * @param \BeAmado\OjsMigrator\Entity\Entity | integer $user
+     * @param \BeAmado\OjsMigrator\Entity\Entity | integer $journal
+     * @return \BeAmado\OjsMigrator\MyObject
+     */
     public function getUserRoles($user, $journal)
     {
         if (
