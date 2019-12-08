@@ -76,6 +76,15 @@ class OjsScenarioTester
         );
     }
 
+    public function setEntitiesDir()
+    {
+        Registry::set(
+            'EntitiesDir',
+            $this->getSandboxDir() 
+                . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'entities'
+        );
+    }
+
     public function setUpStage()
     {
         if (!Registry::hasKey('OjsDir'))
@@ -83,6 +92,9 @@ class OjsScenarioTester
 
         if (!Registry::hasKey('ConfigPreprocessor'))
             Registry::set('ConfigPreprocessor', new ConfigPreprocessor());
+
+        if (!Registry::hasKey('EntitiesDir'))
+            $this->setEntitiesDir();
 
         if (!$this->ojsDirExists()) {
             $this->createSandbox();

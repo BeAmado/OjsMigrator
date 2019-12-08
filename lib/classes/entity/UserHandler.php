@@ -421,7 +421,7 @@ class UserHandler extends EntityHandler
         $entries = Registry::get('ControlledVocabEntriesDAO')->read(array(
             'controlled_vocab_entry_id' => \is_numeric($ent)
                 ? (int) $ent
-                : $ent->getData($ent->getData('controlled_vocab_entry_id'))
+                : $ent->getData('controlled_vocab_entry_id')
         ));
 
         if (
@@ -496,7 +496,7 @@ class UserHandler extends EntityHandler
         Registry::remove('user');
         Registry::set(
             'user', 
-            $this->create('users', $res)
+            $this->create($res)
         );
         Registry::get('user')->set('roles', array());
     }
@@ -538,7 +538,7 @@ class UserHandler extends EntityHandler
           . 'FROM roles r '
           . 'INNER JOIN users u '
           .     'ON u.user_id = r.user_id '
-          . 'WHERE journal_id = :selectUsersFromJournal_journalId'
+          . 'WHERE journal_id = :selectUsersFromJournal_journalId '
           . 'ORDER BY r.user_id'
         );
 
@@ -585,8 +585,10 @@ class UserHandler extends EntityHandler
             }
 
             Registry::get('user')->get('roles')->push(
-                $this->create('roles', $res)
+                Registry::get('EntityHandler')->create('roles', $res)
             );
+
+            return true;
             
         });
 

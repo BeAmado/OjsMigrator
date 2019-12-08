@@ -243,8 +243,7 @@ class DAOTest extends FunctionalTest
             $section
         );
 
-        $expected = \BeAmado\OjsMigrator\BASE_DIR 
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . '_data'
+        $expected = Registry::get('EntitiesDir')
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'sections'
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . '14.json';
 
@@ -280,9 +279,7 @@ class DAOTest extends FunctionalTest
         $this->assertSame(
             5,
             count(Registry::get('FileSystemManager')->listdir(
-                Registry::get('FileSystemManager')->formPathFromBaseDir(array(
-                    '_data', 'sections',
-                ))
+                Registry::get('EntityHandler')->getEntityDataDir('sections')
             ))
         );
     }

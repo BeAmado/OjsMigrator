@@ -131,8 +131,7 @@ class EntityHandlerTest extends FunctionalTest implements StubInterface
     public function testGetUsersDataDirPassingAString()
     {
         $dir = Registry::get('EntityHandler')->getEntityDataDir('users');
-        $expected = \BeAmado\OjsMigrator\BASE_DIR
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . '_data'
+        $expected = Registry::get('EntitiesDir')
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'users';
         
         $this->assertSame($expected, $dir);
@@ -148,8 +147,7 @@ class EntityHandlerTest extends FunctionalTest implements StubInterface
         ));
 
         $dir = Registry::get('EntityHandler')->getEntityDataDir($user);
-        $expected = \BeAmado\OjsMigrator\BASE_DIR
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . '_data'
+        $expected = Registry::get('EntitiesDir')
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'users';
         
         $this->assertSame($expected, $dir);

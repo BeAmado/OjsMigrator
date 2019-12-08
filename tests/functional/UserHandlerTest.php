@@ -17,7 +17,7 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
     {
         parent::__construct();
         $this->userMock = new UserMock();
-
+        $this->importedUsers = 0;
     }
 
     public static function setUpBeforeClass() : void
@@ -368,6 +368,9 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
                 $interests->length(),
             ))
         );
+
+        if ($imported)
+            $this->importedUsers++;
     }
 
     /**
@@ -409,6 +412,9 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
                 $entries->length(),
             ))
         );
+
+        if ($imported)
+            $this->importedUsers++;
     }
 
     /**
@@ -450,6 +456,9 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
                 $entries->length(),
             ))
         );
+
+        if ($imported)
+            $this->importedUsers++;
     }
 
     /**
@@ -519,6 +528,9 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
                 $equals,
             ))
         );
+
+        if ($imported)
+            $this->importedUsers++;
     }
 
     /**
@@ -552,29 +564,36 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
 
         $roles = Registry::get('UserHandler')->getUserRoles($ironman, $journal);
 
-        $this->assertTrue(Registry::get('ArrayHandler')->areEquivalent(
-            $roles->toArray(),
+        $expected = array(
             array(
-                array(
-                    '__tableName_' => 'roles',
-                    'user_id' => $ironman->getId(), 
-                    'journal_id' => $journal->getId(), 
-                    'role_id' => '16'
-                ),
-                array(
-                    '__tableName_' => 'roles',
-                    'user_id' => $ironman->getId(), 
-                    'journal_id' => $journal->getId(), 
-                    'role_id' => '256'
-                ),
-                array(
-                    '__tableName_' => 'roles',
-                    'user_id' => $ironman->getId(), 
-                    'journal_id' => $journal->getId(), 
-                    'role_id' => '4096'
-                ),
-            )
+                '__tablename_' => 'roles',
+                'user_id' => $ironman->getId(), 
+                'journal_id' => $journal->getId(), 
+                'role_id' => '16'
+            ),
+            array(
+                '__tablename_' => 'roles',
+                'user_id' => $ironman->getId(), 
+                'journal_id' => $journal->getId(), 
+                'role_id' => '256'
+            ),
+            array(
+                '__tablename_' => 'roles',
+                'user_id' => $ironman->getId(), 
+                'journal_id' => $journal->getId(), 
+                'role_id' => '4096'
+            ),
+        );
+
+        $this->assertTrue(Registry::get('ArrayHandler')->areEquivalent(
+            $expected,
+            $roles->toArray()
         ));
+
+        /*$this->assertEquals(
+            $expected,
+            $roles->toArray()
+        );*/
     }
 
     /**
@@ -592,8 +611,91 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
 
         //$this->assertSame(3, $interests->length());
 
-        $entries = $interests->get(0)->get('controlled_vocab_entries');
+        $userInts = array();
 
-        $this->assertSame(1, $entries->length());
+        for ($i = 0; $i < $interests->length(); $i++) {
+            $userInts[] = $interests->get($i)->get('controlled_vocab_entries')
+                      ->get(0)->get('settings')
+                      ->get(0)->getData('setting_value');
+        }
+
+        $this->assertTrue(Registry::get('ArrayHandler')->equals(
+            $userInts,
+            array(
+                'high tech',
+                'science',
+                'parties',
+            )
+        ));
+    }
+
+    /**
+     * @depends testCanImportUserIronMan
+     */
+    public function testCanGetUsersFromTestJournal()
+    {
+        $journal = Registry::get('JournalsDAO')->read(array(
+            'path' => 'test_journal',
+        ))->get(0);
+
+        Registry::get('UserHandler')->exportUsersFromJournal($journal);
+
+        $list = Registry::get('FileSystemManager')->listdir(
+            Registry::get('EntityHandler')->getEntityDataDir('users')
+        );
+
+        $ah = Registry::get('ArrayHandler');
+        $eh = Registry::get('EntityHandler');
+        $jh = Registry::get('JsonHandler');
+
+        // 1 - Tony Stark
+        // 2 - Bruce Wayne
+        // 3 - Hal Jordan
+        // 4 - John Stewart
+
+        $ironmanExported = $jh->createFromFile($list[0]);
+        $ironman = $this->createIronMan();
+        $ironman->get('roles')->forEachValue(function($role) {
+            $role->set(
+                'journal_id',
+                Registry::get('DataMapper')->getMapping(
+                    'journals',
+                    $role->get('journal_id')->getValue()
+                )
+            );
+            $role->set(
+                'user_id',
+                Registry::get('DataMapper')->getMapping(
+                    'users',
+                    $role->get('user_id')->getValue()
+                )
+            );
+        });
+        $ironman->get('settings')->forEachValue(function($setting) {
+            $setting->set(
+                'user_id',
+                Registry::get('DataMapper')->getMapping(
+                    'users',
+                    $setting->get('user_id')->getValue()
+                )
+            );
+            $setting->set('assoc_type', 0);
+            $setting->set('assoc_id', 0);
+        });
+
+        $this->assertEquals(
+            '4-1-1',
+            implode('-', array(
+                count($list),
+                $ah->areEquivalent(
+                    $ironman->get('settings')->toArray(),
+                    $ironmanExported->get('settings')->toArray()
+                ),
+                $ah->areEquivalent(
+                    $ironman->get('roles')->toArray(),
+                    $ironmanExported->get('roles')->toArray()
+                ),
+            ))
+        );
     }
 }

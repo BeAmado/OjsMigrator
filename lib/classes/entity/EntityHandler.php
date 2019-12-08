@@ -82,6 +82,11 @@ class EntityHandler
     {
         return $this->getValidData($name, $data);
     }
+
+    public function isEntity($data)
+    {
+        return \is_a($data, \BeAmado\OjsMigrator\Entity\Entity::class);
+    }
     
     /**
      * Checks if two entities are equal by comparing the attributes that are 
@@ -97,13 +102,31 @@ class EntityHandler
         $entity2, 
         $considerAutoIncrementedId = false
     ) {
-        if (\is_array($entity1) && \is_a($entity2, Entity::class))
+        if (
+            (
+                !\is_array($entity1) && 
+                !\is_a($entity1, \BeAmado\OjsMigrator\MyObject::class)
+            ) ||
+            (
+                !\is_array($entity2) &&
+                !\is_a($entity2, \BeAmado\OjsMigrator\MyObject::class)
+            )
+        )
+            return;
+
+        if (
+            (\is_array($entity1) || !$this->isEntity($entity1)) && 
+            \is_a($entity2, Entity::class)
+        )
             return $this->areEqual(
                 $this->getValidData($entity2->getTableName(), $entity1),
                 $entity2
             );
 
-        if (\is_array($entity2) && \is_a($entity1, Entity::class))
+        if (
+            (\is_array($entity2) || !$this->isEntity($entity2)) && 
+            \is_a($entity1, Entity::class)
+        )
             return $this->areEqual(
                 $entity1,
                 $this->getValidData($entity1->getTableName(), $entity2)
@@ -204,8 +227,15 @@ class EntityHandler
             return $entity['__tableName_'];
 
         if (
+            !$this->isEntity($entity) &&
+            \is_a($entity, \BeAmado\OjsMigrator\MyObject::class) &&
+            $entity->hasAttribute('__tableName_')
+        )
+            return $entity->get('__tableName_')->getValue();
+
+        if (
             !\is_string($entity) &&
-            !\is_a($entity, Entity::class)
+            !$this->isEntity($entity)
         )
             return;
 
@@ -278,7 +308,7 @@ class EntityHandler
      */
     public function getEntityDataDir($entity)
     {
-        if (
+        /*if (
             !\is_a(
                 Registry::get('entitiesDataDir'),
                 \BeAmado\OjsMigrator\MyObject::class
@@ -291,7 +321,10 @@ class EntityHandler
 
         return Registry::get('entitiesDataDir')->get(
             $this->entityTableName($entity)
-        )->getValue();
+        )->getValue();*/
+        return Registry::get('entitiesDir') 
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR 
+            . $this->entityTableName($entity);
     }
 
     /**

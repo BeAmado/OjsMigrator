@@ -36,6 +36,16 @@ form-filename()
     filename="$(echo $(dirname $0)/$1/$2)Test.php"
 }
 
+all-tests()
+{
+    php7.2 \
+        $(echo "$(dirname $0)/../vendor/bin/phpunit") \
+        --bootstrap=$(echo "$(dirname $0)/includes/bootstrap.php") \
+        --colors=always \
+        --testdox \
+        $(dirname $0)
+}
+
 unit-tests()
 {
     if [ -e $filename ]
@@ -104,7 +114,7 @@ run-tests()
 
     if [[ $@ =~ '--all' ]]
     then
-        run-tests --bootstrap --unit --functional --integration
+        all-tests
     fi
 }
 

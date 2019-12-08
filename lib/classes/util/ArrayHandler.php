@@ -72,6 +72,29 @@ class ArrayHandler
         return \array_search($elem, $arr) === (\count($arr) - 1);
     }
 
+    protected function equalsAssoc($arr1, $arr2)
+    {
+        foreach ($arr1 as $key => $value) {
+            if (!\array_key_exists($key, $arr2))
+                return false;
+
+            if ($arr2[$key] != $value)
+                return false;
+        }
+
+        return true;
+    }
+
+    protected function equalsIndex($arr1, $arr2)
+    {
+        foreach ($arr1 as $value) {
+            if (!\in_array($value, $arr2))
+                return false;
+        }
+
+        return true;
+    }
+
     /**
      * Checks if the arrays are equal, i.e. have the same data, not taking into 
      * consideration the order.
@@ -91,7 +114,13 @@ class ArrayHandler
         if (\count($arr1) !== \count($arr2))
             return false;
 
-        return \count(\array_intersect($arr1, $arr2)) === \count($arr1);
+        if ($this->isAssoc($arr1) && $this->isAssoc($arr2))
+            return $this->equalsAssoc($arr1, $arr2);
+
+        if (!$this->isAssoc($arr1) && !$this->isAssoc($arr2))
+            return $this->equalsIndex($arr1, $arr2);
+
+        return false;
     }
 
     /**
