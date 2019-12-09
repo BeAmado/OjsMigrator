@@ -293,4 +293,21 @@ class SchemaHandler implements FiletypeHandler
         Registry::remove('filename');
         Registry::remove('Schema');
     }
+
+    public function tableIsDefined($name)
+    {
+        $tbDef = $this->getTableDefinition($name);
+        if (
+            \is_a($tbDef, \BeAmado\OjsMigrator\Db\TableDefinition::class) &&
+            \strtolower($tbDef->getTableName()) === \strtolower($name)
+        ) {
+            Registry::get('MemoryManager')->destroy($tbDef);
+            unset($tbDef);
+            return true;
+        }
+
+        Registry::get('MemoryManager')->destroy($tbDef);
+        unset($tbDef);
+        return false;
+    }
 }

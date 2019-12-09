@@ -575,10 +575,7 @@ class UserHandler extends EntityHandler
             } else if (Registry::get('user')->getId() != $res['user_id']) {
                 // save the previous user data in the json data dir
                 $this->getUserSettingsAndInterests();
-                Registry::get('JsonHandler')->dumpToFile(
-                    $this->formJsonFilename(Registry::get('user')),
-                    Registry::get('user')
-                );
+                $this->dumpEntity(Registry::get('user'));
 
                 // replace the previous user data with the new one
                 $this->setUser($res);
@@ -598,10 +595,7 @@ class UserHandler extends EntityHandler
         // the last iteration will not dump the user to json, so it must be
         // done now.
         $this->getUserSettingsAndInterests();
-        Registry::get('JsonHandler')->dumpToFile(
-            $this->formJsonFilename(Registry::get('user')),
-            Registry::get('user')
-        );
+        $this->dumpEntity(Registry::get('user'));
 
         Registry::remove('user');
     }

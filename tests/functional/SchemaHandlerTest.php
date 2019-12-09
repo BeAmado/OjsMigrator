@@ -353,4 +353,18 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
             in_array('review_forms', $tablesNames)
         );
     }
+
+    public function testCanSeeThatTableIssuesIsDefined()
+    {
+        $this->assertTrue(
+            Registry::get('SchemaHandler')->tableIsDefined('issues')
+        );
+    }
+
+    public function testCanSeeThatTableAdminIsNotDefined()
+    {
+        $this->assertFalse(
+            Registry::get('SchemaHandler')->tableIsDefined('admin')
+        );
+    }
 }

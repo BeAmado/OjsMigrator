@@ -470,6 +470,23 @@ class EntityHandler
     }
 
     /**
+     * Dumps the entity's data into a json file.
+     * 
+     * @param \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return boolean
+     */
+    public function dumpEntity($entity)
+    {
+        if (!\is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class))
+            return false;
+
+        return Registry::get('JsonHandler')->dumpToFile(
+            $this->formJsonFilename($entity),
+            $entity
+        );
+    }
+
+    /**
      * Get the entity's primary key values as an associative array.
      *
      * @param \BeAmado\OjsMigrator\MyObject $entity
