@@ -13,6 +13,18 @@ class AnnouncementHandler extends EntityHandler
     protected function registerAnnouncement($data)
     {
         $ann = $this->getValidData('announcements', $data);
+        if (Registry::get('DataMapper')->isMapped(
+            'journals', 
+            $ann->getData('assoc_id'))
+        )
+            $ann->set(
+                'assoc_id',
+                Registry::get('DataMapper')->getMapping(
+                    'journals', 
+                    $ann->getData('assoc_id')
+                )
+            );
+        // TODO: treat if the assoc_id (the journal) is not mapped
         return $this->createInDatabase($ann);
     }
 
@@ -22,10 +34,12 @@ class AnnouncementHandler extends EntityHandler
         $setting->set(
             'announcement_id',
             Registry::get('DataMapper')->getMapping(
-                'annoucements',
+                'announcements',
                 $setting->get('announcement_id')->getValue()
             )
         );
+
+        return $this->createOrUpdateInDatabase($setting);
     }
 
     public function importAnnouncement($ann)
@@ -37,15 +51,18 @@ class AnnouncementHandler extends EntityHandler
             if ($ann->getTableName() !== 'announcements')
                 return false;
 
-            if (!Registry::get('DataMapper')->isMapped(
-                'announcements', 
-                $ann->getId()
-            ))
-                $this->registerAnnouncement($ann);
+            if (
+                !Registry::get('DataMapper')->isMapped(
+                    'announcements', 
+                    $ann->getId()
+                ) &&
+                !$this->registerAnnouncement($ann)
+            )
+                return false;
 
             // import the settings
             foreach ($ann->getData('settings') as $setting) {
-                $this->importAnnouncementSetting($setting)
+                $this->importAnnouncementSetting($setting);
             }
         } catch (\Exception $e) {
             // TODO: treat the exception
@@ -70,7 +87,7 @@ class AnnouncementHandler extends EntityHandler
 
         return Registry::get('AnnouncementSettingsDAO')->read(array(
             'announcement_id' => \is_numeric($ann)
-                ? (int) $ann,
+                ? (int) $ann
                 : $ann->get('announcement_id')->getValue()
         ));
     }
