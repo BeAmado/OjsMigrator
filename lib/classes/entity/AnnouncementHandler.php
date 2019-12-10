@@ -98,31 +98,31 @@ class AnnouncementHandler extends EntityHandler
             !\is_numeric($journal) &&
             (
                 !\is_a($journal, Entity::class) ||
-                !$journal->getId() == null
+                $journal->getId() == null
             )
         )
             return;
 
-        Registry::get('StatementHandler')->execute(
-            'selectAnnouncements',
-            array(
-                'assoc_id' => \is_numeric($journal)
-                    ? (int) $journal
-                    : $journal->getId()
-            ),
-            function($res) {
-                $ann = Registry::get('EntityHandler')->getValidData(
-                    'announcements',
-                    $res
-                );
+        Registry::get('AnnouncementsDAO')->dumpToJson(array(
+            'assoc_id' => \is_numeric($journal) ? $journal : $journal->getId(),
+        ));
 
-                $ann->set(
-                    'settings',
-                    $this->getAnnouncementSettings($ann)
-                );
+        foreach (Registry::get('FileSystemManager')->listdir(
+            $this->getEntityDataDir('announcements')
+        ) as $filename) {
+            $announcement = $this->create(
+                Registry::get('JsonHandler')->createFromFile($filename)
+            );
 
-                return $this->dumpEntity($ann);
-            }
-        );
+            $announcement->set(
+                'settings',
+                $this->getAnnouncementSettings($announcement)
+            );
+
+            Registry::get('JsonHandler')->dumpToFile(
+                $filename,
+                $announcement
+            );
+        }
     }
 }

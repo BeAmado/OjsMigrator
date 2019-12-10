@@ -75,10 +75,19 @@ class ArrayHandler
     protected function equalsAssoc($arr1, $arr2)
     {
         foreach ($arr1 as $key => $value) {
-            if (!\array_key_exists($key, $arr2))
+            if (
+                !\array_key_exists($key, $arr2) &&
+                !\array_key_exists(\strtolower($key), $arr2)
+            )
                 return false;
 
-            if ($arr2[$key] != $value)
+            if (\array_key_exists($key, $arr2) && $arr2[$key] != $value)
+                return false;
+
+            if (
+                \array_key_exists(\strtolower($key), $arr2) && 
+                $arr2[\strtolower($key)] != $value
+            )
                 return false;
         }
 
@@ -151,8 +160,6 @@ class ArrayHandler
                 }
             }
             if (!$found) {
-                // Registry::get('MemoryManager')->destroy($arr2Copy);
-                // unset($arr2Copy);
                 return false;
             }
         }
