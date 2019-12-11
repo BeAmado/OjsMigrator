@@ -2,14 +2,20 @@
 
 namespace BeAmado\OjsMigrator;
 
-class UserMock extends EntityMock
+class AnnouncementMock
 {
-    /**
-     * @Override
-     */
-    public function __construct($name = null)
+    protected function getUsersDir()
     {
-        parent::__construct('users');
+        return Registry::get('FileSystemManager')->formPathFromBaseDir(array(
+            'tests', '_data', 'users',
+        ));
+    }
+
+    protected function formFilename($name)
+    {
+        return $this->getUsersDir()
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR 
+            . \strtolower($name) . '.php';
     }
 
     public function getUser($name)
