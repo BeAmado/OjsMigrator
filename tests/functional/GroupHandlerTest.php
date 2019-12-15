@@ -45,8 +45,38 @@ class GroupHandlerTest extends FunctionalTest
         $this->groupMock = new GroupMock();
     }
 
+    protected function createGroupBacks()
+    {
+        return $this->groupMock->getGroupBacks();
+    }
+
+    protected function createGroupForwards()
+    {
+        return $this->groupMock->getGroupForwards();
+    }
+
     public function testCanCreateMockedGroups()
     {
-        
+        $backs = $this->createGroupBacks();
+        $forwards = $this->createGroupForwards();
+
+        $testJournal = (new JournalMock())->getJournal('test_journal');
+        $ironman = (new UserMock())->getUser('ironman');
+        $batman = (new UserMock())->getUser('batman');
+        $hulk = (new UserMock())->getUser('hulk');
+        $thor = (new UserMock())->getUser('thor');
+        $greenlantern = (new UserMock())->getUser('greenlantern');
+
+        $this->assertSame(
+            '1-1',
+            implode('-', array(
+                (int) $backs->get('assoc_id')
+                            ->getValue() === $testJournal->get('journal_id')
+                                                         ->getValue(),
+                (int) $forwards->get('assoc_id')
+                               ->getValue() === $testJournal->get('journal_id')
+                                                            ->getValue(),
+            ))
+        );
     }
 }

@@ -4,7 +4,7 @@ return array(
     '__tableName_' => 'groups',
     'group_id' => 782,
     'context' => 1,
-    'assoc_id' => '[test_journal]',
+    'assoc_id' => '[test_journal_id]',
     'about_displayed' => 1,
     'seq' => 1,
     'assoc_type' => 256,

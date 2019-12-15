@@ -22,6 +22,7 @@ class UserMock extends EntityMock
                 'hulk' => 'banner',
                 'hawkeye' => 'barton',
                 'greenlantern' => 'jordan',
+                'thor' => 'blake',
             )
         ));
 

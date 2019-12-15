@@ -58,9 +58,10 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
         $hawkeye = $this->userMock->getUser('HAWKEYE');
         $greenlantern = $this->userMock->getUser('GreenLantern');
         $johnstewart = $this->userMock->getUser('stewart');
+        $thor = $this->userMock->getUser('thor');
 
         $this->assertSame(
-            'Stark-Banner-Bruce-Clint-Jordan-Stewart',
+            'Stark-Banner-Bruce-Clint-Jordan-Stewart-Donald',
             implode('-', array(
                 $ironman->get('last_name')->getValue(),
                 $hulk->get('last_name')->getValue(),
@@ -68,6 +69,7 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
                 $hawkeye->get('first_name')->getValue(),
                 $greenlantern->get('last_name')->getValue(),
                 $johnstewart->get('last_name')->getValue(),
+                $thor->get('first_name')->getValue(),
             ))
         );
     }
