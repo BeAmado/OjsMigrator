@@ -162,12 +162,12 @@ class GroupHandler extends EntityHandler
 
             $group->set(
                 'settings',
-                $this->getGroupSettings()
+                $this->getGroupSettings($group)
             );
 
             $group->set(
                 'memberships',
-                $this->getGroupMemberships()
+                $this->getGroupMemberships($group)
             );
 
             Registry::get('JsonHandler')->dumpToFile(

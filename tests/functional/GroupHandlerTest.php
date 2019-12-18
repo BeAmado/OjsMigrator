@@ -305,4 +305,88 @@ class GroupHandlerTest extends FunctionalTest
             ))
         );
     }
+
+    /**
+     * @depends testCanImportGroupForwards
+     */
+    public function testCanGetTheSettingsOfTheForwardsGroup()
+    {
+        $forwards = $this->createGroupForwards();
+        $settings = $this->getStub()->callMethod(
+            'getGroupSettings',
+            Registry::get('DataMapper')->getMapping(
+                'groups',
+                $forwards->getId()
+            )
+        );
+
+        $this->assertSame(
+            '1-title-forwards',
+            implode('-', array(
+                $settings->length(),
+                $settings->get(0)->getData('setting_name'),
+                $settings->get(0)->getData('setting_value'),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportGroupForwards
+     */
+    public function testCanGetTheMembershipsOfTheForwardsGroup()
+    {
+        $forwards = $this->createGroupForwards();
+        $memberships = $this->getStub()->callMethod(
+            'getGroupMemberships',
+            Registry::get('DataMapper')->getMapping(
+                'groups',
+                $forwards->getId()
+            )
+        );
+
+        $users = array();
+        foreach (array('hulk', 'thor') as $username) {
+            $users[] = Registry::get('UsersDAO')->read(array(
+                'username' => $username
+            ))->get(0)->toArray();
+        }
+        
+        $members = array();
+        for ($i = 0; $i < $memberships->length(); $i++) {
+            $members[] = Registry::get('UsersDAO')->read(array(
+                'user_id' => $memberships->get($i)->getData('user_id'),
+            ))->get(0)->toArray();
+        }
+
+        $this->assertSame(
+            '2-1-Banner-Blake',
+            implode('-', array(
+                $memberships->length(),
+                Registry::get('ArrayHandler')->areEquivalent($users, $members),
+                $users[0]['last_name'],
+                $users[1]['last_name'],
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportGroupBacks
+     * @depends testCanGetTheSettingsOfTheForwardsGroup
+     * @depends testCanGetTheMembershipsOfTheForwardsGroup
+     */
+    public function testCanExportTheGroupsFromTheTestJournal()
+    {
+        Registry::get('GroupHandler')->exportGroupsFromJournal(
+            Registry::get('JournalsDAO')->read(array(
+                'path' => (new JournalMock())->getTestJournal()->get('path')->getValue(),
+            ))->get(0)
+        );
+
+        $this->assertSame(
+            2,
+            count(Registry::get('FileSystemManager')->listdir(
+                Registry::get('EntityHandler')->getEntityDataDir('groups')
+            ))
+        );
+    }
 }
