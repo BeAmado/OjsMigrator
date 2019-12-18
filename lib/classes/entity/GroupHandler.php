@@ -97,4 +97,83 @@ class GroupHandler extends EntityHandler
 
         return true;
     }
+
+    protected function getGroupMemberships($group)
+    {
+        if (
+            !\is_numeric($group) &&
+            (
+                !\is_a($group, \BeAmado\OjsMigrator\MyObject::class) ||
+                !$group->hasAttribute('group_id') ||
+                $group->get('group_id')->getValue() == null
+            )
+        )
+            return;
+
+        return Registry::get('GroupMembershipsDAO')->read(array(
+            'group_id' => \is_numeric($group)
+                ? $group
+                : $group->get('group_id')->getValue()
+        ));
+    }
+
+    protected function getGroupSettings($group)
+    {
+        if (
+            !\is_numeric($group) &&
+            (
+                !\is_a($group, \BeAmado\OjsMigrator\MyObject::class) ||
+                !$group->hasAttribute('group_id') ||
+                $group->get('group_id')->getValue() == null
+            )
+        )
+            return;
+
+        return Registry::get('GroupSettingsDAO')->read(array(
+            'group_id' => \is_numeric($group)
+                ? $group
+                : $group->get('group_id')->getValue()
+        ));
+    }
+
+    public function exportGroupsFromJournal($journal)
+    {
+        if (
+            !\is_numeric($journal) &&
+            (
+                !$this->isEntity($journal) ||
+                $journal->getId() == null
+            )
+        )
+            return;
+        
+        Registry::get('GroupsDAO')->dumpToJson(array(
+            'assoc_id' => \is_numeric($journal) 
+                ? (int) $journal 
+                : $journal->getId(),
+        ));
+
+        foreach (Registry::get('FileSystemManager')->listdir(
+            $this->getEntityDataDir('groups')
+        ) as $filename) {
+            $group = $this->create(
+                Registry::get('JsonHandler')->createFromFile($filename)
+            );
+
+            $group->set(
+                'settings',
+                $this->getGroupSettings()
+            );
+
+            $group->set(
+                'memberships',
+                $this->getGroupMemberships()
+            );
+
+            Registry::get('JsonHandler')->dumpToFile(
+                $filename,
+                $group
+            );
+        }
+    }
 }

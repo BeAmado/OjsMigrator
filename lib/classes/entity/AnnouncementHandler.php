@@ -97,7 +97,7 @@ class AnnouncementHandler extends EntityHandler
         if (
             !\is_numeric($journal) &&
             (
-                !\is_a($journal, Entity::class) ||
+                !$this->isEntity($journal) ||
                 $journal->getId() == null
             )
         )
