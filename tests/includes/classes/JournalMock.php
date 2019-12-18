@@ -16,4 +16,12 @@ class JournalMock extends EntityMock
             'path' => 'test_journal',
         ));
     }
+
+    public function getJournal($journal)
+    {
+        if (\strpos(\strtolower($journal), 'test_journal') !== false)
+            return $this->getTestJournal();
+
+        return parent::get($journal);
+    }
 }

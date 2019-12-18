@@ -45,6 +45,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\FileHandler();
     }
 
+    protected function createGroupHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\GroupHandler();
+    }
+
     protected function createIndexDefinitionHandler()
     {
         return new \BeAmado\OjsMigrator\Db\IndexDefinitionHandler();
@@ -142,6 +147,8 @@ class Factory
                 return 'EntityHandler';
             case \strtolower('FileHandler'):
                 return 'FileHandler';
+            case \strtolower('GroupHandler'):
+                return 'GroupHandler';
             case \strtolower('IndexDefinitionHandler'):
                 return 'IndexDefinitionHandler';
             case \strtolower('JsonHandler'):

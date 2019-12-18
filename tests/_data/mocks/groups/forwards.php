@@ -11,6 +11,7 @@ return array(
     'publish_email' => 0,
     'settings' => array(
         array(
+            '__tableName_' => 'group_settings',
             'group_id' => 782,
             'locale' => 'en',
             'setting_name' => 'title',
@@ -20,12 +21,14 @@ return array(
     ),
     'memberships' => array(
         array(
+            '__tableName_' => 'group_memberships',
             'group_id' => 782,
             'user_id' => '[hulk_user_id]',
             'about_displayed' => 1,
             'seq' => 1,
         ),
         array(
+            '__tableName_' => 'group_memberships',
             'group_id' => 782,
             'user_id' => '[thor_user_id]',
             'about_displayed' => 1,

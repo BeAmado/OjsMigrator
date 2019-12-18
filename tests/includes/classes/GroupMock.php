@@ -12,12 +12,12 @@ class GroupMock extends EntityMock
     protected function fillJournalId($group)
     {
         $path = \str_replace(
-            \substr($group->get('assoc_id')->getValue(), 1, -1), // remove the []
             '_id',
-            ''
+            '',
+            $this->removeBrackets($group->get('assoc_id')->getValue()) // remove the []
         );
-
-        $journal = (new JournalMock())->get($path);
+        
+        $journal = (new JournalMock())->getJournal($path);
 
         $group->set(
             'assoc_id',
@@ -30,18 +30,16 @@ class GroupMock extends EntityMock
     protected function fillUserId($membership)
     {
         $username = \str_replace(
-            \str_replace(
-                $membership->get('user_id')->getValue(),
-                '_id',
-                ''
-            ),
             '_user',
-            ''
+            '',
+            \str_replace(
+                '_id',
+                '',
+                $this->removeBrackets($membership->get('user_id')->getValue())
+            )
         );
 
-        var_dump($username);
-
-        $user = (new UserMock())->get($username);
+        $user = (new UserMock())->getUser($username);
 
         $membership->set(
             'user_id',

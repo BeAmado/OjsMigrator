@@ -94,12 +94,14 @@ class EntityHandler
      *
      * @param \BeAmado\OjsMigrator\Entity $entity1
      * @param \BeAmado\OjsMigrator\Entity $entity2
+     * @param array $disconsider
      * @param boolean $considerAutoIncrementedId
      * @return boolean
      */
     public function areEqual(
         $entity1, 
-        $entity2, 
+        $entity2,
+        $disconsider = array(),
         $considerAutoIncrementedId = false
     ) {
         if (
@@ -144,8 +146,11 @@ class EntityHandler
 
         foreach ($tbDef->getColumnNames() as $field) {
             if (
-                !$considerAutoIncrementedId &&
-                $tbDef->getColumn($field)->isAutoIncrement()
+                \in_array($field, $disconsider) ||
+                (
+                    !$considerAutoIncrementedId &&
+                    $tbDef->getColumn($field)->isAutoIncrement()
+                )
             )
                 continue;
 

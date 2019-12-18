@@ -5,7 +5,7 @@ use \BeAmado\OjsMigrator\Registry;
 
 class GroupHandler extends EntityHandler
 {
-    public function create($data)
+    public function create($data, $extra = null)
     {
         return new Entity($data, 'groups');
     }

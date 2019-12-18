@@ -14,6 +14,17 @@ abstract class EntityMock
         $this->setTableName($name);
     }
 
+    protected function removeBrackets($str)
+    {
+        if (
+            \substr($str, 0, 1) === '[' &&
+            \substr($str, -1) === ']'
+        )
+            return \substr($str, 1, -1);
+
+        return $str;
+    }
+
     protected function setTableName($name)
     {
         if (\is_string($name))
