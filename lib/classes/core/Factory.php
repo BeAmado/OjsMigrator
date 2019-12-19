@@ -5,6 +5,11 @@ namespace BeAmado\OjsMigrator;
 class Factory
 {
     ///////////////////////////// HANDLERS ///////////////////////////////////
+    protected function createAnnouncementHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\AnnouncementHandler();
+    }
+
     protected function createArrayHandler()
     {
         return new \BeAmado\OjsMigrator\Util\ArrayHandler();
@@ -40,6 +45,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\FileHandler();
     }
 
+    protected function createGroupHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\GroupHandler();
+    }
+
     protected function createIndexDefinitionHandler()
     {
         return new \BeAmado\OjsMigrator\Db\IndexDefinitionHandler();
@@ -73,6 +83,11 @@ class Factory
     protected function createTableDefinitionHandler()
     {
         return new \BeAmado\OjsMigrator\Db\TableDefinitionHandler();
+    }
+
+    protected function createUserHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\UserHandler();
     }
 
     protected function createXmlHandler()
@@ -116,6 +131,8 @@ class Factory
                 return 'Dao';
 
             //////////// HANDLERS ///////////////
+            case \strtolower('AnnouncementHandler'):
+                return 'AnnouncementHandler';
             case \strtolower('ArrayHandler'):
                 return 'ArrayHandler';
             case \strtolower('CaseHandler'):
@@ -130,6 +147,8 @@ class Factory
                 return 'EntityHandler';
             case \strtolower('FileHandler'):
                 return 'FileHandler';
+            case \strtolower('GroupHandler'):
+                return 'GroupHandler';
             case \strtolower('IndexDefinitionHandler'):
                 return 'IndexDefinitionHandler';
             case \strtolower('JsonHandler'):
@@ -142,6 +161,8 @@ class Factory
                 return 'SchemaHandler';
             case \strtolower('StatementHandler'):
                 return 'StatementHandler';
+            case \strtolower('UserHandler'):
+                return 'UserHandler';
             case \strtolower('TableDefinitionHandler'):
                 return 'TableDefinitionHandler';
             case \strtolower('XmlHandler'):

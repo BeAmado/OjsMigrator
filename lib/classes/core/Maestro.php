@@ -57,6 +57,11 @@ class Maestro
             return Registry::get('FileSystemManager')->formPathFromBaseDir(
                 'schema'
             );
+        
+        if (\strtolower($name) === 'entitiesdir')
+            return Registry::get('FileSystemManager')->formPathFromBaseDir(
+                'entities'
+            );
     }
 
     protected static function getDao($name)

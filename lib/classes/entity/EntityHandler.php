@@ -82,6 +82,11 @@ class EntityHandler
     {
         return $this->getValidData($name, $data);
     }
+
+    public function isEntity($data)
+    {
+        return \is_a($data, \BeAmado\OjsMigrator\Entity\Entity::class);
+    }
     
     /**
      * Checks if two entities are equal by comparing the attributes that are 
@@ -89,21 +94,41 @@ class EntityHandler
      *
      * @param \BeAmado\OjsMigrator\Entity $entity1
      * @param \BeAmado\OjsMigrator\Entity $entity2
+     * @param array $disconsider
      * @param boolean $considerAutoIncrementedId
      * @return boolean
      */
     public function areEqual(
         $entity1, 
-        $entity2, 
+        $entity2,
+        $disconsider = array(),
         $considerAutoIncrementedId = false
     ) {
-        if (\is_array($entity1) && \is_a($entity2, Entity::class))
+        if (
+            (
+                !\is_array($entity1) && 
+                !\is_a($entity1, \BeAmado\OjsMigrator\MyObject::class)
+            ) ||
+            (
+                !\is_array($entity2) &&
+                !\is_a($entity2, \BeAmado\OjsMigrator\MyObject::class)
+            )
+        )
+            return;
+
+        if (
+            (\is_array($entity1) || !$this->isEntity($entity1)) && 
+            \is_a($entity2, Entity::class)
+        )
             return $this->areEqual(
                 $this->getValidData($entity2->getTableName(), $entity1),
                 $entity2
             );
 
-        if (\is_array($entity2) && \is_a($entity1, Entity::class))
+        if (
+            (\is_array($entity2) || !$this->isEntity($entity2)) && 
+            \is_a($entity1, Entity::class)
+        )
             return $this->areEqual(
                 $entity1,
                 $this->getValidData($entity1->getTableName(), $entity2)
@@ -121,8 +146,11 @@ class EntityHandler
 
         foreach ($tbDef->getColumnNames() as $field) {
             if (
-                !$considerAutoIncrementedId &&
-                $tbDef->getColumn($field)->isAutoIncrement()
+                \in_array($field, $disconsider) ||
+                (
+                    !$considerAutoIncrementedId &&
+                    $tbDef->getColumn($field)->isAutoIncrement()
+                )
             )
                 continue;
 
@@ -204,8 +232,15 @@ class EntityHandler
             return $entity['__tableName_'];
 
         if (
+            !$this->isEntity($entity) &&
+            \is_a($entity, \BeAmado\OjsMigrator\MyObject::class) &&
+            $entity->hasAttribute('__tableName_')
+        )
+            return $entity->get('__tableName_')->getValue();
+
+        if (
             !\is_string($entity) &&
-            !\is_a($entity, Entity::class)
+            !$this->isEntity($entity)
         )
             return;
 
@@ -278,7 +313,7 @@ class EntityHandler
      */
     public function getEntityDataDir($entity)
     {
-        if (
+        /*if (
             !\is_a(
                 Registry::get('entitiesDataDir'),
                 \BeAmado\OjsMigrator\MyObject::class
@@ -291,7 +326,10 @@ class EntityHandler
 
         return Registry::get('entitiesDataDir')->get(
             $this->entityTableName($entity)
-        )->getValue();
+        )->getValue();*/
+        return Registry::get('entitiesDir') 
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR 
+            . $this->entityTableName($entity);
     }
 
     /**
@@ -314,7 +352,9 @@ class EntityHandler
     {
         return \is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class) &&
             $entity->getTableName() != null &&
-            $entity->getId() != null;
+            Registry::get('DataMapper')->isMappable($entity) ?
+                $entity->getId() != null
+                : true;
     }
 
     /**
@@ -336,16 +376,18 @@ class EntityHandler
             $this->getEntityDao($entity)->create($entity)
         );
         
-        if ($this->entityIsOk($vars->get('createdEntity'))) {
+        if (!$this->entityIsOk($vars->get('createdEntity'))) {
             Registry::get('MemoryManager')->destroy($vars);
             unset($vars);
 
             return false;
         }
 
-        if (Registry::get('DataMapper')->isMappable($vars->get('createdEntity'))
+        if (Registry::get('DataMapper')->isMappable(
+            $vars->get('createdEntity')
+        ))
             Registry::get('DataMapper')->mapData(
-                $vars->get('tableName'), 
+                $vars->get('tableName')->getValue(), 
                 array(
                     'old' => $vars->get('oldId')->getValue(),
                     'new' => $vars->get('createdEntity')->getId(),
@@ -353,7 +395,6 @@ class EntityHandler
             );
             // TODO: treat better if did not map the id
 
-        Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
 
         return true;
@@ -382,22 +423,25 @@ class EntityHandler
      */
     public function createOrUpdateInDatabase($entity)
     {
-        if (
-            $entity->getId() == null ||
-            !Registry::get('DataMapper')->isMapped(
-                $entity->getTableName(),
-                $entity->getId()
-            )
-       )
-            return $this->createInDatabase($entity);
+        if (Registry::get('DataMapper')->isMappable($entity)) {
+            
+            if (
+                $entity->getId() == null ||
+                !Registry::get('DataMapper')->isMapped(
+                    $entity->getTableName(),
+                    $entity->getId()
+                )
+            ) 
+                return $this->createInDatabase($entity);
 
-        $entity->setId(
-            Registry::get('DataMapper')->getMapping(
-                $entity->getTableName(),
-                $entity->getId()
-            )
-        );
-
+            $entity->setId(
+                Registry::get('DataMapper')->getMapping(
+                    $entity->getTableName(),
+                    $entity->getId()
+                )
+            );
+        }
+ 
         $option = 'update';
         $entities = $this->getEntityDAO($entity)->read($entity);
 
@@ -428,5 +472,57 @@ class EntityHandler
     {
         return $this->getEntityDataDir($entity) 
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . $entity->getId() . '.json';
+    }
+
+    /**
+     * Dumps the entity's data into a json file.
+     * 
+     * @param \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return boolean
+     */
+    public function dumpEntity($entity)
+    {
+        if (!\is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class))
+            return false;
+
+        return Registry::get('JsonHandler')->dumpToFile(
+            $this->formJsonFilename($entity),
+            $entity
+        );
+    }
+
+    /**
+     * Get the entity's primary key values as an associative array.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $entity
+     * @param string $name
+     * @return array
+     */
+    public function getPrimaryKeys($entity, $name = null)
+    {
+        if (\is_array($entity))
+            $entity = Registry::get('MemoryManager')->create($entity);
+
+        if (!$entity->hasAttribute('__tableName_') && !\is_string($name))
+            return null;
+            // TODO: TREAT BETTER
+
+        $tbDef = Registry::get('SchemaHandler')->getTableDefinition(
+            \is_string($name) ? $name : $entity->get('__tableName_')->getValue()
+        );
+
+        if (!\is_a($tbDef, \BeAmado\OjsMigrator\Db\TableDefinition::class))
+            return;
+            // TODO: TREAT BETTER
+
+        $pks = array();
+        foreach ($tbDef->getPrimaryKeys() as $pk) {
+            if ($entity->hasAttribute($pk))
+                $pks[$pk] = $entity->get($pk)->getValue();
+            else
+                $pks[$pk] = $tbDef->getColumn($pk)->getDefaultValue();
+        }
+
+        return $pks;
     }
 }

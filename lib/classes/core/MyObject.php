@@ -295,7 +295,9 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
      */
     public function length()
     {
-        return \count($this->listValues());
+        return (isset($this->values) && \is_array($this->values))
+            ? \count($this->listValues()) 
+            : 0;
     }
 }
 

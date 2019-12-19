@@ -4,10 +4,13 @@ namespace BeAmado\OjsMigrator;
 
 class DataMapper
 {
-    public function getEntityMappingDir($entityName)
+    public function getEntityMappingDir($entity)
     {
         return Registry::get('DataMappingDir')
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . $entityName;
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR 
+            . (\is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class)
+                ? $entity->getTableName()
+                : $entity);
     }
 
     protected function formMappingFilename($entityName, $id)
@@ -123,10 +126,10 @@ class DataMapper
      */
     public function isMappable($entity)
     {
-        if (\is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class))
+        if (!\is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class))
             return false;
 
-        $tbDef = Registry::get('SchemaHandler')->getTableDefintion(
+        $tbDef = Registry::get('SchemaHandler')->getTableDefinition(
             $entity->getTableName()
         );
 
@@ -134,7 +137,7 @@ class DataMapper
             return false;
 
         foreach ($tbDef->getColumnNames() as $column) {
-            if ($tbDef->getColumn($column)->isAutoIncrement) {
+            if ($tbDef->getColumn($column)->isAutoIncrement()) {
                 Registry::get('MemoryManager')->destroy($tbDef);
                 unset($tbDef);
                 return true;

@@ -164,15 +164,28 @@ class DAO
      * @param array $conditions
      * @return \BeAmado\OjsMigrator\MyObject
      */
-    public function read($conditions = array())
+    public function read($data = array())
     {
         Registry::remove('selectData');
-        if (
-            \is_array($conditions) && 
-            !\array_key_exists('where', $conditions) &&
-            !empty($conditions)
+
+        $conditions = array();
+
+        if (\is_a($data, \BeAmado\OjsMigrator\MyObject::class)) {
+            if ($data->hasAttribute('where'))
+                $conditions = $data->toArray();
+            else
+                $conditions = array(
+                    'where' => Registry::get('EntityHandler')->getPrimaryKeys(
+                        $data,
+                        $this->getTableName()
+                    ),
+                );
+        } else if (
+            \is_array($data) && 
+            !\array_key_exists('where', $data) &&
+            !empty($data)
         )
-            $conditions = array('where' => $conditions);
+            $conditions = array('where' => $data);
 
         if (!$this->statementOk('select', $conditions))
             Registry::get('StatementHandler')->removeStatement(
@@ -181,9 +194,7 @@ class DAO
 
         Registry::get('StatementHandler')->execute(
             $this->formStatementName('select'),
-            (\is_array($conditions) && \array_key_exists('where', $conditions)) 
-                ? $conditions 
-                : null,
+            empty($conditions) ? null : $conditions,
             function($res) {
                 if (!Registry::hasKey('selectData'))
                     Registry::set(
@@ -202,7 +213,9 @@ class DAO
             }
         );
 
-        return Registry::get('selectData')->cloneInstance();
+        return Registry::get('selectData') !== null
+            ? Registry::get('selectData')->cloneInstance()
+            : null;
     }
 
     protected function getRowCount($operation)

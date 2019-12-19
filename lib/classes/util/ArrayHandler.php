@@ -4,6 +4,29 @@ namespace BeAmado\OjsMigrator\Util;
 
 class ArrayHandler
 {
+    /**
+     * Checks if the array is associative.
+     *
+     * @param array $arr
+     * @return boolean
+     */
+    protected function isAssoc($arr)
+    {
+        foreach (\array_keys($arr) as $key) {
+            if (!\is_numeric($key))
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the union of two arrays.
+     *
+     * @param array $arr1
+     * @param array $arr2
+     * @return array
+     */
     public function union($arr1, $arr2)
     {
         if ($arr1 === null)
@@ -25,10 +48,10 @@ class ArrayHandler
             return $this->union($arr1, array($arr2));
 
         return \array_merge(
-            \array_unique($arr1),
+            $this->isAssoc($arr1) ? $arr1 : \array_unique($arr1),
             \array_diff(
-                \array_unique($arr2),
-                \array_unique($arr1)
+                $this->isAssoc($arr2) ? $arr2 : \array_unique($arr2),
+                $this->isAssoc($arr1) ? $arr1 : \array_unique($arr1)
             ) ?: array()
         );
     }
@@ -49,9 +72,41 @@ class ArrayHandler
         return \array_search($elem, $arr) === (\count($arr) - 1);
     }
 
+    protected function equalsAssoc($arr1, $arr2)
+    {
+        foreach ($arr1 as $key => $value) {
+            if (
+                !\array_key_exists($key, $arr2) &&
+                !\array_key_exists(\strtolower($key), $arr2)
+            )
+                return false;
+
+            if (\array_key_exists($key, $arr2) && $arr2[$key] != $value)
+                return false;
+
+            if (
+                \array_key_exists(\strtolower($key), $arr2) && 
+                $arr2[\strtolower($key)] != $value
+            )
+                return false;
+        }
+
+        return true;
+    }
+
+    protected function equalsIndex($arr1, $arr2)
+    {
+        foreach ($arr1 as $value) {
+            if (!\in_array($value, $arr2))
+                return false;
+        }
+
+        return true;
+    }
+
     /**
      * Checks if the arrays are equal, i.e. have the same data, not taking into 
-     * consideration the order
+     * consideration the order.
      *
      * @param array $arr1
      * @param array $arr2
@@ -59,12 +114,56 @@ class ArrayHandler
      */
     public function equals($arr1, $arr2)
     {
+        if (empty($arr1) || empty($arr2))
+            return false;
+
         if (!\is_array($arr1) || !\is_array($arr2))
             return false;
 
         if (\count($arr1) !== \count($arr2))
             return false;
 
-        return \count(\array_intersect($arr1, $arr2)) === \count($arr1);
+        if ($this->isAssoc($arr1) && $this->isAssoc($arr2))
+            return $this->equalsAssoc($arr1, $arr2);
+
+        if (!$this->isAssoc($arr1) && !$this->isAssoc($arr2))
+            return $this->equalsIndex($arr1, $arr2);
+
+        return false;
+    }
+
+    /**
+     * Checks if two multidimensional array are equivalent, i.e their subarrays
+     * are equal not considering the order.
+     *
+     * @param array $arr1
+     * @param array $arr2
+     * @return boolean
+     */
+    public function areEquivalent($arr1, $arr2)
+    {
+        if (!\is_array($arr1) || !\is_array($arr2))
+            return false;
+
+        if (\count($arr1) !== \count($arr2))
+            return false;
+
+        $arr2Copy = $arr2;
+
+        for ($i = 0; $i < \count($arr1); $i++) {
+            $found = false;
+            for ($j = 0; $j < \count($arr2Copy); $j++) {
+                if ($this->equals($arr1[$i], $arr2Copy[$j])) {
+                    $found = true;
+                    \array_splice($arr2Copy, $j, 1); // removes the element at index $j
+                    break;
+                }
+            }
+            if (!$found) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
