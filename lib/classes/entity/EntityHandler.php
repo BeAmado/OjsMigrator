@@ -122,7 +122,9 @@ class EntityHandler
         )
             return $this->areEqual(
                 $this->getValidData($entity2->getTableName(), $entity1),
-                $entity2
+                $entity2,
+                $disconsider,
+                $considerAutoIncrementedId
             );
 
         if (
@@ -131,7 +133,9 @@ class EntityHandler
         )
             return $this->areEqual(
                 $entity1,
-                $this->getValidData($entity1->getTableName(), $entity2)
+                $this->getValidData($entity1->getTableName(), $entity2),
+                $disconsider,
+                $considerAutoIncrementedId
             );
 
         if (!\is_a($entity1, Entity::class) || !\is_a($entity2, Entity::class))
