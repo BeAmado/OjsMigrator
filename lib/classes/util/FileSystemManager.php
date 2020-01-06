@@ -188,7 +188,7 @@ class FileSystemManager
     }
 
     /**
-     * Tests if adirectory exists
+     * Tests if a directory exists
      *
      * @param mixed $dirname - A string or an array
      * @return boolean
@@ -352,13 +352,86 @@ class FileSystemManager
         return \copy($originalFilename, $newFilename);
     }
 
-    public function move($old, $new)
+    /**
+     * Removes the files and directories specified.
+     *
+     * @param array $items
+     * @return void
+     */
+    protected function removeItems($items)
+    {
+        if (!\is_array($items))
+            return;
+
+        foreach ($items as $item) {
+            if (\is_file($item))
+                $this->removeFile($item);
+
+            elseif (\is_dir($item))
+                $this->removeWholeDir($item);
+        }
+    }
+
+    /**
+     * Move the contents of a directory into another.
+     *
+     * @param string $old
+     * @param string $new
+     * @return boolean
+     */
+    protected function moveContent($old, $new)
     {
         if (
             !$this->fileExists($old) &&
             !$this->dirExists($old)
         )
             return false;
+
+        if (
+            \is_file($old) || 
+            (\is_dir($old) && !$this->dirExists($new))
+        )
+            return \rename($old, $new);
+
+        $movedItems = array();
+        foreach (\array_map('basename', $this->listdir($old)) as $name) {
+            if ($this->moveContent(
+                $this->formPath(array($old, $name)),
+                $this->formPath(array($new, $name))
+            ))
+                $movedItems[] = $this->formPath(array($new, $name));
+            else {
+                $this->removeItems($movedItems);
+                return false;
+            }
+        }
+
+        Registry::get('MemoryManager')->destroy($movedItems);
+        unset($movedItems);
+
+        $this->removeWholeDir($old);
+
+        return true;
+    }
+
+    /**
+     * Move the file or directory.
+     *
+     * @param string $old
+     * @param string $new
+     * @param boolean $merge
+     * @return boolean
+     */
+    public function move($old, $new, $merge = true)
+    {
+        if (
+            !$this->fileExists($old) &&
+            !$this->dirExists($old)
+        )
+            return false;
+
+        if (\is_dir($old) && $this->dirExists($new))
+            return $this->moveContent($old, $new);
 
         if (!$this->dirExists($this->parentDir($new)))
             $this->createDir($this->parentDir($new));

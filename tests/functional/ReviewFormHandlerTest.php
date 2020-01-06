@@ -236,14 +236,14 @@ class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
     {
         $rev1 = $this->createFirstReviewForm();
 
-        $reviewFormId = Registry::get('DataMapper')->getMapping(
+        $reviewForm1Id = Registry::get('DataMapper')->getMapping(
             'review_forms',
             $rev1->getId()
         );
 
-        $imported = Registry::get('ReviewFormHandler')->importReviewForm($rev1);
+        $cond = array('review_form_id' => $reviewForm1Id);
 
-        $cond = array('review_form_id' => $reviewFormId);
+        $imported = Registry::get('ReviewFormHandler')->importReviewForm($rev1);
 
         $revFromDb = Registry::get('ReviewFormsDAO')->read($cond);
 
@@ -268,13 +268,28 @@ class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
     public function testCanImportTheSecondReviewForm()
     {
         $rev2 = $this->createSecondReviewForm();
-
         $imported = Registry::get('ReviewFormHandler')->importReviewForm($rev2);
 
+        $reviewForm2Id = Registry::get('DataMapper')->getMapping(
+            'review_forms',
+            $rev2->getId()
+        );
+
+        $cond = array('review_form_id' => $reviewForm2Id);
+
+        $revFromDb = Registry::get('ReviewFormsDAO')->read($cond);
+
+        $settingsFromDb = Registry::get('ReviewFormSettingsDAO')->read($cond);
+
+        $elementsFromDb = Registry::get('ReviewFormElementsDAO')->read($cond);
+
         $this->assertSame(
-            '1',
+            '1-1-1-1',
             implode('-', array(
                 (int) $imported,
+                (int) $this->areEqual(1, $revFromDb->length()),
+                (int) $this->areEqual(1, $settingsFromDb->length()),
+                (int) $this->areEqual(2, $elementsFromDb->length()),
             ))
         );
     }

@@ -345,4 +345,75 @@ class FileSystemManagerTest extends TestCase implements StubInterface
 
         $this->removeSandbox();
     }
+
+    public function testMoveDirectoryToAnExistingOneMergingTheirContents()
+    {
+        $this->createSandbox();
+
+        $fsm = Registry::get('FileSystemManager');
+
+        $destination = $fsm->formPath(array(
+            $this->sandbox(),
+            'destination',
+        ));
+
+        $origin = $fsm->formPath(array(
+            $this->sandbox(),
+            'origin',
+        ));
+
+        foreach (array(
+            $destination,
+            $fsm->formPath(array($destination, '100')),
+            $origin,
+            $fsm->formPath(array($origin, '100')),
+        ) as $directory) {
+            $fsm->createDir($directory);
+        }
+
+        foreach (array(
+            $fsm->formPath(array(
+                $destination,
+                '100',
+                '21',
+            )),
+            $fsm->formPath(array(
+                $destination,
+                '100',
+                '22',
+            )),
+            $fsm->formPath(array(
+                $origin,
+                '100', 
+                '77',
+            )),
+            $fsm->formPath(array(
+                $origin,
+                '100',
+                '78',
+            )),
+        ) as $file) {
+            $fsm->createFile($file);
+        }
+
+        $moved = $fsm->move(
+            $fsm->formPath(array($origin, '100')),
+            $fsm->formPath(array($destination, '100'))
+        );
+
+        $this->assertSame(
+            '1-0-4',
+            implode('-', array(
+                (int) $moved,
+                (int) $fsm->dirExists(
+                    $fsm->formPath(array($origin, '100'))
+                ),
+                count($fsm->listdir(
+                    $fsm->formPath(array($destination, '100'))
+                )), 
+            ))
+        );
+
+        $this->removeSandbox();
+    }
 }
