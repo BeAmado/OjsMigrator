@@ -70,6 +70,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\RangeHandler();
     }
 
+    protected function createReviewFormHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\ReviewFormHandler();
+    }
+
     protected function createSchemaHandler()
     {
         return new \BeAmado\OjsMigrator\Db\SchemaHandler();
@@ -157,6 +162,8 @@ class Factory
                 return 'QueryHandler';
             case \strtolower('RangeHandler'):
                 return 'RangeHandler';
+            case \strtolower('ReviewFormHandler'):
+                return 'ReviewFormHandler';
             case \strtolower('SchemaHandler'):
                 return 'SchemaHandler';
             case \strtolower('StatementHandler'):

@@ -188,11 +188,93 @@ class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
             )
         ));
 
+        $settings = Registry::get('ReviewFormElementSettingsDAO')->read(array(
+            'review_form_element_id' => Registry::get('DataMapper')->getMapping(
+                'review_form_elements',
+                $element->get('review_form_element_id')->getValue()
+            )
+        ));
+
         $this->assertSame(
-            '1-1',
+            '1-1-1-1-1-1',
             implode('-', array(
                 (int) $imported,
-                (int) $this->areEqual(1, $fromDb->length())
+                (int) $this->areEqual(1, $fromDb->length()),
+                (int) $this->areEqual(
+                    Registry::get('DataMapper')->getMapping(
+                        'review_form_elements',
+                        $element->get('review_form_element_id')->getValue()
+                    ),
+                    $fromDb->get(0)->getId()
+                ),
+                (int) $this->areEqual(
+                    Registry::get('DataMapper')->getMapping(
+                        'review_forms',
+                        $element->get('review_form_id')->getValue()
+                    ),
+                    $fromDb->get(0)->getData('review_form_id')
+                ),
+                (int) Registry::get('EntityHandler')->areEqual(
+                    $element,
+                    $fromDb->get(0),
+                    array('review_form_id') // not compare the review_form_id
+                ),
+                (int) Registry::get('EntityHandler')->areEqual(
+                    $element->get('settings')->get(0),
+                    $settings->get(0),
+                    array('review_form_element_id')
+                ),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportASettingOfTheFirstReviewForm
+     * @depends testCanImportAnElementOfTheFirstReviewForm
+     */
+    public function testCanImportTheFirstReviewForm()
+    {
+        $rev1 = $this->createFirstReviewForm();
+
+        $reviewFormId = Registry::get('DataMapper')->getMapping(
+            'review_forms',
+            $rev1->getId()
+        );
+
+        $imported = Registry::get('ReviewFormHandler')->importReviewForm($rev1);
+
+        $cond = array('review_form_id' => $reviewFormId);
+
+        $revFromDb = Registry::get('ReviewFormsDAO')->read($cond);
+
+        $settingsFromDb = Registry::get('ReviewFormSettingsDAO')->read($cond);
+
+        $elementsFromDb = Registry::get('ReviewFormElementsDAO')->read($cond);
+
+        $this->assertSame(
+            '1-1-1-1',
+            implode('-', array(
+                (int) $imported,
+                (int) $this->areEqual(1, $revFromDb->length()),
+                (int) $this->areEqual(2, $settingsFromDb->length()),
+                (int) $this->areEqual(2, $elementsFromDb->length()),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportTheFirstReviewForm
+     */
+    public function testCanImportTheSecondReviewForm()
+    {
+        $rev2 = $this->createSecondReviewForm();
+
+        $imported = Registry::get('ReviewFormHandler')->importReviewForm($rev2);
+
+        $this->assertSame(
+            '1',
+            implode('-', array(
+                (int) $imported,
             ))
         );
     }
