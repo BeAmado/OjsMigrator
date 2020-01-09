@@ -11,8 +11,8 @@ use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\TestStub;
 
 // mocks
-use BeAmado\OjsMigrator\JournalMock;
 use BeAmado\OjsMigrator\ReviewFormMock;
+use BeAmado\OjsMigrator\JournalMock;
 
 class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
 {
@@ -290,6 +290,159 @@ class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
                 (int) $this->areEqual(1, $revFromDb->length()),
                 (int) $this->areEqual(1, $settingsFromDb->length()),
                 (int) $this->areEqual(2, $elementsFromDb->length()),
+            ))
+        );
+    }
+
+    protected function updateWithTheMappedIds($data)
+    {
+        if (!\is_a($data, \BeAmado\OjsMigrator\MyObject::class))
+            return;
+
+        if ($data->hasAttribute('review_form_id'))
+            $data->set(
+                'review_form_id',
+                Registry::get('DataMapper')->getMapping(
+                    'review_forms',
+                    $data->get('review_form_id')->getValue()
+                )
+            );
+
+        if ($data->hasAttribute('review_form_element_id'))
+            $data->set(
+                'review_form_element_id',
+                Registry::get('DataMapper')->getMapping(
+                    'review_form_elements',
+                    $data->get('review_form_element_id')->getValue()
+                )
+            );
+    }
+
+    protected function updateReviewFormWithMappedIds($reviewForm)
+    {
+        $this->updateWithTheMappedIds($reviewForm);
+
+        if ($reviewForm->hasAttribute('settings'))
+            $reviewForm->get('settings')->forEachValue(function($setting) {
+                $this->updateWithTheMappedIds($setting);
+            });
+
+        if (!$reviewForm->hasAttribute('elements'))
+            return;
+        
+        $reviewForm->get('elements')->forEachValue(function($element) {
+            $this->updateWithTheMappedIds($element);
+
+            $element->get('settings')->forEachValue(function($setting) {
+                $this->updateWithTheMappedIds($setting);
+            });
+        });
+    }
+
+    /**
+     * @depends testCanImportTheSecondReviewForm
+     */
+    public function testCanGetTheSettingsOfTheSecondReviewForm()
+    {
+        $rev2 = $this->createSecondReviewForm();
+        $this->updateReviewFormWithMappedIds($rev2);
+        $settings = $this->getStub()->callMethod(
+            'getReviewFormSettings',
+            $rev2
+        );
+
+        $this->assertSame(
+            '1-1-1',
+            implode('-', array(
+                (int) $this->areEqual(1, $settings->length()),
+                (int) $this->areEqual(
+                    $settings->get(0)->getData('setting_value'),
+                    $rev2->get('settings')->get(0)->get('setting_value')
+                                                  ->getValue()
+                ),
+                (int) $this->areEqual(
+                    $settings->get(0)->getData('setting_name'),
+                    $rev2->get('settings')->get(0)->get('setting_name')
+                                                  ->getValue()
+                ),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportTheSecondReviewForm
+     */
+    public function testCanGetTheElementsOfTheSecondReviewForm()
+    {
+        $rev2 = $this->createSecondReviewForm();
+        $this->updateReviewFormWithMappedIds($rev2);
+
+        $elements = $this->getStub()->callMethod(
+            'getReviewFormElements',
+            $rev2
+        );
+
+        $rev2ElementsArr = array();
+        $rev2ElementSettingsArr = array();
+        foreach ($rev2->get('elements')->toArray() as $elementArr) {
+            $rev2ElementSettingsArr[] = $elementArr['settings'];
+            unset($elementArr['settings']);
+            $rev2ElementsArr[] = $elementArr;
+        }
+
+        $elementsArr = array();
+        $elementSettingsArr = array();
+        foreach ($elements->toArray() as $elArr) {
+            $elementSettingsArr[] = $elArr['settings'];
+            unset($elArr['settings']);
+            $elementsArr[] = $elArr;
+        }
+
+        $this->assertSame(
+            '1-1-1',
+            implode('-', array(
+                (int) $this->areEqual(2, $elements->length()),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $elementsArr,
+                    $rev2ElementsArr
+                ),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $elementSettingsArr,
+                    $rev2ElementSettingsArr
+                ),
+            ))
+        );
+    }
+
+    public function testCanImportTheReviewFormsOfTheTestJournal()
+    {
+        $jnl = Registry::get('JournalsDAO')->read(array(
+            'path' => (new JournalMock())->getTestJournal()->get('path')
+                                                           ->getValue()
+        ))->get(0);
+
+        Registry::get('ReviewFormHandler')->exportReviewFormsFromJournal($jnl);
+        $dir = Registry::get('EntityHandler')->getEntityDataDir('review_forms');
+
+        $content = Registry::get('FileSystemManager')->listdir($dir);
+
+        $filenameRev1 = $dir . \BeAmado\OjsMigrator\DIR_SEPARATOR . '1.json';
+        $filenameRev2 = $dir . \BeAmado\OjsMigrator\DIR_SEPARATOR . '2.json';
+
+        $rev1 = Registry::get('JsonHandler')->createFromFile($filenameRev1);
+        $rev2 = Registry::get('JsonHandler')->createFromFile($filenameRev2);
+
+        $this->assertSame(
+            '1-1-1-1-1',
+            implode('-', array(
+                (int) Registry::get('ArrayHandler')->equals(
+                    $content,
+                    array($filenameRev1, $filenameRev2)
+                ),
+                (int) $this->areEqual($rev1->get('settings')->length(), 2),
+                (int) $this->areEqual($rev1->get('elements')->length(), 2),
+                (int) $this->areEqual($rev2->get('settings')->length(), 1),
+                (int) $this->areEqual($rev2->get('elements')->length(), 2),
             ))
         );
     }
