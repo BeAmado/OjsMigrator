@@ -414,7 +414,7 @@ class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
         );
     }
 
-    public function testCanImportTheReviewFormsOfTheTestJournal()
+    public function testCanExportTheReviewFormsOfTheTestJournal()
     {
         $jnl = Registry::get('JournalsDAO')->read(array(
             'path' => (new JournalMock())->getTestJournal()->get('path')
