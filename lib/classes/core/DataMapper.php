@@ -4,6 +4,13 @@ namespace BeAmado\OjsMigrator;
 
 class DataMapper
 {
+    /**
+     * Gets the location of the directory where the mapping of the given entity
+     * is stored.
+     *
+     * @param string | \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @return string
+     */
     public function getEntityMappingDir($entity)
     {
         return Registry::get('DataMappingDir')
@@ -42,6 +49,13 @@ class DataMapper
         ));
     }
 
+    /**
+     * Checks if the id is mapped for the given entity.
+     *
+     * @param string $entityName
+     * @param integer $id
+     * @return boolean
+     */
     public function isMapped($entityName, $id)
     {
         return Registry::get('FileSystemManager')->fileExists(
@@ -49,6 +63,14 @@ class DataMapper
         );
     }
 
+    /**
+     * Maps the data of an entity.
+     *
+     * @param string $entityName
+     * @param array $mapping An array that must have the keys 'old' and 'new'
+     * for example: array('old' => 12, 'new' => 34)
+     * @return boolean
+     */
     public function mapData($entityName, $mapping)
     {
         if (!Registry::get('FileHandler')->write(
@@ -77,6 +99,13 @@ class DataMapper
             )[0]);
     }
 
+    /**
+     * Gets the mapped id for the given entity.
+     *
+     * @param string $entityName
+     * @param integer $id
+     * @return integer
+     */
     public function getMapping($entityName, $id)
     {
         if ($this->isMapped($entityName, $id))

@@ -308,4 +308,79 @@ class EntityHandlerTest extends FunctionalTest implements StubInterface
             $groupAfter->getData('publish_email') === '0'
         );
     } 
+
+    public function testCanSetTheMappedIdsOfAnEntity()
+    {
+        $ids = array(
+            'users' => array(
+                'old' => 13,
+                'new' => 22,
+            ),
+            'journals' => array(
+                'old' => 8192,
+                'new' => 5,
+            ),
+            'sections' => array(
+                'old' => 9293,
+                'new' => 19,
+            ),
+        );
+
+        foreach ($ids as $table => $mapping) {
+            Registry::get('DataMapper')->mapData($table, $mapping);
+        }
+
+        $se = Registry::get('EntityHandler')->create('section_editors', array(
+            'journal_id' => $ids['journals']['old'],
+            'section_id' => $ids['sections']['old'],
+            'user_id' => $ids['users']['old'],
+        ));
+
+        $seBefore = $se->cloneInstance();
+
+        Registry::get('EntityHandler')->setMappedData($se, array(
+            'users' => 'user_id',
+            'journals' => 'journal_id',
+            'sections' => 'section_id',
+        ));
+
+        $this->assertSame(
+            '1-1-1-1-1-1-1-1',
+            implode('-', array(
+                (int) $this->areEqual(
+                    $ids['journals']['old'],
+                    $seBefore->getData('journal_id')
+                ),
+                (int) $this->areEqual(
+                    $ids['sections']['old'],
+                    $seBefore->getData('section_id')
+                ),
+                (int) $this->areEqual(
+                    $ids['users']['old'],
+                    $seBefore->getData('user_id')
+                ),
+                (int) $this->areEqual(
+                    $se->getData('can_edit'),
+                    $seBefore->getData('can_edit')
+                ),
+                (int) $this->areEqual(
+                    $se->getData('can_review'),
+                    $seBefore->getData('can_review')
+                ),
+                (int) $this->areEqual(
+                    $ids['journals']['new'],
+                    $se->getData('journal_id')
+                ),
+                (int) $this->areEqual(
+                    $ids['sections']['new'],
+                    $se->getData('section_id')
+                ),
+                (int) $this->areEqual(
+                    $ids['users']['new'],
+                    $se->getData('user_id')
+                ),
+            ))
+        );
+
+    }
 }

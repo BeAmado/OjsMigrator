@@ -529,4 +529,24 @@ class EntityHandler
 
         return $pks;
     }
+
+    public function setMappedData($entity, $args = array())
+    {
+        if (!\is_array($args))
+            return;
+
+        if (!\is_a($entity, \BeAmado\OjsMigrator\MyObject::class))
+            return;
+
+        foreach ($args as $table => $field) {
+            if ($entity->hasAttribute($field))
+                $entity->set(
+                    $field,
+                    Registry::get('DataMapper')->getMapping(
+                        $table, 
+                        $entity->get($field)->getValue()
+                    )
+                );
+        }
+    }
 }
