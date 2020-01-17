@@ -157,7 +157,18 @@ class IssueHandler extends EntityHandler
             //import the issue_galleys
             if ($issue->hasAttribute('galleys'))
                 $issue->get('galleys')->forEachValue(function($galley) {
-                
+                    $this->importIssueGalley($galley);
+                });
+
+            // import the custom_issue_order
+            if ($issue->hasAttribute('custom_order'))
+                $this->importCustomIssueOrder($issue->get('custom_order'));
+
+            // import the custom_section_orders
+            if ($issue->hasAttribute('custom_section_order'))
+                $issue->get('custom_section_orders')
+                      ->forEachValue(function($sectionOrder) {
+                    $this->importCustomSectionOrder($sectionOrder);
                 });
         } catch (\Exception $e) {
             // TODO: TREAT BETTER
@@ -165,4 +176,184 @@ class IssueHandler extends EntityHandler
         }
     }
 
+    protected function getIssueSettings($issue)
+    {
+        return Registry::get('IssueSettingsDAO')->read(array(
+            'issue_id' => \is_numeric($issue)
+                ? (int) $issue
+                : $issue->get('issue_id')->getValue()
+        ));
+    }
+
+    protected function getIssueFiles($issue)
+    {
+        return Registry::get('IssueFilesDAO')->read(array(
+            'issue_id' => \is_numeric($issue)
+                ? (int) $issue
+                : $issue->get('issue_id')->getValue()
+        ));
+    }
+
+    protected function getIssueGalleySettings($galley)
+    {
+        return Registry::get('IssueGalleySettingsDAO')->read(array(
+            'galley_id' => \is_numeric($galley)
+                ? (int) $galley
+                : $galley->get('galley_id')->getValue()
+        ));
+    }
+
+    protected function getIssueGalleys($issue)
+    {
+        $galleys = Registry::get('IssueGalleysDAO')->read(array(
+            'issue_id' => \is_numeric($issue)
+                ? (int) $issue
+                : $issue->get('issue_id')->getValue()
+        ));
+
+        if (
+            !\is_a($galleys, \BeAmado\OjsMigrator\MyObject::class) ||
+            $galleys->length() < 1
+        )
+            return;
+
+        $galleys->forEachValue(function($g) {
+            $settings = $this->getIssueGalleySettings($g);
+
+            if (
+                \is_a($settings, \BeAmado\OjsMigrator\MyObject::class) &&
+                $settings->length() >= 1
+            )
+                $g->set(
+                    'settings',
+                    $settings
+                );
+        });
+
+        return $galleys;
+    }
+
+    protected function getCustomIssueOrder($issue)
+    {
+        return Registry::get('CustomIssueOrdersDAO')->read(array(
+            'issue_id' => \is_numeric($issue)
+                ? (int) $issue
+                : $issue->get('issue_id')->getValue()
+        ));
+    }
+
+    protected function getCustomSectionOrders($issue)
+    {
+        return Registry::get('CustomSectionOrdersDAO')->read(array(
+            'issue_id' => \is_numeric($issue)
+                ? (int) $issue
+                : $issue->get('issue_id')->getValue()
+        ));
+    }
+
+    protected function getIssueFilesDir($journal)
+    {
+        return Registry::get('FileSystemManager')->formPath(array(
+            Registry::get('filesDir'),
+            'journals',
+            \is_numeric($journal)
+                ? (int) $journal 
+                : $journal->get('journal_id')->getValue(),
+            'issues',
+        ));
+    }
+
+    protected function copyIssueFiles($issue)
+    {
+        Registry::set(
+            '__journalId__',
+            $issue->get('journal_id')->getValue()
+        );
+
+        $issue->get('files')->forEachValue(function($issueFile) {
+            Registry::get('FileSystemManager')->copyDir(
+                Registry::get('FileSystemManager')->formPath(array(
+                    $this->getIssueFilesDir(Registry::get('__journalId__')),
+                    $issueFile->get('issue_id')->getValue(),
+                )),
+                Registry::get('FileSystemManager')->formPath(array(
+                    $this->getEntityDataDir('issues'),
+                    $issueFile->get('issue_id')->getValue(),
+                ))
+            );
+        });
+
+        Registry::remove('__journalId__');
+    }
+
+    protected function getIssueData($filename)
+    {
+        $issue = Registry::get('JsonHandler')->createFromFile($filename);
+        $issue->set(
+            'settings',
+            $this->getIssueSettings($issue)
+        );
+
+        $issue->set(
+            'files',
+            $this->getIssueFiles($issue)
+        );
+
+        $issue->set(
+            'galleys',
+            $this->getIssueGalleys($issue)
+        );
+
+        $issue->set(
+            'custom_order',
+            $this->getCustomIssueOrder($issue)
+        );
+
+        $issue->set(
+            'custom_section_orders',
+            $this->getCustomSectionOrders($issue)
+        );
+
+        // copy the files
+        if ($issue->get('files')->length() > 0)
+            $this->copyIssueFiles($issue);
+
+        return Registry::get('JsonHandler')->dumpToFile(
+            Registry::get('FileSystemManager')->formPath(array(
+                \dirname($filename),
+                $issue->get('issue_id')->getValue(),
+                $issue->get('issue_id')->getValue() . '.json',
+            )),
+            $issue
+        ) && Registry::get('FileSystemManager')->removeFile($filename);
+    }
+
+    public function exportIssuesFromJournal($journal)
+    {
+        if (
+            !\is_numeric($journal) &&
+            (
+                !$this->isEntity($journal) ||
+                $journal->getId() == null
+            )
+        )
+            return;
+
+        Registry::get('IssuesDAO')->dumpToJson(array(
+            'journal_id' => \is_numeric($journal)
+                ? (int) $journal
+                : $journal->getId()
+        ));
+
+        foreach (Registry->get('FileSystemManager')->listdir(
+            $this->getEntityDataDir('issues')
+        ) as $filename) {
+            if (!$this->getIssueData($filename))
+                return false;
+            
+            // TODO: log the error and continue the exportation
+        }
+
+        return true;
+    }
 }

@@ -530,6 +530,13 @@ class EntityHandler
         return $pks;
     }
 
+    /**
+     * Sets the attributes of the given entity with data mapped.
+     *
+     * @param \BeAmado\OjsMigrator\Entity\Entity $entity
+     * @param array $args
+     * @return boolean
+     */
     public function setMappedData($entity, $args = array())
     {
         if (!\is_array($args))
@@ -539,7 +546,12 @@ class EntityHandler
             return;
 
         foreach ($args as $table => $field) {
-            if ($entity->hasAttribute($field))
+            if (
+                $entity->hasAttribute($field) && 
+                !Registry::get('DataMapper')->isMapped()
+            )
+                return false;
+            else if ($entity->hasAttribute($field))
                 $entity->set(
                     $field,
                     Registry::get('DataMapper')->getMapping(
@@ -548,5 +560,7 @@ class EntityHandler
                     )
                 );
         }
+
+        return true;
     }
 }

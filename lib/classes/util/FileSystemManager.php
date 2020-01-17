@@ -349,6 +349,9 @@ class FileSystemManager
             return false;
         }
 
+        if (!$this->dirExists($this->parentDir($newFilename)))
+            $this->createDir($this->parentDir($newFilename));
+
         return \copy($originalFilename, $newFilename);
     }
 
@@ -437,5 +440,48 @@ class FileSystemManager
             $this->createDir($this->parentDir($new));
 
         return \rename($old, $new);
+    }
+
+    /**
+     * Copies the directory to the new location.
+     *
+     * @param string $old
+     * @param string $new
+     * @param boolean $merge
+     * @return boolean
+     */
+    public function copyDir($old, $new, $merge = true)
+    {
+        if (!$this->dirExists($old))
+            return false;
+        
+        if (\is_dir($old) && $this->dirExists($new))
+            return $this->copyContent($old, $new);
+
+        $result = $this->createDir($new);
+
+        foreach ($this->listdir($old) as $item) {
+            if ($result == false)
+                break;
+
+            if (\is_dir($item))
+                $result = $result && $this->copyDir(
+                    $item, 
+                    $this->formPath(array(
+                        $new,
+                        \basename($item)
+                    ))
+                );
+            else if (\is_file($item))
+                $result = $result && $this->copyFile(
+                    $item,
+                    $this->formPath(array(
+                        $new,
+                        \basename($item)
+                    ))
+                );
+        }
+
+        return $result;
     }
 }

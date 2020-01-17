@@ -70,6 +70,57 @@ class JournalHandler extends EntityHandler
 
     protected function getJournalSettings($journal)
     {
+        return Registry::get('JournalSettingsDAO')->read(array(
+            'journal_id' => \is_numeric($journal)
+                ? (int) $journal
+                : $journal->get('journal_id')->getValue()
+        ));
+    }
 
+    protected function getPluginSettings($journal)
+    {
+        return Registry::get('PluginSettingsDAO')->read(array(
+            'journal_id' => \is_numeric($journal)
+                ? (int) $journal
+                : $journal->get('journal_id')->getValue()
+        ));
+    }
+    
+    protected function getJournalPlugins($journal)
+    {
+        return $this->getPluginSettings($journal);
+    }
+
+    public function exportJournal($journalId)
+    {
+        $res = Registry::get('JournalsDAO')->read(array(
+            'journal_id' => $journalId
+        ));
+
+        if (
+            !\is_a($res, \BeAmado\OjsMigrator\MyObject::class) ||
+            $res->length() !== 1
+        )
+            return;
+
+        $journal = $res->get(0);
+        $journal->set('settings', $this->getJournalSettings($journal->getId());
+        $journal->set('plugins', $this->getJournalPlugins($journal->getId());
+
+        $filename = Registry::get('entitiesDir')
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'journal.json';
+
+        $exportedJournal = Registry::get('JsonHandler')->dumpToFile(
+            $filename,
+            $journal
+        );
+
+        // export the users
+        // export the groups
+        // export the announcements
+        // export the review forms
+        // export the sections
+        // export the issues
+        // export articles
     }
 }
