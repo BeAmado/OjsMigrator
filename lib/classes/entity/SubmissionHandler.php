@@ -62,6 +62,11 @@ class SubmissionHandler extends EntityHandler
         return \implode('_', $parts);
     }
 
+    public function formIdField()
+    {
+        return $this->getEntityAlias() . '_id';
+    }
+
     public function getDAO($name = 'main')
     {
         return Registry::get(
@@ -85,6 +90,100 @@ class SubmissionHandler extends EntityHandler
         return $this->createInDatabase($submission);
     }
 
+    protected function importSubmissionSetting($data)
+    {
+        $setting = $this->getValidData(
+            $this->formTableName('settings'),
+            $data
+        );
+
+        if (!$this->setMappedData($setting, array(
+            $this->formTableName() => $this->formIdField(), 
+        )))
+            return;
+
+        return $this->createOrUpdateInDatabase($setting);
+    }
+
+    protected function importSubmissionFile($data)
+    {
+        $submissionFile = $this->getValidData(
+            $this->formTableName('files'),
+            $data
+        );
+
+        if (!$this->setMappedData($submissionFile, array(
+            $this->formTableName() => $this->formIdField(),
+        )))
+            return;
+
+        return $this->createOrUpdateInDatabase($submissionFile);
+    }
+
+    protected function importSubmissionSupplementaryFile($data)
+    {
+        throw new \Exception(
+            'Gotta implement the method importSubmissionSupplementaryFile '
+                . ' in the class SubmissionHandler.'
+        );
+    }
+
+    protected function importSubmissionSuppFileSetting($data)
+    {
+        throw new \Exception(
+            'Gotta implement the method importSubmissionSuppFileSetting '
+                . ' in the class SubmissionHandler.'
+        );
+    }
+
+    protected function importSubmissionGalley($data)
+    {
+        throw new \Exception(
+            'Gotta implement the method importSubmissionGalley '
+                . ' in the class SubmissionHandler.'
+        );
+    }
+
+    protected function importSubmissionGalleySetting($data)
+    {
+        throw new \Exception(
+            'Gotta implement the method importSubmissionGalleySetting '
+                . ' in the class SubmissionHandler.'
+        );
+    }
+
+    protected function importSubmissionComment($data)
+    {
+        throw new \Exception(
+            'Gotta implement the method importSubmissionComment '
+                . ' in the class SubmissionHandler.'
+        );
+    }
+
+    protected function importSubmissionHtmlGalleyImage($data)
+    {
+        throw new \Exception(
+            'Gotta implement the method importSubmissionHtmlGalleyImage '
+                . ' in the class SubmissionHandler.'
+        );
+    }
+
+    protected function importSubmissionKeyword($data)
+    {
+        throw new \Exception(
+            'Gotta implement the method importSubmissionKeywords '
+                . ' in the class SubmissionHandler.'
+        );
+    }
+
+    protected function importSubmissionGalleys($data)
+    {
+        throw new \Exception(
+            'Gotta implement the method importSubmissionGalleys '
+                . ' in the class SubmissionHandler.'
+        );
+    }
+
     public function importSubmission($submission)
     {
         if (
@@ -95,6 +194,11 @@ class SubmissionHandler extends EntityHandler
             !$this->registerSubmission($submission)
         )
             return false;
+
+        // import the submission settings
+        $submission->get('settings')->forEachValue(function($setting) {
+            $this->importSubmissionSetting($setting);
+        });
     }
 
 }

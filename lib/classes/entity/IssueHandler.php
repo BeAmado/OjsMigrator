@@ -72,6 +72,12 @@ class IssueHandler extends EntityHandler
 
     }
 
+    protected function copyIssueFile($filename)
+    {
+        throw new \Exception('Gotta implement the copyIssueFile method from the'
+            . ' class IssueHandler.');
+    }
+
     protected function importIssueGalleySetting($data)
     {
         $setting = $this->getValidData('issue_galley_settings', $data);
