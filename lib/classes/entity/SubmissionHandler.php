@@ -122,17 +122,26 @@ class SubmissionHandler extends EntityHandler
 
     protected function importSubmissionSupplementaryFile($data)
     {
-        throw new \Exception(
-            'Gotta implement the method importSubmissionSupplementaryFile '
-                . ' in the class SubmissionHandler.'
+        $suppFile = $this->getValidData(
+            $this->formTableName('supplementary_files'),
+            $data
         );
+
+        if (!$this->setMappedData($suppFile, array(
+            $this->formTableName('files') => 'file_id',
+            $this->formTableName() => $this->formIdField(),
+        )))
+            return;
+
+        return $this->createOrUpdateInDatabase($suppFile);
     }
 
     protected function importSubmissionSuppFileSetting($data)
     {
-        throw new \Exception(
-            'Gotta implement the method importSubmissionSuppFileSetting '
-                . ' in the class SubmissionHandler.'
+        return $this->importEntity(
+            $data,
+            $this->formTableName('supp_file_settings'),
+            array($this->formTableName('supplementary_files') => 'supp_id')
         );
     }
 
@@ -176,12 +185,37 @@ class SubmissionHandler extends EntityHandler
         );
     }
 
-    protected function importSubmissionGalleys($data)
+    protected function importSubmissionAuthor($data)
     {
         throw new \Exception(
-            'Gotta implement the method importSubmissionGalleys '
+            'Gotta implement the method importSubmissionAuthor '
                 . ' in the class SubmissionHandler.'
         );
+    }
+
+    protected function importEditAssingment($data)
+    {
+
+    }
+
+    protected function importEditDecision($data)
+    {
+
+    }
+
+    protected function importSubmissionHistory($data)
+    {
+
+    }
+
+    protected function importReviewAssingment($data)
+    {
+
+    }
+
+    protected function importReviewRound($data)
+    {
+
     }
 
     public function importSubmission($submission)

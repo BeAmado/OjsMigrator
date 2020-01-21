@@ -548,7 +548,10 @@ class EntityHandler
         foreach ($args as $table => $field) {
             if (
                 $entity->hasAttribute($field) && 
-                !Registry::get('DataMapper')->isMapped()
+                !Registry::get('DataMapper')->isMapped(
+                    $table,
+                    $entity->get($field)->getValue()
+                )
             )
                 return false;
             else if ($entity->hasAttribute($field))
@@ -562,5 +565,34 @@ class EntityHandler
         }
 
         return true;
+    }
+
+    /**
+     * Imports the entity's data.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $data
+     * @param string $table
+     * @param array $mappings
+     * @param boolean $forceCreate
+     * @return boolean
+     */
+    protected function importEntity(
+        $data, 
+        $table, 
+        $mappings = array(), 
+        $forceCreate = false
+    ) {
+        $entity = $this->getValidData($table, $data);
+
+        if (
+            !empty($mappings) && 
+            !$this->setMappedData($entity, $mappings)
+        )
+            return;
+
+        if ($forceCreate)
+            return $this->createInDatabase($entity);
+
+        return $this->createOrUpdateInDatabase($entity);
     }
 }

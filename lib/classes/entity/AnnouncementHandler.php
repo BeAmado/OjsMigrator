@@ -12,7 +12,7 @@ class AnnouncementHandler extends EntityHandler
 
     protected function registerAnnouncement($data)
     {
-        $ann = $this->getValidData('announcements', $data);
+        /*$ann = $this->getValidData('announcements', $data);
         if (Registry::get('DataMapper')->isMapped(
             'journals', 
             $ann->getData('assoc_id'))
@@ -25,12 +25,20 @@ class AnnouncementHandler extends EntityHandler
                 )
             );
         // TODO: treat if the assoc_id (the journal) is not mapped
-        return $this->createInDatabase($ann);
+        return $this->createInDatabase($ann);*/
+        return $this->importEntity(
+            $data,
+            'announcements',
+            array(
+                'journals' => 'assoc_id'
+            ),
+            true // force create in the database
+        );
     }
 
     protected function importAnnouncementSetting($data)
     {
-        $setting = $this->getValidData('announcement_settings', $data);
+        /*$setting = $this->getValidData('announcement_settings', $data);
         $setting->set(
             'announcement_id',
             Registry::get('DataMapper')->getMapping(
@@ -39,7 +47,12 @@ class AnnouncementHandler extends EntityHandler
             )
         );
 
-        return $this->createOrUpdateInDatabase($setting);
+        return $this->createOrUpdateInDatabase($setting);*/
+        return $this->importEntity(
+            $data, 
+            'announcement_settings', 
+            array('announcements' => 'announcement_id')
+        );
     }
 
     public function importAnnouncement($ann)

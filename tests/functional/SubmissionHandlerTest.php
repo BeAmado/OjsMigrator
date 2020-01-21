@@ -23,7 +23,7 @@ class SubmissionHandlerTest extends FunctionalTest
     {
         $this->assertSame(
             'article',
-            $this->getStub()->getSubmissionAlias()
+            $this->getStub()->getEntityAlias()
         );
     }
 }

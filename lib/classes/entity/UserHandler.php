@@ -105,7 +105,7 @@ class UserHandler extends EntityHandler
 
     protected function importUserSetting($data)
     {
-        $setting = $this->getValidData('user_settings', $data);
+        /*$setting = $this->getValidData('user_settings', $data);
         $setting->set(
             'user_id',
             Registry::get('DataMapper')->getMapping(
@@ -114,7 +114,12 @@ class UserHandler extends EntityHandler
             )
         );
 
-        return $this->createOrUpdateInDatabase($setting);
+        return $this->createOrUpdateInDatabase($setting);*/
+        return $this->importEntity(
+            $data, 
+            'user_settings', 
+            array('users' => 'user_id')
+        );
     }
 
     protected function importControlledVocab($data)
@@ -129,7 +134,7 @@ class UserHandler extends EntityHandler
         if (!$data->hasAttribute('settings'))
             return false;
 
-        $entry = $this->getValidData('controlled_vocab_entries', $data);
+        /*$entry = $this->getValidData('controlled_vocab_entries', $data);
         
         if (!Registry::get('DataMapper')->isMapped(
             'controlled_vocabs',
@@ -148,6 +153,14 @@ class UserHandler extends EntityHandler
         );
 
         if (!$this->createInDatabase($entry))
+            return false;
+*/
+        if (!$this->importEntity(
+            $data,
+            'controlled_vocab_entries',
+            array('controlled_vocabs' => 'controlled_vocab_id'),
+            true
+        ))
             return false;
 
         $data->get('settings')->forEachValue(function($s) {

@@ -12,7 +12,7 @@ class GroupHandler extends EntityHandler
 
     protected function registerGroup($data)
     {
-        $group = $this->getValidData('groups', $data);
+        /*$group = $this->getValidData('groups', $data);
         $group->set(
             'assoc_id',
             Registry::get('DataMapper')->getMapping(
@@ -21,12 +21,18 @@ class GroupHandler extends EntityHandler
             )
         );
 
-        return $this->createInDatabase($group);
+        return $this->createInDatabase($group);*/
+        return $this->importEntity(
+            $data,
+            'groups',
+            array('journals' => 'assoc_id'),
+            true
+        );
     }
 
     protected function importGroupSetting($data)
     {
-        $setting = $this->getValidData('group_settings', $data);
+        /*$setting = $this->getValidData('group_settings', $data);
         $setting->set(
             'group_id',
             Registry::get('DataMapper')->getMapping(
@@ -35,12 +41,17 @@ class GroupHandler extends EntityHandler
             )
         );
 
-        return $this->createOrUpdateInDatabase($setting);
+        return $this->createOrUpdateInDatabase($setting);*/
+        return $this->importEntity(
+            $data,
+            'group_settings',
+            array('groups' => 'group_id')
+        );
     }
 
     protected function importGroupMembership($data)
     {
-        $membership = $this->getValidData('group_memberships', $data);
+        /*$membership = $this->getValidData('group_memberships', $data);
         if (!Registry::get('DataMapper')->isMapped(
             'users',
             $membership->getData('user_id')
@@ -71,7 +82,11 @@ class GroupHandler extends EntityHandler
             )
         );
 
-        return $this->createOrUpdateInDatabase($membership);
+        return $this->createOrUpdateInDatabase($membership);*/
+        return $this->importEntity($data, 'group_memberships', array(
+            'groups' => 'group_id',
+            'users' => 'user_id',
+        ));
     }
 
     public function importGroup($data)
