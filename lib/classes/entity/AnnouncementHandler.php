@@ -12,42 +12,16 @@ class AnnouncementHandler extends EntityHandler
 
     protected function registerAnnouncement($data)
     {
-        /*$ann = $this->getValidData('announcements', $data);
-        if (Registry::get('DataMapper')->isMapped(
-            'journals', 
-            $ann->getData('assoc_id'))
-        )
-            $ann->set(
-                'assoc_id',
-                Registry::get('DataMapper')->getMapping(
-                    'journals', 
-                    $ann->getData('assoc_id')
-                )
-            );
-        // TODO: treat if the assoc_id (the journal) is not mapped
-        return $this->createInDatabase($ann);*/
         return $this->importEntity(
             $data,
             'announcements',
-            array(
-                'journals' => 'assoc_id'
-            ),
+            array('journals' => 'assoc_id'),
             true // force create in the database
         );
     }
 
     protected function importAnnouncementSetting($data)
     {
-        /*$setting = $this->getValidData('announcement_settings', $data);
-        $setting->set(
-            'announcement_id',
-            Registry::get('DataMapper')->getMapping(
-                'announcements',
-                $setting->get('announcement_id')->getValue()
-            )
-        );
-
-        return $this->createOrUpdateInDatabase($setting);*/
         return $this->importEntity(
             $data, 
             'announcement_settings', 
@@ -74,9 +48,10 @@ class AnnouncementHandler extends EntityHandler
                 return false;
 
             // import the settings
-            foreach ($ann->getData('settings') as $setting) {
-                $this->importAnnouncementSetting($setting);
-            }
+            if ($ann->hasAttribute('settings'))
+                $ann->get('settings')->forEachValue(function($setting) {
+                    $this->importAnnouncementSetting($setting);
+                });
         } catch (\Exception $e) {
             // TODO: treat the exception
             echo "\n\n" . $e->getMessage() . "\n\n";

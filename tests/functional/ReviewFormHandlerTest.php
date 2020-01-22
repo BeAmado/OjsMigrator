@@ -176,7 +176,7 @@ class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
     {
         $element = $this->createFirstReviewForm()->get('elements')->get(0);
 
-        $imported = $this->getStub()->callMethod(
+        $this->getStub()->callMethod(
             'importReviewFormElement',
             $element
         );
@@ -196,9 +196,8 @@ class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
         ));
 
         $this->assertSame(
-            '1-1-1-1-1-1',
+            '1-1-1-1-1',
             implode('-', array(
-                (int) $imported,
                 (int) $this->areEqual(1, $fromDb->length()),
                 (int) $this->areEqual(
                     Registry::get('DataMapper')->getMapping(

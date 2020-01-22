@@ -12,16 +12,6 @@ class GroupHandler extends EntityHandler
 
     protected function registerGroup($data)
     {
-        /*$group = $this->getValidData('groups', $data);
-        $group->set(
-            'assoc_id',
-            Registry::get('DataMapper')->getMapping(
-                'journals',
-                $group->getData('assoc_id')
-            )
-        );
-
-        return $this->createInDatabase($group);*/
         return $this->importEntity(
             $data,
             'groups',
@@ -32,16 +22,6 @@ class GroupHandler extends EntityHandler
 
     protected function importGroupSetting($data)
     {
-        /*$setting = $this->getValidData('group_settings', $data);
-        $setting->set(
-            'group_id',
-            Registry::get('DataMapper')->getMapping(
-                'groups',
-                $setting->getData('group_id')
-            )
-        );
-
-        return $this->createOrUpdateInDatabase($setting);*/
         return $this->importEntity(
             $data,
             'group_settings',
@@ -51,42 +31,14 @@ class GroupHandler extends EntityHandler
 
     protected function importGroupMembership($data)
     {
-        /*$membership = $this->getValidData('group_memberships', $data);
-        if (!Registry::get('DataMapper')->isMapped(
-            'users',
-            $membership->getData('user_id')
-        )) {
-
-        }
-
-        if (!Registry::get('DataMapper')->isMapped(
-            'users', 
-            $membership->getData('user_id')
-        ))
-            return false;
-            // TODO: treat better
-
-        $membership->set(
-            'group_id',
-            Registry::get('DataMapper')->getMapping(
-                'groups',
-                $membership->getData('group_id')
+        return $this->importEntity(
+            $data, 
+            'group_memberships', 
+            array(
+                'groups' => 'group_id',
+                'users' => 'user_id',
             )
         );
-
-        $membership->set(
-            'user_id',
-            Registry::get('DataMapper')->getMapping(
-                'users',
-                $membership->getData('user_id')
-            )
-        );
-
-        return $this->createOrUpdateInDatabase($membership);*/
-        return $this->importEntity($data, 'group_memberships', array(
-            'groups' => 'group_id',
-            'users' => 'user_id',
-        ));
     }
 
     public function importGroup($data)
@@ -102,13 +54,17 @@ class GroupHandler extends EntityHandler
             return false;
             // TODO: treat better
 
-        foreach ($group->getData('settings') as $setting) {
-            $this->importGroupSetting($setting);
-        }
+        // import the settings
+        if ($group->hasAttribute('settings'))
+            $group->get('settings')->forEachValue(function($setting) {
+                $this->importGroupSetting($setting);
+            });
 
-        foreach ($group->getData('memberships') as $membership) {
-            $this->importGroupMembership($membership);
-        }
+        // import the memberships
+        if ($group->hasAttribute('memberships'))
+            $group->get('memberships')->forEachValue(function($membership) {
+                $this->importGroupMembership($membership);
+            });
 
         return true;
     }

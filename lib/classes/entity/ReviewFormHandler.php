@@ -18,55 +18,31 @@ class ReviewFormHandler extends EntityHandler
      */
     protected function importReviewFormElementSetting($data)
     {
-        $setting = $this->getValidData(
+        return $this->importEntity(
+            $data,
             'review_form_element_settings',
-            $data
+            array('review_form_elements' => 'review_form_element_id')
         );
-
-        $setting->set(
-            'review_form_element_id',
-            Registry::get('DataMapper')->getMapping(
-                'review_form_elements',
-                $setting->getData('review_form_element_id')
-            )
-        );
-
-        return $this->createOrUpdateInDatabase($setting);
     }
 
     /**
      * Inserts or updates the review_form_elements data.
      *
      * @param \BeAmado\OjsMigrator\MyObject $data
-     * @return boolean
+     * @return void
      */
     protected function importReviewFormElement($data)
     {
-        $element = $this->getValidData('review_form_elements', $data);
-
-        $element->set(
-            'review_form_id',
-            Registry::get('DataMapper')->getMapping(
-                'review_forms',
-                $element->getData('review_form_id')
-            )
+        $this->importEntity(
+            $data,
+            'review_form_elements',
+            array('review_forms' => 'review_form_id')
         );
 
-        $this->createOrUpdateInDatabase($element);
-
-        if (!Registry::get('DataMapper')->isMapped(
-            'review_form_elements',
-            $element->getId()
-        ))
-
-        if (!$data->hasAttribute('settings'))
-            return;
-
-        $data->get('settings')->forEachValue(function($setting) {
-            $this->importReviewFormElementSetting($setting);
-        });
-
-        return true;
+        if ($data->hasAttribute('settings'))
+            $data->get('settings')->forEachValue(function($setting) {
+                $this->importReviewFormElementSetting($setting);
+            });
     }
 
     /**
@@ -77,15 +53,11 @@ class ReviewFormHandler extends EntityHandler
      */
     protected function importReviewFormSetting($data)
     {
-        $setting = $this->getValidData('review_form_settings', $data);
-        $setting->set(
-            'review_form_id',
-            Registry::get('DataMapper')->getMapping(
-                'review_forms',
-                $setting->getData('review_form_id')
-            )
+        return $this->importEntity(
+            $data,
+            'review_form_settings',
+            array('review_forms' => 'review_form_id')
         );
-        return $this->createOrUpdateInDatabase($setting);
     }
 
     /**
@@ -96,15 +68,12 @@ class ReviewFormHandler extends EntityHandler
      */
     protected function registerReviewForm($data)
     {
-        $reviewForm = $this->getValidData('review_forms', $data);
-        $reviewForm->set(
-            'assoc_id',
-            Registry::get('DataMapper')->getMapping(
-                'journals',
-                $reviewForm->getData('assoc_id')
-            )
+        return $this->importEntity(
+            $data,
+            'review_forms',
+            array('journals' => 'assoc_id'),
+            true
         );
-        return $this->createInDatabase($reviewForm);
     }
 
     /**
@@ -125,14 +94,16 @@ class ReviewFormHandler extends EntityHandler
             return false;
 
         // importing the settings
-        foreach ($reviewForm->getData('settings') as $setting) {
-            $this->importReviewFormSetting($setting);
-        }
+        if ($reviewForm->hasAttribute('settings'))
+            $reviewForm->get('settings')->forEachValue(function($setting) {
+                $this->importReviewFormSetting($setting);
+            });
 
         // importing the elements
-        foreach ($reviewForm->getData('elements') as $element) {
-            $this->importReviewFormElement($element);
-        }
+        if ($reviewForm->hasAttribute('elements'))
+            $reviewForm->get('elements')->forEachValue(function($element) {
+                $this->importReviewFormElement($element);
+            });
 
         return true;
     }
@@ -182,14 +153,17 @@ class ReviewFormHandler extends EntityHandler
             $this->getEntityDataDir('review_forms')
         ) as $filename) {
             $rev = Registry::get('JsonHandler')->createFromFile($filename);
+
             $rev->set(
                 'settings',
                 $this->getReviewFormSettings($rev)
             );
+
             $rev->set(
                 'elements',
                 $this->getReviewFormElements($rev)
             );
+
             Registry::get('JsonHandler')->dumpToFile(
                 $filename,
                 $rev

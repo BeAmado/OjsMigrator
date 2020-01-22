@@ -240,20 +240,28 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             )
         );
 
-        $this->assertTrue(
-            $imported &&
-            Registry::get('DataMapper')->isMapped(
-                'controlled_vocab_entries',
-                $interest->get('controlled_vocab_entry_id')->getValue()
-            ) &&
-            Registry::get('DataMapper')->isMapped(
-                'controlled_vocabs',
-                $interest->get('controlled_vocab_entries')
-                         ->get(0)
-                         ->get('controlled_vocab_id')->getValue()
-            ) &&
-            $entrySettings->length() === 1 &&
-            $entrySettings->get(0)->getData('setting_value') === 'science'
+        $this->assertTrue($imported);
+
+        $this->assertSame(
+            '1-1-1-1',
+            implode('-', array(
+                (int) $imported,
+                (int) Registry::get('DataMapper')->isMapped(
+                    'controlled_vocab_entries',
+                    $interest->get('controlled_vocab_entry_id')->getValue()
+                ),
+                (int) Registry::get('DataMapper')->isMapped(
+                    'controlled_vocabs',
+                    $interest->get('controlled_vocab_entries')
+                             ->get(0)
+                             ->get('controlled_vocab_id')->getValue()
+                ),
+                (int) $this->areEqual($entrySettings->length(), 1),
+                (int) $this->areEqual(
+                    $entrySettings->get(0)->getData('setting_value'),
+                    'science'
+                )
+            ))
         );
     }
 
