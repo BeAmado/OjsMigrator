@@ -134,7 +134,7 @@ class UserHandler extends EntityHandler
         if (!$data->hasAttribute('settings'))
             return false;
 
-        /*$entry = $this->getValidData('controlled_vocab_entries', $data);
+        $entry = $this->getValidData('controlled_vocab_entries', $data);
         
         if (!Registry::get('DataMapper')->isMapped(
             'controlled_vocabs',
@@ -153,14 +153,6 @@ class UserHandler extends EntityHandler
         );
 
         if (!$this->createInDatabase($entry))
-            return false;
-*/
-        if (!$this->importEntity(
-            $data,
-            'controlled_vocab_entries',
-            array('controlled_vocabs' => 'controlled_vocab_id'),
-            true
-        ))
             return false;
 
         $data->get('settings')->forEachValue(function($s) {
@@ -247,7 +239,7 @@ class UserHandler extends EntityHandler
 
     protected function importUserRole($data)
     {
-        $role = $this->getValidData('roles', $data);
+        /*$role = $this->getValidData('roles', $data);
 
         if (
             !Registry::get('DataMapper')->isMapped(
@@ -277,7 +269,15 @@ class UserHandler extends EntityHandler
             )
         );
 
-        return $this->createOrUpdateInDatabase($role);
+        return $this->createOrUpdateInDatabase($role);*/
+        return $this->importEntity(
+            $data,
+            'roles',
+            array(
+                'users' => 'user_id',
+                'journals' => 'journal_id',
+            )
+        );
     }
 
     public function importUser($user)

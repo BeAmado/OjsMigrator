@@ -240,10 +240,8 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             )
         );
 
-        $this->assertTrue($imported);
-
         $this->assertSame(
-            '1-1-1-1',
+            '1-1-1-1-1',
             implode('-', array(
                 (int) $imported,
                 (int) Registry::get('DataMapper')->isMapped(

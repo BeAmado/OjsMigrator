@@ -12,7 +12,7 @@ class SectionHandler extends EntityHandler
 
     protected function registerSection($data)
     {
-        $section = $this->getValidData('sections', $data);
+        /*$section = $this->getValidData('sections', $data);
 
         if (!Registry::get('DataMapper')->isMapped(
             'journals',
@@ -41,12 +41,21 @@ class SectionHandler extends EntityHandler
                 )
             );
         
-        return $this->createInDatabase($section);
+        return $this->createInDatabase($section);*/
+        return $this->importEntity(
+            $data,
+            'sections',
+            array(
+                'journals' => 'journal_id',
+                'review_forms' => 'review_form_id',
+            )
+            true
+        );
     }
 
     protected function importSectionSetting($data)
     {
-        $setting = $this->getValidData('section_settings', $data);
+        /*$setting = $this->getValidData('section_settings', $data);
 
         $setting->set(
             'section_id',
@@ -56,12 +65,18 @@ class SectionHandler extends EntityHandler
             )
         );
         
-        return $this->createOrUpdateInDatabase($setting);
+        return $this->createOrUpdateInDatabase($setting);*/
+        return $this->importEntity(
+            $data,
+            'review_form_settings',
+            array('sections' => 'section_id'),
+            true
+        );
     }
 
     protected function importSectionEditor($data)
     {
-        $sectionEditor = $this->getValidData('section_editors', $data);
+        /*$sectionEditor = $this->getValidData('section_editors', $data);
 
         if (!Registry::get('DataMapper')->isMapped(
             'users',
@@ -90,7 +105,16 @@ class SectionHandler extends EntityHandler
             'journals' => 'journal_id',
         ));
 
-        return $this->createorUpdateInDatabase($sectionEditor);
+        return $this->createorUpdateInDatabase($sectionEditor);*/
+        return $this->importEntity(
+            $data,
+            'section_editors',
+            array(
+                'users' => 'user_id',
+                'sections' => 'section_id',
+                'journals' => 'journal_id',
+            )
+        );
     }
 
     public function importSection($section)
