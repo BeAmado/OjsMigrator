@@ -4,49 +4,12 @@ namespace BeAmado\OjsMigrator;
 
 class GroupMock extends EntityMock
 {
+    use JournalFiller; // trait used to fill the journal_id (assoc_id)
+    use UserFiller; // trait used to fill the user_id
+
     public function __construct($name = null)
     {
         parent::__construct('groups');
-    }
-
-    protected function fillJournalId($group)
-    {
-        $path = \str_replace(
-            '_id',
-            '',
-            $this->removeBrackets($group->get('assoc_id')->getValue()) // remove the []
-        );
-        
-        $journal = (new JournalMock())->getJournal($path);
-
-        $group->set(
-            'assoc_id',
-            $journal->get('journal_id')->getValue()
-        );
-
-        return $group;
-    }
-
-    protected function fillUserId($membership)
-    {
-        $username = \str_replace(
-            '_user',
-            '',
-            \str_replace(
-                '_id',
-                '',
-                $this->removeBrackets($membership->get('user_id')->getValue())
-            )
-        );
-
-        $user = (new UserMock())->getUser($username);
-
-        $membership->set(
-            'user_id',
-            $user->get('user_id')->getValue()
-        );
-
-        //return $membership;
     }
 
     protected function fill($group)
@@ -55,7 +18,7 @@ class GroupMock extends EntityMock
             $this->fillUserId($m);
         });
 
-        return $this->fillJournalId($group);
+        return $this->fillJournalId($group, 'assoc_id');
     }
 
     public function getGroupForwards()

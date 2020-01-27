@@ -27,6 +27,6 @@ class UserMock extends EntityMock
         ));
 
         if (Registry::get('FileSystemManager')->fileExists($filename))
-            return Registry::get('MemoryManager')->create(include($filename));
+            return Registry::get('UserHandler')->create(include($filename));
     }
 }

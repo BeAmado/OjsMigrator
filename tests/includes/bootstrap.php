@@ -16,7 +16,13 @@ require_once(
 
 $fm = new \BeAmado\OjsMigrator\Util\FileSystemManager();
 
-foreach (array('classes', 'interfaces', 'traits') as $directory) {
+require_once(
+    dirname(__FILE__)
+    . $sep . 'classes'
+    . $sep . 'EntityMock.php'
+);
+
+foreach (array('interfaces', 'traits', 'classes') as $directory) {
     foreach ($fm->listdir(dirname(__FILE__) . $sep . $directory) as $filename) {
         require_once($filename);
     }

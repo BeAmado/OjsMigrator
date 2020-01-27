@@ -12,60 +12,19 @@ class SectionHandler extends EntityHandler
 
     protected function registerSection($data)
     {
-        /*$section = $this->getValidData('sections', $data);
-
-        if (!Registry::get('DataMapper')->isMapped(
-            'journals',
-            $section->getData('journal_id')
-        ))
-            return false;
-            // TODO: TREAT BETTER
-
-        $section->set(
-            'journal_id',
-            Registry::get('DataMapper')->getMapping(
-                'journals',
-                $section->getData('journal_id')
-            )
-        );
-
-        if (Registry::get('DataMapper')->isMapped(
-            'review_forms',
-            $section->getData('review_form_id')
-        ))
-            $section->set(
-                'review_form_id',
-                Registry::get('DataMapper')->getMapping(
-                    'review_forms',
-                    $section->getData('review_form_id')
-                )
-            );
-        
-        return $this->createInDatabase($section);*/
         return $this->importEntity(
             $data,
             'sections',
             array(
                 'journals' => 'journal_id',
                 'review_forms' => 'review_form_id',
-            )
+            ),
             true
         );
     }
 
     protected function importSectionSetting($data)
     {
-        /*$setting = $this->getValidData('section_settings', $data);
-
-        $setting->set(
-            'section_id',
-            Registry::get('DataMapper')->getMapping(
-                'sections',
-                $setting->getData('section_id')
-            )
-        );
-        
-        return $this->createOrUpdateInDatabase($setting);*/
         return $this->importEntity(
             $data,
             'review_form_settings',
@@ -76,36 +35,6 @@ class SectionHandler extends EntityHandler
 
     protected function importSectionEditor($data)
     {
-        /*$sectionEditor = $this->getValidData('section_editors', $data);
-
-        if (!Registry::get('DataMapper')->isMapped(
-            'users',
-            $sectionEditor->getData('user_id')
-        ))
-            return false;
-            // TODO: TREAT BETTER
-
-        if (!Registry::get('DataMapper')->isMapped(
-            'sections',
-            $sectionEditor->getData('section_id')
-        ))
-            return false;
-            // TODO: TREAT BETTER
-
-        if (!Registry::get('DataMapper')->isMapped(
-            'journals',
-            $sectionEditor->getData('journal_id')
-        ))
-            return false;
-            // TODO: TREAT BETTER
-
-        $this->setMappedData($sectionEditor, array(
-            'users' => 'user_id',
-            'sections' => 'section_id',
-            'journals' => 'journal_id',
-        ));
-
-        return $this->createorUpdateInDatabase($sectionEditor);*/
         return $this->importEntity(
             $data,
             'section_editors',
