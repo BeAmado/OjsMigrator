@@ -104,8 +104,16 @@ class JournalHandler extends EntityHandler
             return;
 
         $journal = $res->get(0);
-        $journal->set('settings', $this->getJournalSettings($journal->getId());
-        $journal->set('plugins', $this->getJournalPlugins($journal->getId());
+
+        $journal->set(
+            'settings', 
+            $this->getJournalSettings($journal->getId())
+        );
+
+        $journal->set(
+            'plugins', 
+            $this->getJournalPlugins($journal->getId())
+        );
 
         $filename = Registry::get('entitiesDir')
             . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'journal.json';

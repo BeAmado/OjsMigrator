@@ -28,12 +28,18 @@ class SectionMock extends EntityMock
 
     public function getSection($name)
     {
-        return $this->fill($this->get($name));
+        return Registry::get('SectionHandler')->create(
+            $this->fill($this->get($name))
+        );
     }
 
     public function getSportsSection()
     {
-        return $this->fill($this->get('sports'));
+        return $this->getSection('sports');
     }
 
+    public function getSciencesSection()
+    {
+        return $this->getSection('sciences');
+    }
 }

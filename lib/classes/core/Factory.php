@@ -55,6 +55,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Db\IndexDefinitionHandler();
     }
 
+    protected function createJournalHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\JournalHandler();
+    }
+
     protected function createJsonHandler()
     {
         return new \BeAmado\OjsMigrator\Util\JsonHandler();
@@ -78,6 +83,11 @@ class Factory
     protected function createSchemaHandler()
     {
         return new \BeAmado\OjsMigrator\Db\SchemaHandler();
+    }
+
+    protected function createSectionHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\SectionHandler();
     }
 
     protected function createStatementHandler()
@@ -156,6 +166,8 @@ class Factory
                 return 'GroupHandler';
             case \strtolower('IndexDefinitionHandler'):
                 return 'IndexDefinitionHandler';
+            case \strtolower('JournalHandler'):
+                return 'JournalHandler';
             case \strtolower('JsonHandler'):
                 return 'JsonHandler';
             case \strtolower('QueryHandler'):
@@ -166,6 +178,8 @@ class Factory
                 return 'ReviewFormHandler';
             case \strtolower('SchemaHandler'):
                 return 'SchemaHandler';
+            case \strtolower('SectionHandler'):
+                return 'SectionHandler';
             case \strtolower('StatementHandler'):
                 return 'StatementHandler';
             case \strtolower('UserHandler'):

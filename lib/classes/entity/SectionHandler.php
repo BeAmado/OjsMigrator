@@ -27,9 +27,8 @@ class SectionHandler extends EntityHandler
     {
         return $this->importEntity(
             $data,
-            'review_form_settings',
-            array('sections' => 'section_id'),
-            true
+            'section_settings',
+            array('sections' => 'section_id')
         );
     }
 
@@ -65,14 +64,16 @@ class SectionHandler extends EntityHandler
                 return false;
 
             // import the settings
-            $section->get('settings')->forEachValue(function($setting) {
-                $this->importSectionSetting($setting);
-            });
+            if ($section->hasAttribute('settings'))
+                $section->get('settings')->forEachValue(function($setting) {
+                    $this->importSectionSetting($setting);
+                });
 
             // import the section editors
-            $section->get('section_editors')->forEachValue(function($se) {
-                $this->importSectionEditor($se);
-            });
+            if ($section->hasAttribute('editors'))
+                $section->get('editors')->forEachValue(function($se) {
+                    $this->importSectionEditor($se);
+                });
         } catch (\Exception $e) {
             // TODO: TREAT THE Exception
             echo \PHP_EOL . \PHP_EOL . $e->getMessage() . \PHP_EOL . \PHP_EOL;

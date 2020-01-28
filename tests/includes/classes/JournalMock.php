@@ -11,7 +11,7 @@ class JournalMock extends EntityMock
 
     public function getTestJournal()
     {
-        return Registry::get('EntityHandler')->create('journals', array(
+        return Registry::get('JournalHandler')->create(array(
             'journal_id' => 179,
             'path' => 'test_journal',
         ));
