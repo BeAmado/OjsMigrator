@@ -395,4 +395,153 @@ class SectionHandlerTest extends FunctionalTest implements StubInterface
             ))
         );
     }
+
+    protected function getMappedSection($name)
+    {
+        $section = null;
+        switch(strtolower($name)) {
+            case 'sports':
+                $section = $this->createSportsSection();
+                break;
+            case 'sciences':
+                $section = $this->createSciencesSection();
+                break;
+        }
+
+        Registry::get('EntityHandler')->setMappedData($section, array(
+            'sections' => 'section_id',
+            'journals' => 'journal_id',
+            'review_forms' => 'review_form_id',
+        ));
+
+        $section->get('settings')->forEachValue(function($setting) {
+            Registry::get('EntityHandler')->setMappedData($setting, array(
+                'sections' => 'section_id',
+            ));
+        });
+
+        $section->get('editors')->forEachValue(function($editor) {
+            Registry::get('EntityHandler')->setMappedData($editor, array(
+                'sections' => 'section_id',
+                'users' => 'user_id',
+                'journals' => 'journal_id',
+            ));
+        });
+
+        return $section;
+    }
+
+    /**
+     * @depends testCanImportTheSportsSection
+     */
+    public function testCanGetTheSectionSettings()
+    {
+        $sportsSection = $this->getMappedSection('sports');
+
+        $settings = $this->getStub()->callMethod(
+            'getSectionSettings',
+            $sportsSection
+        );
+
+        $this->assertSame(
+            '2-1',
+            implode('-', array(
+                $settings->length(),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $sportsSection->get('settings')->toArray(),
+                    $settings->toArray()
+                )
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportTheSciencesSection
+     */
+    public function testCanGetTheSectionEditors()
+    {
+        $sciencesSection = $this->getMappedSection('sciences');
+
+        $editors = $this->getStub()->callMethod(
+            'getSectionEditors',
+            $sciencesSection
+        );
+
+        $this->assertSame(
+            '3-1',
+            implode('-', array(
+                $editors->length(),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $sciencesSection->get('editors')->toArray(),
+                    $editors->toArray()
+                )
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportTheSportsSection
+     * @depends testCanImportTheSciencesSection
+     * @depends testCanGetTheSectionSettings
+     * @depends testCanGetTheSectionEditors
+     */
+    public function testCanExportTheSectionsFromTheTestJournal()
+    {
+        $journal = Registry::get('JournalsDAO')->read(array(
+            'path' => 'test_journal',
+        ))->get(0);
+
+        Registry::get('SectionHandler')->exportSectionsFromJournal($journal);
+        $eh = Registry::get('EntityHandler');
+        $ah = Registry::get('ArrayHandler');
+
+        $sectionsList = Registry::get('FileSystemManager')->listdir(
+            $eh->getEntityDataDir('sections')
+        );
+
+        sort($sectionsList);
+
+        $exportedSportsSection = Registry::get('JsonHandler')->createFromFile(
+            $sectionsList[0]
+        );
+        $exportedSciencesSection = Registry::get('JsonHandler')->createFromFile(
+            $sectionsList[1]
+        );
+
+        $mockedSportsSection = $this->getMappedSection('sports');
+        $mockedSciencesSection = $this->getMappedSection('sciences');
+
+        $this->assertTrue($exportedSportsSection->hasAttribute('settings'));
+
+        $this->assertSame(
+            '2-1-1-1-1-1-1',
+            implode('-', array(
+                count($sectionsList),
+                (int) $eh->areEqual(
+                    $mockedSportsSection,
+                    $exportedSportsSection
+                ),
+                (int) $eh->areEqual(
+                    $mockedSciencesSection,
+                    $exportedSciencesSection
+                ),
+                (int) $ah->areEquivalent(
+                    $mockedSportsSection->get('settings')->toArray(),
+                    $exportedSportsSection->get('settings')->toArray()
+                ),
+                (int) $ah->areEquivalent(
+                    $mockedSportsSection->get('editors')->toArray(),
+                    $exportedSportsSection->get('editors')->toArray()
+                ),
+                (int) $ah->areEquivalent(
+                    $mockedSciencesSection->get('settings')->toArray(),
+                    $exportedSciencesSection->get('settings')->toArray()
+                ),
+                (int) $ah->areEquivalent(
+                    $mockedSciencesSection->get('editors')->toArray(),
+                    $exportedSciencesSection->get('editors')->toArray()
+                ),
+            ))
+        );
+    }
 }

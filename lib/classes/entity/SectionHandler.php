@@ -125,6 +125,11 @@ class SectionHandler extends EntityHandler
                 'editors',
                 $this->getSectionEditors($sec)
             );
+
+            Registry::get('JsonHandler')->dumpToFile(
+                $filename,
+                $sec
+            );
         }
     }
 }
