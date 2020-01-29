@@ -351,7 +351,7 @@ class IssueHandler extends EntityHandler
                 : $journal->getId()
         ));
 
-        foreach (Registry->get('FileSystemManager')->listdir(
+        foreach (Registry::get('FileSystemManager')->listdir(
             $this->getEntityDataDir('issues')
         ) as $filename) {
             if (!$this->getIssueData($filename))

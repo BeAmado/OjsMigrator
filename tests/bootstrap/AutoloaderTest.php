@@ -73,7 +73,7 @@ class AutoloaderTest extends TestCase
         );
     }
 
-    public function testCanIncludeMongoose()
+    public function testCanIncludeMyObject()
     {
         $this->assertTrue(
             $this->getStub()->callMethod(
@@ -81,7 +81,7 @@ class AutoloaderTest extends TestCase
                 $this->getStub()->callMethod(
                     'formFullpath', 
                     array(
-                        'classname' => 'Mongoose', 
+                        'classname' => 'MyObject', 
                         'args' => array('classes', 'core')
                     )
                 )
@@ -89,12 +89,12 @@ class AutoloaderTest extends TestCase
         );
     }
 
-    public function testCanLoadClassMongoose()
+    public function testCanLoadClassMyObject()
     {
         $this->assertTrue(
             $this->getStub()->callMethod(
                 'loadClass',
-                'Mongoose'
+                'MyObject'
             )
         );
     }
