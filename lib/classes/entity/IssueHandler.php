@@ -16,6 +16,8 @@ class IssueHandler extends EntityHandler
         $this->setMappedData($issue, array(
             'journals' => 'journal_id',
         ));
+
+        return $this->createInDatabase($issue);
     }
 
     protected function importIssueSetting($data)
@@ -28,54 +30,135 @@ class IssueHandler extends EntityHandler
         return $this->createOrUpdateInDatabase($setting);
     }
 
+    public function getJournalIssuesDir($journal)
+    {
+        if (
+            !\is_numeric($journal) &&
+            (
+                !\is_a($journal, \BeAmado\OjsMigrator\MyObject::class) ||
+                !$journal->hasAttribute('journal_id')
+            )
+        )
+            return;
+
+        return Registry::get('FileSystemManager')->formPath(array(
+            Registry::get('ConfigHandler')->getFilesDir(),
+            'journals',
+            \is_numeric($journal) 
+                ? (int) $journal
+                : $journal->get('journal_id')->getValue(),
+            'issues',
+        ));
+    }
+
+    protected function getJournalIdUsingIssueFile($issueFile)
+    {
+        $res = Registry::get('IssuesDAO')->read(array(
+            'issue_id' => \is_string($issueFile)
+                ? \explode('-', $issueFile)[0]
+                : $issueFile->get('issue_id')->getValue()
+        ));
+
+        if ($res === null || $res->length() === 0)
+            return false;
+            // TODO: throw Exception
+
+        return $res->get(0)->get('journal_id')->getValue();
+    }
+
+    protected function formIssueFilenameFullpath($issueFile, $journal = null)
+    {
+        $filename = \is_string($issueFile) 
+            ? $issueFile
+            : $issueFile->get('file_name')->getValue();
+        
+        if ($journal === null)
+            $journal = $this->getJournalIdUsingIssueFile($issueFile);
+
+        return Registry::get('FileSystemManager')->formPath(array(
+            $this->getJournalIssuesDir($journal),
+            \explode('-', $filename)[0], // issue_id
+            'public',
+            $filename,
+        ));
+    }
+
+    protected function formNewIssueFileName($issueFile, $useMapping = false)
+    {
+        $parts = \explode('-', $issueFile->get('file_name')->getValue());
+        // the file_name has the structure {issue_id}-{file_id}-PB.pdf
+
+        $parts[0] = $useMapping 
+            ? Registry::get('DataMapper')->getMapping('issues', $parts[0])
+            : $issueFile->get('issue_id')->getValue();
+
+        $parts[1] = $useMapping
+            ? Registry::get('DataMapper')->getMapping('issue_files', $parts[1])
+            : $issueFile->get('file_id')->getValue();
+
+        return \implode('-', $parts);
+    }
+
+    protected function updateIssueFileName($issueFile)
+    {
+        return Registry::get('IssueFilesDAO')->update(array(
+            'set' => array(
+                'file_name' => $this->formNewIssueFileName($issueFile)
+            ),
+            'where' => array(
+                'file_id' => $issueFile->get('file_id')->getValue()
+            ),
+        ));
+
+    }
+
+    protected function copyIssueFile($issueFile)
+    {
+        $oldFilename = $issueFile->get('file_name')->getValue();
+
+        $fileFullpath = Registry::get('FileSystemManager')->formPath(array(
+            $this->getEntityDataDir('issues'),
+            \explode('-', $oldFilename)[0], // issue_id
+            $oldFilename,
+        ));
+
+        if (!Registry::get('FileSystemManager')->fileExists($fileFullpath))
+            return false;
+
+        return Registry::get('FileSystemManager')->copyFile(
+            $fileFullpath,
+            $this->formIssueFileNameFullpath(
+                $this->formNewIssueFileName($issueFile),
+                Registry::get('__journalId__')
+            )
+        );
+    }
+
     protected function importIssueFile($data)
     {
         $issueFile = $this->getValidData('issue_files', $data);
         $this->setMappedData($issueFile, array(
             'issues' => 'issue_id',
         ));
-
+        
         if (!$this->createInDatabase($issueFile))
             return false;
 
-        if (!$this->updateIssueFileName($issueFile->getData('file_name'))) {
-            Registry::get('IssueFilesDAO')->delete($issueFile);
+        $newIssueFile = $this->getValidData('issue_files', $data);
+        $this->setMappedData($newIssueFile, array(
+            'issues' => 'issue_id',
+            'issue_files' => 'file_id',
+        ));
+
+        if (!$this->updateIssueFileName($newIssueFile)) {
+            Registry::get('IssueFilesDAO')->delete($newIssueFile);
             return false;
         }
 
+        if (!$this->copyIssueFile($newIssueFile))
+            // TODO: log the error
+
         return true;
-    }
-
-    protected function updateIssueFileName($filename)
-    {
-        $parts = \explode('-', $filename);
-        // the file_name has the structure {issue_id}-{file_id}-PB.pdf
-
-        $parts[0] = Registry::get('DataMapper')->getMapping(
-            'issues',
-            $parts[0]
-        );
-
-        $parts[1] = Registry::get('DataMapper')->getMapping(
-            'issue_files',
-            $parts[1]
-        );
-
-        return Registry::get('IssueFilesDAO')->update(array(
-            'set' => array(
-                'file_name' => \implode($parts)
-            ),
-            'where' => array(
-                'file_id' => $parts[1]
-            ),
-        ));
-
-    }
-
-    protected function copyIssueFile($filename)
-    {
-        throw new \Exception('Gotta implement the copyIssueFile method from the'
-            . ' class IssueHandler.');
     }
 
     protected function importIssueGalleySetting($data)
@@ -322,7 +405,7 @@ class IssueHandler extends EntityHandler
 
         // copy the files
         if ($issue->get('files')->length() > 0)
-            $this->copyIssueFiles($issue);
+            $this->copyIssueFiles($issue, 'export');
 
         return Registry::get('JsonHandler')->dumpToFile(
             Registry::get('FileSystemManager')->formPath(array(

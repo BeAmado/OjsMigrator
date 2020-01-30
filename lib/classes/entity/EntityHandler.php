@@ -399,6 +399,7 @@ class EntityHandler
             );
             // TODO: treat better if did not map the id
 
+        Registry::get('MemoryManager')->destroy($vars);
         unset($vars);
 
         return true;

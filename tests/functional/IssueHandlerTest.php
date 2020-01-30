@@ -18,6 +18,21 @@ use BeAmado\OjsMigrator\SectionMock; // for the custom_section_orders data
 
 class IssueHandlerTest extends FunctionalTest implements StubInterface
 {
+    protected static function createTheIssueFiles($issue)
+    {
+        $issue->get('files')->forEachValue(function($issueFile) {
+            Registry::get('FileHandler')->write(
+                Registry::get('FileSystemManager')->formPath(array(
+                    Registry::get('IssueHandler')->getEntityDataDir('issues'),
+                    $issueFile->get('issue_id')->getValue(),
+                    $issueFile->get('file_name')->getValue(),
+                )),
+                'This is the issue with original file name '
+                    . $issueFile->get('file_name')->getValue()
+            );
+        });
+    }
+
     public static function setUpBeforeClass() : void
     {
         parent::setUpBeforeClass();
@@ -36,9 +51,8 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
             Registry::get('DbHandler')->createTableIfNotExists($table);
         }
 
-        Registry::get('EntityHandler')->createOrUpdateInDatabase(
-            (new JournalMock())->getTestJournal()
-        );
+        $testJournal = (new JournalMock())->getTestJournal();
+        Registry::get('EntityHandler')->createOrUpdateInDatabase($testJournal);
 
         foreach(array(
             'sciences',
@@ -49,9 +63,27 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
             );
         }
 
-        Registry::get('FileSystemManager')->createDir(
-            (new OjsScenarioTester())->getOjsFilesDir()
-        );
+        $fsm = Registry::get('FileSystemManager');
+
+        $fsm->createDir(Registry::get('IssueHandler')->getJournalIssuesDir(
+            Registry::get('DataMapper')->getMapping(
+                'journals',
+                $testJournal->getId()
+            )
+        ));
+
+        foreach(array(
+            (new IssueMock())->getRWC2015Issue(),
+        ) as $issue) {
+            $fsm->createDir($fsm->formPath(array(
+                Registry::get('EntityHandler')->getEntityDataDir('issues'),
+                $issue->getId(),
+            )));
+
+            self::createTheIssueFiles($issue);
+        }
+
+
     }
 
     public function getStub()
@@ -66,6 +98,20 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
         parent::__construct();
         $this->issueMock = new IssueMock();
         $this->scenario = new OjsScenarioTester();
+    }
+
+    public function testCanGetTheDirectoryWhereTheIssueFilesAreStored()
+    {
+        $testJournal = (new JournalMock())->getTestJournal();
+        $this->assertSame(
+            Registry::get('FileSystemManager')->formPath(array(
+                $this->scenario->getOjsFilesDir(),
+                'journals',
+                $testJournal->getId(),
+                'issues',
+            )),
+            Registry::get('IssueHandler')->getJournalIssuesDir($testJournal)
+        );
     }
 
     public function testTheFilesDirExists()
@@ -115,4 +161,80 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
 
     }
 
+    public function testCanRegisterTheRugbyWorldCup2015Issue()
+    {
+        $issue = $this->createRWC2015Issue();
+
+        $registered = $this->getStub()->callMethod(
+            'registerIssue',
+            $issue
+        );
+
+        $fromDb = Registry::get('IssuesDAO')->read(array(
+            'issue_id' => Registry::get('DataMapper')->getMapping(
+                'issues',
+                $issue->getId()
+            )
+        ));
+
+        $this->assertSame(
+            '1-1-1',
+            implode('-', array(
+                (int) $registered,
+                $fromDb->length(),
+                (int) Registry::get('EntityHandler')->areEqual(
+                    $issue,
+                    $fromDb->get(0),
+                    array('journal_id') // not compare the journal_id
+                ),
+            ))
+        );
+    }
+
+    public function testCanImportAnIssueSetting()
+    {
+        $issueSetting = $this->createRWC2015Issue()->get('settings')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importIssueSetting',
+            $issueSetting
+        );
+
+        $fromDb = Registry::get('IssueSettingsDAO')->read(array(
+            'issue_id' => Registry::get('DataMapper')->getMapping(
+                'issues',
+                $issueSetting->get('issue_id')->getValue()
+            )
+        ));
+
+        $this->assertSame(
+            '1-1-1',
+            implode('-', array(
+                (int) $imported,
+                $fromDb->length(),
+                (int) Registry::get('EntityHandler')->areEqual(
+                    $fromDb->get(0),
+                    $issueSetting,
+                    array('issue_id')
+                )
+            ))
+        );
+    }
+
+    public function testCanImportAnIssueFile()
+    {
+        $issueFile = $this->createRWC2015Issue()->get('files')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importIssueFile',
+            $issueFile
+        );
+
+        $this->assertSame(
+            '1',
+            implode('-', array(
+                (int) $imported,
+            ))
+        );
+    }
 }
