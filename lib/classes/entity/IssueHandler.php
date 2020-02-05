@@ -66,7 +66,14 @@ class IssueHandler extends EntityHandler
         return $res->get(0)->get('journal_id')->getValue();
     }
 
-    protected function formIssueFilenameFullpath($issueFile, $journal = null)
+    /**
+     * Gets the absolute location of the file for the issue.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject | string $issueFile
+     * @param \BeAmado\OjsMigrator\MyObject | integer $journal
+     * @return string
+     */
+    public function formIssueFilenameFullpath($issueFile, $journal = null)
     {
         $filename = \is_string($issueFile) 
             ? $issueFile
@@ -112,6 +119,13 @@ class IssueHandler extends EntityHandler
 
     }
 
+    /**
+     * Copies the issue file that is in the specific location for the issue
+     * importation to the location where the journal issue files must be.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject $issueFile
+     * @return boolean
+     */
     protected function copyIssueFile($issueFile)
     {
         $oldFilename = $issueFile->get('file_name')->getValue();
@@ -134,13 +148,20 @@ class IssueHandler extends EntityHandler
         );
     }
 
+    /**
+     * Imports the issue file data and copies the file to the proper location 
+     * for the journal issue files.
+     *
+     * @param \BeAmado\OjsMigrator\MyObject | array $data
+     * @return boolean
+     */
     protected function importIssueFile($data)
     {
         $issueFile = $this->getValidData('issue_files', $data);
         $this->setMappedData($issueFile, array(
             'issues' => 'issue_id',
         ));
-        
+
         if (!$this->createInDatabase($issueFile))
             return false;
 
@@ -155,10 +176,10 @@ class IssueHandler extends EntityHandler
             return false;
         }
 
-        if (!$this->copyIssueFile($newIssueFile))
+        //if (!$this->copyIssueFile($newIssueFile))
             // TODO: log the error
 
-        return true;
+        return $this->CopyIssueFile($newIssueFile);
     }
 
     protected function importIssueGalleySetting($data)
@@ -168,7 +189,7 @@ class IssueHandler extends EntityHandler
             'issue_galleys' => 'galley_id',
         ));
 
-        return $this->createInDatabase($setting);
+        return $this->createOrUpdateInDatabase($setting);
     }
 
     protected function importIssueGalley($data)
@@ -246,7 +267,11 @@ class IssueHandler extends EntityHandler
             //import the issue_galleys
             if ($issue->hasAttribute('galleys'))
                 $issue->get('galleys')->forEachValue(function($galley) {
-                    $this->importIssueGalley($galley);
+                    if (!Registry::get('DataMapper')->isMapped(
+                        'issue_galleys',
+                        $galley->get('galley_id')->getValue()
+                    ))
+                        $this->importIssueGalley($galley);
                 });
 
             // import the custom_issue_order
@@ -254,14 +279,17 @@ class IssueHandler extends EntityHandler
                 $this->importCustomIssueOrder($issue->get('custom_order'));
 
             // import the custom_section_orders
-            if ($issue->hasAttribute('custom_section_order'))
+            if ($issue->hasAttribute('custom_section_orders'))
                 $issue->get('custom_section_orders')
                       ->forEachValue(function($sectionOrder) {
                     $this->importCustomSectionOrder($sectionOrder);
                 });
+
+            return true;
         } catch (\Exception $e) {
             // TODO: TREAT BETTER
             echo \PHP_EOL . \PHP_EOL . $e->getMessage() . \PHP_EOL . \PHP_EOL;
+            return false;
         }
     }
 
