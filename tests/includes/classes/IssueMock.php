@@ -32,6 +32,11 @@ class IssueMock extends EntityMock
         );
     }
 
+    public function getRWC2011Issue()
+    {
+        return $this->getIssue('2011');
+    }
+
     public function getRWC2015Issue()
     {
         return $this->getIssue('2015');

@@ -74,6 +74,7 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
 
         foreach(array(
             (new IssueMock())->getRWC2015Issue(),
+            (new IssueMock())->getRWC2011Issue(),
         ) as $issue) {
             $fsm->createDir($fsm->formPath(array(
                 Registry::get('EntityHandler')->getEntityDataDir('issues'),
@@ -128,7 +129,12 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
         return $this->issueMock->getRWC2015Issue();
     }
 
-    public function testCanCreateTheRugbyWorldCup2015Issue()
+    protected function createRWC2011Issue()
+    {
+        return $this->issueMock->getRWC2011Issue();
+    }
+
+    public function testCanCreateTheRugbyWorldCup2015MockedIssue()
     {
         $issue = $this->createRWC2015Issue();
         $testJournal = (new JournalMock())->getTestJournal();
@@ -423,6 +429,296 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
                 $issueGalleysFromDb->length(),
                 $ciOrdersFromDb->length(),
                 $csOrdersFromDb->length(),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyWorldCup2015Issue
+     */
+    public function testCanImportTheRugbyWorldCup2011Issue()
+    {
+        $issue = $this->createRWC2011Issue();
+
+        $imported = Registry::get('IssueHandler')->importIssue($issue);
+
+        $issueId = Registry::get('DataMapper')->getMapping(
+            'issues',
+            $issue->getId()
+        );
+
+        $issuesFromDb = Registry::get('IssuesDAO')->read(array(
+            'issue_id' => $issueId,
+        ));
+
+        $issueSettingsFromDb = Registry::get('IssueSettingsDAO')->read(array(
+            'issue_id' => $issueId,
+        ));
+
+        $issueFilesFromDb = Registry::get('IssueFilesDAO')->read(array(
+            'issue_id' => $issueId,
+        ));
+
+        $issueGalleysFromDb = Registry::get('IssueGalleysDAO')->read(array(
+            'issue_id' => $issueId,
+        ));
+
+        $ciOrdersFromDb = Registry::get('CustomIssueOrdersDAO')->read(array(
+            'issue_id' => $issueId,
+        ));
+
+        $csOrdersFromDb = Registry::get('CustomSectionOrdersDAO')->read(array(
+            'issue_id' => $issueId,
+        ));
+
+        $fileslist = Registry::get('FileSystemManager')->listdir(
+            
+        );
+
+        $this->assertSame(
+            '1-1-2-2-2-1-2',
+            implode('-', array(
+                (int) $imported,
+                $issuesFromDb->length(),
+                $issueSettingsFromDb->length(),
+                $issueFilesFromDb->length(),
+                $issueGalleysFromDb->length(),
+                $ciOrdersFromDb->length(),
+                $csOrdersFromDb->length(),
+            ))
+        );
+    }
+
+    protected function getMappedIssue($alias, $extra = array())
+    {
+        $issue = null;
+
+        switch(strtolower($alias)) {
+            case '2015':
+            case 'rwc2015':
+                $issue = $this->createRWC2015Issue();
+                break;
+            case '2011':
+            case 'rwc2011':
+                $issue = $this->createRWC2011Issue();
+                break;
+        }
+
+        Registry::get('EntityHandler')->setMappedData($issue, array(
+            'issues' => 'issue_id',
+            'journals' => 'journal_id',
+        ));
+
+        if (empty($extra))
+            return $issue;
+
+        // map the issue_settings data
+        if (
+            in_array('settings', $extra) &&
+            $issue->hasAttribute('settings')
+        )
+            $issue->get('settings')->forEachValue(function($s) {
+                Registry::get('EntityHandler')->setMappedData($s, array(
+                    'issues' => 'issue_id',
+                ));
+            });
+        
+        // map the issue_files data
+        if (
+            in_array('issue_files', $extra) &&
+            $issue->hasAttribute('files')
+        )
+            $issue->get('files')->forEachValue(function($f) {
+                Registry::get('EntityHandler')->setMappedData($f, array(
+                    'issues' => 'issue_id',
+                    'issue_files' => 'file_id',
+                ));
+
+                $f->set(
+                    'file_name',
+                    $this->getStub()->callMethod(
+                        'formNewIssueFilename',
+                        array(
+                            'issueFile' => $f
+                        )
+                    )
+                );
+            });
+
+        // map the issue_galleys data
+        if (
+            in_array('issue_galleys', $extra) &&
+            $issue->hasAttribute('galleys')
+        )
+            $issue->get('galleys')->forEachValue(function($g) {
+                Registry::get('EntityHandler')->setMappedData($g, array(
+                    'issues' => 'issue_id',
+                    'issue_galleys' => 'galley_id',
+                    'issue_files' => 'file_id',
+                ));
+            });
+
+        // map the custom_issue_orders data
+        if (
+            in_array('custom_issue_orders', $extra) &&
+            $issue->hasAttribute('custom_order')
+        )
+            Registry::get('EntityHandler')->setMappedData(
+                $issue->get('custom_order'),
+                array(
+                    'issues' => 'issue_id',
+                    'journals' => 'journal_id',
+                )
+            );
+        
+        // map the custom_section_orders data
+        if (
+            in_array('custom_section_orders', $extra) &&
+            $issue->hasAttribute('custom_section_orders')
+        )
+            $issue->get('custom_section_orders')->forEachValue(function($o) {
+                Registry::get('EntityHandler')->setMappedData($o, array(
+                    'issues' => 'issue_id',
+                    'sections' => 'section_id',
+                ));
+            });
+
+        return $issue;
+    }
+
+    /**
+     * @depends testCanImportTheRugbyWorldCup2015Issue
+     */
+    public function testCanGetTheIssueSettings()
+    {
+        $issue = $this->getMappedIssue('rwc2015', array('settings'));
+
+        $issueSettings = $this->getStub()->callMethod(
+            'getIssueSettings',
+            $issue
+        );
+
+        $this->assertSame(
+            '1-1',
+            implode('-', array(
+                (int) $this->areEqual(
+                    $issueSettings->length(),
+                    $issue->get('settings')->length()
+                ),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $issueSettings->toArray(),
+                    $issue->get('settings')->toArray()
+                ),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyWorldCup2015Issue
+     */
+    public function testCanGetTheIssueFiles()
+    {
+        $issue = $this->getMappedIssue('rwc2015', array('issue_files'));
+
+        $issueFiles = $this->getStub()->callMethod(
+            'getIssueFiles',
+            $issue
+        );
+
+        $this->assertSame(
+            '1-1',
+            implode('-', array(
+                (int) $this->areEqual(
+                    $issueFiles->length(),
+                    $issue->get('files')->length()
+                ),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $issueFiles->toArray(),
+                    $issue->get('files')->toArray()
+                ),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyWorldCup2015Issue
+     */
+    public function testCanGetTheIssueGalleys()
+    {
+        $issue = $this->getMappedIssue('rwc2015', array('issue_galleys'));
+
+        $issueGalleys = $this->getStub()->callMethod(
+            'getIssueGalleys',
+            $issue
+        );
+
+        $this->assertSame(
+            '1-1',
+            implode('-', array(
+                (int) $this->areEqual(
+                    $issueGalleys->length(),
+                    $issue->get('galleys')->length()
+                ),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $issueGalleys->toArray(),
+                    $issue->get('galleys')->toArray()
+                ),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyWorldCup2015Issue
+     */
+    public function testCanGetTheCustomIssueOrder()
+    {
+        $issue = $this->getMappedIssue(
+            'rwc2015', 
+            array('custom_issue_orders')
+        );
+
+        $issueOrder = $this->getStub()->callMethod(
+            'getCustomIssueOrder',
+            $issue
+        );
+        
+        $this->assertSame(
+            '1',
+            implode('-', array(
+                (int) Registry::get('EntityHandler')->areEqual(
+                    $issueOrder,
+                    $issue->get('custom_order')
+                ),
+            ))
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyWorldCup2015Issue
+     */
+    public function testCanGetTheCustomSectionOrders()
+    {
+        $issue = $this->getMappedIssue(
+            'rwc2015', 
+            array('custom_section_orders')
+        );
+
+        $csOrders = $this->getStub()->callMethod(
+            'getCustomSectionOrders',
+            $issue
+        );
+
+        $this->assertSame(
+            '1-1',
+            implode('-', array(
+                $this->areEqual(
+                    $csOrders->length(),
+                    $issue->get('custom_section_orders')->length()
+                ),
+                Registry::get('ArrayHandler')->areEquivalent(
+                    $csOrders->toArray(),
+                    $issue->get('custom_section_orders')->toArray()
+                ),
             ))
         );
     }

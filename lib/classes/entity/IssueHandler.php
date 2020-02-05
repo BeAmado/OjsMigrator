@@ -352,11 +352,19 @@ class IssueHandler extends EntityHandler
 
     protected function getCustomIssueOrder($issue)
     {
-        return Registry::get('CustomIssueOrdersDAO')->read(array(
+        $orders = Registry::get('CustomIssueOrdersDAO')->read(array(
             'issue_id' => \is_numeric($issue)
                 ? (int) $issue
                 : $issue->get('issue_id')->getValue()
         ));
+
+        if (
+            !\is_a($orders, \BeAmado\OjsMigrator\MyObject::class) ||
+            $orders->length() == 0
+        )
+            return;
+
+        return $orders->get(0);
     }
 
     protected function getCustomSectionOrders($issue)
@@ -380,27 +388,28 @@ class IssueHandler extends EntityHandler
         ));
     }
 
-    protected function copyIssueFiles($issue)
+    protected function copyIssueFiles($issue, $op = 'export')
     {
         Registry::set(
-            '__journalId__',
+            '__copyIssueFiles_journalId__',
             $issue->get('journal_id')->getValue()
         );
 
         $issue->get('files')->forEachValue(function($issueFile) {
             Registry::get('FileSystemManager')->copyDir(
-                Registry::get('FileSystemManager')->formPath(array(
-                    $this->getIssueFilesDir(Registry::get('__journalId__')),
-                    $issueFile->get('issue_id')->getValue(),
-                )),
+                $this->formIssueFilenameFullpath(
+                    $issueFile,
+                    Registry::get('__copyIssueFiles_journalId__')
+                ),
                 Registry::get('FileSystemManager')->formPath(array(
                     $this->getEntityDataDir('issues'),
                     $issueFile->get('issue_id')->getValue(),
+                    $issueFile->get('file_name')->getValue(),
                 ))
             );
         });
 
-        Registry::remove('__journalId__');
+        Registry::remove('__copyIssueFiles_journalId__');
     }
 
     protected function getIssueData($filename)
