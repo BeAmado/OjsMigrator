@@ -151,7 +151,7 @@ class IoManager
 
     public function getUserInput($message)
     {
-        $this->writeToStdout($message, true);
+        /*$this->writeToStdout($message, true);
         $content = '';
         do {
             $c = $this->readFromStdin();
@@ -164,7 +164,8 @@ class IoManager
             return substr($content, 0, -1);
         }
 
-        return $content;
+        return $content;*/
+        return \readline($message);
     }
 
     public function destroy()

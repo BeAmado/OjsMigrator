@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    '__tableName_' => '[submission_table_name]',
+    '__tableName_' => '[submissions_table]',
     '[submission_id]' => 7384,
     'locale' => 'en_NZ',
     'user_id' => '[ironman_user_id]',
@@ -17,7 +17,14 @@ return array(
      * remaining submission fields
      */
     'settings' => array(
-        array(),
+        array(
+            '__tableName_' => '[submission_settings_table]',
+            '[submission_id]' => 7384,
+            'locale' => 'en_NZ',
+            'setting_name' => 'title',
+            'setting_value' => 'The Rugby World Cup 2015',
+            'setting_type' => 'string',
+        ),
         /*
          * other settings
          */

@@ -70,6 +70,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\JsonHandler();
     }
 
+    protected function createMenuHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\MenuHandler();
+    }
+
     protected function createQueryHandler()
     {
         return new \BeAmado\OjsMigrator\Db\QueryHandler();
@@ -138,9 +143,19 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\FileSystemManager();
     }
 
+    protected function createIoManager()
+    {
+        return new \BeAmado\OjsMigrator\Util\IoManager();
+    }
+
     protected function createMemoryManager()
     {
         return new \BeAmado\OjsMigrator\Util\MemoryManager();
+    }
+
+    protected function createMigrationManager()
+    {
+        return new \BeAmado\OjsMigrator\MigrationManager();
     }
 
     protected function fixCase($classname)
@@ -177,6 +192,8 @@ class Factory
                 return 'JournalHandler';
             case \strtolower('JsonHandler'):
                 return 'JsonHandler';
+            case \strtolower('MenuHandler'):
+                return 'MenuHandler';
             case \strtolower('QueryHandler'):
                 return 'QueryHandler';
             case \strtolower('RangeHandler'):
@@ -205,6 +222,8 @@ class Factory
                 return 'ConnectionManager';
             case \strtolower('FileSystemManager'):
                 return 'FileSystemManager';
+            case \strtolower('IoManager'):
+                return 'IoManager';
             case \strtolower('MemoryManager'):
                 return 'MemoryManager';
 
