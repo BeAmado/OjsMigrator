@@ -42,6 +42,11 @@ class Maestro
         return self::is($name, 'mapper');
     }
 
+    protected static function isKeeper($name)
+    {
+        return self::is($name, 'keeper');
+    }
+
     protected static function getDefaultDir($name)
     {
         if (!self::isDirectory($name))
@@ -113,8 +118,9 @@ class Maestro
             return Registry::get($name);
 
         if (
-            self::isManager($name) || 
             self::isHandler($name) || 
+            self::isKeeper($name) ||
+            self::isManager($name) || 
             self::isMapper($name)
         )
             return (new Factory())->create($name);

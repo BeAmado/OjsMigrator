@@ -1,6 +1,7 @@
 <?php
 
-require_once(dirname(__FILE__) . '/../includes/bootstrap.php');
+require_once(dirname(__FILE__) . '/../../includes/bootstrap.php');
+require_once(dirname(__FILE__) . '/../includes/traits/TestStub.php');
 
 $io = new class extends \BeAmado\OjsMigrator\Util\IoManager {
     use \BeAmado\OjsMigrator\TestStub;
@@ -73,8 +74,8 @@ for ($i = 0 ; $i < 5; $i++) {
 $io->clearStdout();
 
 
-//$data = $io->getUserInput('Enter some data: ');
-$io->clearStdout();
-//var_dump($data);
+$data = $io->getUserInput('Enter some data: ');
+//$io->clearStdout();
+$io->writeToStdout(PHP_EOL . 'the data was: "' . $data . '"' . PHP_EOL);
 (new \BeAmado\OjsMigrator\Util\MemoryManager())->destroy($io);
 

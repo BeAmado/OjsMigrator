@@ -9,12 +9,12 @@ class TimeKeeper
      */
     public function now()
     {
-        return \array_reduce(
+        return \floor(\array_reduce(
             \explode(' ', \microtime()),
             function($a, $b) {
                 return $a + $b;
             }
-        );
+        ) * 1000);
     }
 
     /**
@@ -36,12 +36,15 @@ class TimeKeeper
      */
     public function wait($ms)
     {
+        /*
         $begin = $this->now();
 
-        while ($this->elapsedTime($begin) < ($ms / 1000)) {
+        while ($this->elapsedTime($begin) < $ms) {
             // just wait
         }
 
         unset($begin);
+        */
+        \usleep($ms * 1000);
     }
 }

@@ -163,6 +163,53 @@ class Factory
         return new \BeAmado\OjsMigrator\MigrationManager();
     }
 
+    /////////////////////////// OBJECTS //////////////////////////////////////
+    protected function createArray()
+    {
+        return array();
+    }
+
+    protected function createBoolean($value = null)
+    {
+        if ($value)
+            return true;
+        else
+            return false;
+    }
+
+    protected function createFloat($value = null)
+    {
+        return (float) $value;
+    }
+
+    protected function createInteger($value = null)
+    {
+        return (int) $value;
+    }
+
+    protected function createMyObject($value = null)
+    {
+        return Registry::get('MemoryManager')->create($value);
+    }
+
+    protected function createNull()
+    {
+        return null;
+    }
+
+    protected function createString($str)
+    {
+        if (\is_string($str))
+            return $str;
+
+        if (\is_numeric($str))
+            return '' . $str;
+
+        return '';
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
     protected function fixCase($classname)
     {
         switch (\strtolower($classname)) {
@@ -238,10 +285,37 @@ class Factory
             case \strtolower('DataMapper'):
                 return 'DataMapper';
 
+            //////////// OBJECTS ////////////////
+            case \strtolower('Int'):
+            case \strtolower('Integer'):
+                return 'Integer';
+            case \strtolower('Float'):
+            case \strtolower('Double'):
+            case \strtolower('Number'):
+                return 'Float';
+            case \strtolower('String'):
+            case \strtolower('Str'):
+                return 'String';
+            case \strtolower('Boolean'):
+            case \strtolower('Bool'):
+                return 'Boolean';
+            case \strtolower('Null'):
+            case \strtolower('Nothing'):
+            case \strtolower('None'):
+                return 'Null';
+            case \strtolower('Array'):
+                return 'Array';
+            case \strtolower('MyObject'):
+                return 'MyObject';
+
             //////////// STATEMENT //////////////
             case \strtolower('Statement'):
             case \strtolower('Stmt'):
                 return 'Statement';
+
+            /////////// TIME KEEPER /////////////
+            case \strtolower('TimeKeeper'):
+                return 'TimeKeeper';
         }
 
         return $classname;
@@ -255,6 +329,11 @@ class Factory
     protected function createDataMapper()
     {
         return new \BeAmado\OjsMigrator\DataMapper();
+    }
+
+    protected function createTimeKeeper()
+    {
+        return new \BeAmado\OjsMigrator\Util\TimeKeeper();
     }
 
     /**

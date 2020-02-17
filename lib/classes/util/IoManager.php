@@ -1,6 +1,7 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Util;
+use \BeAmado\OjsMigrator\Registry;
 
 class IoManager
 {
@@ -98,6 +99,16 @@ class IoManager
         return false;
     }
 
+    protected function closeStdin()
+    {
+        return $this->closeStream('stdin');
+    }
+
+    protected function closeStdout()
+    {
+        return $this->closeStream('stdout');
+    }
+
     /**
      * Opens a stream to the standard input and reads the content
      *
@@ -149,8 +160,22 @@ class IoManager
         return $this->closeStream('stdout');
     }
 
-    public function getUserInput($message)
+    public function getUserInput($message, $options = array())
     {
+        $beginning = Registry::get('TimeKeeper')->now();
+        $maxtime = 60000; // 1 minute
+        if (!\array_key_exists('maxtime', $options))
+            $options['maxtime'] = 20000; // 20 seconds
+
+        if (!\array_key_exists('timelapse', $options))
+            $options['timelapse'] = 5000; // 5 seconds
+
+        if (!\array_key_exists('removeTimelapseAfterFirstKeystroke', $options))
+            $options['removeTimelapseAfterFirstKeystroke'] = true;
+
+        if ($options['maxtime'] < $maxtime)
+            $maxtime = (int) $options['maxtime'];
+
         /*$this->writeToStdout($message, true);
         $content = '';
         do {
@@ -165,7 +190,50 @@ class IoManager
         }
 
         return $content;*/
-        return \readline($message);
+        //return \readline($message);
+        $this->writeToStdout($message);
+        $content = '';
+        $this->openStdin();
+        $stdin = $this->getStream('stdin');
+        $read = array(&$stdin);
+        $write = null;
+        $expect = null;
+        \readline_callback_handler_install('', function(){});
+        do {
+            $input = null;
+
+            $beginWait = Registry::get('TimeKeeper')->now();
+
+            $keypressed = \stream_select($read, $write, $expect, 0, 
+                $options['timelapse'] * 1000
+            );
+
+            if (Registry::get('TimeKeeper')
+                        ->elapsedTime($beginWait) > $options['timelapse'])
+                break;
+
+            if ($keypressed)
+                $input = \stream_get_contents($this->getStream('stdin'), 1);
+
+            $this->writeToStdout($input);
+
+            if ($input == PHP_EOL)
+                break;
+
+            if (\is_string($input))
+                $content .= $input;
+
+            if (\substr($content, -2) === '\\b')
+                $content = substr($content, 0, -3);
+                
+        } while (
+            Registry::get('TimeKeeper')->elapsedTime($beginning) <= $maxtime
+        );
+        \readline_callback_handler_remove();
+        $this->closeStdin();
+
+        return $content;
+
     }
 
     public function destroy()

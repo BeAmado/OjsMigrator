@@ -20,7 +20,10 @@ class MigrationManager
         $this->setEntities();
 
         foreach ($this->validMigrationOptions as $name => $struct) {
-            $this->setMigrationOption($name, null);
+            $this->setMigrationOption(
+                $name, 
+                Factory::create($struct->get('type')->getValue())
+            );
         }
     }
 
