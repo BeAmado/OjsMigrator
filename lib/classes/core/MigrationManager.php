@@ -19,23 +19,22 @@ class MigrationManager
         $this->setValidMigrationOptions();
         $this->setEntities();
 
-        foreach ($this->validMigrationOptions as $name) {
+        foreach ($this->validMigrationOptions as $name => $struct) {
             $this->setMigrationOption($name, null);
         }
     }
 
     protected function setValidMigrationOptions()
     {
-        $this->validMigrationOptions = array(
-            'action' => array(
-                'type' => 'string',
-            ),
-            'entitiesToExport' => array(
-                'type' => 'array',
-            ),
-            'entitiesToImport' => array(
-                'type '=> 'array',
-            ),
+        $this->validMigrationOptions = Registry::get('MemoryManager')->create(
+            array(
+                'action' => array(
+                    'type' => 'string',
+                ),
+                'entitiesToMigrate' => array(
+                    'type' => 'MyObject',
+                ),
+            )
         );
     }
 
@@ -65,13 +64,11 @@ class MigrationManager
 
     protected function isValidMigrationOption($name, $value)
     {
-        if (!\array_key_exists(
-            \strtolower($name), 
-            $this->validMigrationOptions
-        ))
+        if (!$this->validMigrationOptions->hasAttribute($name))
             return false;
 
-        switch ($this->validMigrationOptions[$name]['type']) {
+        switch ($this->validMigrationOptions->get($name)
+                                            ->get('type')->getValue()) {
             case 'string':
                 return \is_string($value);
             case 'int':
@@ -81,12 +78,14 @@ class MigrationManager
                 return \is_numeric($value);
             case 'array':
                 return \is_array($value);
+            case 'MyObject':
+                return \is_a($value, \BeAmado\OjsMigrator\MyObject::class);
         }
     }
 
     public function getMigrationOption($name)
     {
-        if (\array_key_exists($name, $this->validMigrationOptions))
+        if ($this->validMigrationOptions->hasAttribute($name))
             return $this->getMigrationOptions()->get($name)->getValue();
     }
 
@@ -124,42 +123,26 @@ class MigrationManager
         );
     }
 
-    protected function chooseEntitiesToExport()
+    public function chooseEntitiesToMigrate()
     {
         Registry::get('IoManager')->writeToStdout(
-            PHP_EOL . '--------- Entities to be exported -----------' . PHP_EOL
+            PHP_EOL . '--------- Entities to be '
+            . $this->getMigrationOption('action')
+            . 'ed -----------' . PHP_EOL
         );
 
         $this->setMigrationOption(
-            'entitiesToExport',
+            'entitiesToMigrate',
             Registry::get('MemoryManager')->create()
         );
 
         foreach ($this->entities as $entity) {
             if (Registry::get('ChoiceHandler')->binaryChoice(
-                PHP_EOL . 'Export the ' . $entity . '?'
+                PHP_EOL 
+                . \ucfirst($this->getMigrationOption('action'))
+                . ' the ' . $entity . '?'
             ))
-                $this->getMigrationOption('entitiesToExport')->push($entity);
+                $this->getMigrationOption('entitiesToMigrate')->push($entity);
         }
     }
-
-    protected function chooseEntitiesToImport()
-    {
-        Registry::get('IoManager')->writeToStdout(
-            PHP_EOL . '--------- Entities to be imported -----------' . PHP_EOL
-        );
-
-        $this->setMigrationOption(
-            'entitiesToImport',
-            Registry::get('MemoryManager')->create()
-        );
-
-        foreach ($this->entities as $entity) {
-            if (Registry::get('ChoiceHandler')->binaryChoice(
-                PHP_EOL . 'Import the ' . $entity . '?'
-            ))
-                $this->getMigrationOption('entitiesToImport')->push($entity);
-        }
-    }
-
 }

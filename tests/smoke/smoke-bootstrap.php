@@ -7,7 +7,8 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 }
 
 require_once(
-    '..' 
+    dirname(__FILE__)
+    . $sep . '..' 
     . $sep . '..'
     . $sep . 'includes' 
     . $sep . 'bootstrap.php'
@@ -18,7 +19,8 @@ foreach (array(
     'OjsScenarioTester',
 ) as $classname) {
     require_once(
-        '..'
+        dirname(__FILE__)
+        . $sep . '..'
         . $sep . 'includes'
         . $sep . 'classes'
         . $sep . $classname . '.php'

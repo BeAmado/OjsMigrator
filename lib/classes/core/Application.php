@@ -37,22 +37,50 @@ class Application
         );
     }
 
-    public function run($ojsDir = null)
+    protected function setMigrationOptions()
     {
-        $this->preload(array(
-            'OjsDir' => $ojsDir,
-        ));
-
-        $this->showWelcomeMessage();
-
         Registry::get('MigrationManager')->setImportExportAction();
 
-        echo "\n\nThe params:\n";
-        var_dump(Registry::get('MigrationManager')->getMigrationOptionsAsArray());
-        echo "\n\n";
+        if (\strtolower(
+            Registry::get('MigrationManager')->getMigrationOption('action')
+        ) === 'exit') {
+            $this->endFlow(100);
+        }
 
+        Registry::get('MigrationManager')->chooseEntitiesToMigrate();
+    }
+
+    protected function beginFlow()
+    {
+        $this->showWelcomeMessage();
+        $this->setMigrationOptions();
+    }
+
+    protected function endFlow($signal = 0)
+    {
         $this->finish();
         $this->showEndMessage();
+        exit($signal);
+    }
+
+    public function run($ojsDir = null)
+    {
+        //try {
+            $this->preload(array(
+                'OjsDir' => $ojsDir,
+            ));
+
+            $this->beginFlow();
+
+            echo "\n\nThe params:\n";
+            var_dump(Registry::get('MigrationManager')->getMigrationOptionsAsArray());
+            echo "\n\n";
+        //} catch (Exception $e) {
+            echo "\n\nCaught the exception:\n'" . $e->getMessage() . "\n\n";
+        //} finally {
+            var_dump(\error_get_last());
+            $this->endFlow();
+        //}
     }
 
 }

@@ -20,6 +20,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\CaseHandler();
     }
 
+    protected function createChoiceHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\ChoiceHandler();
+    }
+
     protected function createColumnDefinitionHandler()
     {
         return new \BeAmado\OjsMigrator\Db\ColumnDefinitionHandler();
@@ -172,6 +177,8 @@ class Factory
                 return 'ArrayHandler';
             case \strtolower('CaseHandler'):
                 return 'CaseHandler';
+            case \strtolower('ChoiceHandler'):
+                return 'ChoiceHandler';
             case \strtolower('ColumnDefinitionHandler'):
                 return 'ColumnDefinitionHandler';
             case \strtolower('ConfigHandler'):
