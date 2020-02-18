@@ -65,7 +65,7 @@ class Application
 
     public function run($ojsDir = null)
     {
-        //try {
+        try {
             $this->preload(array(
                 'OjsDir' => $ojsDir,
             ));
@@ -75,12 +75,15 @@ class Application
             echo "\n\nThe params:\n";
             var_dump(Registry::get('MigrationManager')->getMigrationOptionsAsArray());
             echo "\n\n";
-        //} catch (Exception $e) {
+        } catch (Exception $e) {
             echo "\n\nCaught the exception:\n'" . $e->getMessage() . "\n\n";
-        //} finally {
-            var_dump(\error_get_last());
+        } finally {
+            $lastError = \error_get_last();
+            if ($lastError)
+                var_dump($lastError);
+
             $this->endFlow();
-        //}
+        }
     }
 
 }

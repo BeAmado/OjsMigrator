@@ -59,8 +59,32 @@ class DbHandler
         switch(Registry::get('ConnectionManager')->getDbDriver()) {
             case 'sqlite':
                 return 'SELECT COUNT(1) AS count '
-                    . 'FROM sqlite_master '
-                    . 'WHERE type = "table" AND name = :tableName';
+                    .  'FROM sqlite_master '
+                    .  'WHERE '
+                    .      'type = "table" AND '
+                    .      'name = :tableName';
+            case 'mysql':
+                return 'SELECT COUNT(1) AS count '
+                    .  'FROM information_schema.TABLES '
+                    .  'WHERE '
+                    .      'TABLE_SCHEMA = :dbName AND '
+                    .      'TABLE_NAME = :tableName';
+        }
+    }
+
+    protected function tableExistsParams($tableName)
+    {
+        switch(Registry::get('ConnectionManager')->getDbDriver()) {
+            case 'sqlite':
+                return array(
+                    'name' => $tableName,
+                );
+            case 'mysql':
+                return array(
+                    'TABLE_NAME'   => $tableName,
+                    'TABLE_SCHEMA' => Registry::get('ConfigHandler')
+                                              ->getConnectionSettings()['name']
+                );
         }
     }
 
@@ -97,9 +121,7 @@ class DbHandler
 
         Registry::get('StatementHandler')->execute(
             $this->getStatementTableExists(),
-            array(
-                'name' => $tableName,
-            ),
+            $this->tableExistsParams($tableName),
             function($res) {
                 Registry::set(
                     'tableExistsInDb',
@@ -117,6 +139,31 @@ class DbHandler
             return;
 
         if (!$this->tableExists($tableName))
-            $this->createTable($tableName);
+            return $this->createTable($tableName);
+    }
+
+    protected function dropTable($tableName)
+    {
+        if (!\is_string($tableName))
+            return;
+
+        $query = 'DROP TABLE ' . $tableName;
+        
+        $stmt = Registry::get('StatementHandler')->create($query);
+
+        /*
+        if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+            return $stmt->execute() && $stmt->closeCursor();
+*/
+        return $stmt->execute();
+    }
+
+    public function dropTableIfExists($tableName)
+    {
+        if (!\is_string($tableName))
+            return;
+
+        if ($this->tableExists($tableName))
+            return $this->dropTable($tableName);
     }
 }

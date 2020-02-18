@@ -85,13 +85,46 @@ class OjsScenarioTester
         );
     }
 
-    public function setUpStage()
+    protected function createTables($tables = array())
+    {
+        if (!Registry::keyExists('createdTables'))
+            Registry::set(
+                'createdTables', 
+                Registry::get('MemoryManager')->create()
+        );
+
+        foreach ($tables as $table) {
+            if (Registry::get('DbHandler')->createTableIfNotExists($table))
+                Registry::get('createdTables')->push($table);
+        }
+    }
+
+    protected function createConfigPreprocessor($args)
+    {
+        $dbDriverFilename = Registry::get('FileSystemManager')
+                                    ->formPathFromBaseDir(array(
+            'tests',
+            'dbdriver',
+        ));
+
+        if (
+            !\array_key_exists('dbDriver', $args) &&
+            Registry::get('FileSystemManager')->fileExists($dbDriverFilename)
+        )
+            $args['dbDriver'] = Registry::get('FileHandler')->read(
+                $dbDriverFilename
+            );
+
+        if (!Registry::hasKey('ConfigPreprocessor'))
+            Registry::set('ConfigPreprocessor', new ConfigPreprocessor($args));
+    }
+
+    public function setUpStage($args = array())
     {
         if (!Registry::hasKey('OjsDir'))
             Registry::set('OjsDir', $this->getOjsPublicHtmlDir());
 
-        if (!Registry::hasKey('ConfigPreprocessor'))
-            Registry::set('ConfigPreprocessor', new ConfigPreprocessor());
+        $this->createConfigPreprocessor($args);
 
         if (!Registry::hasKey('EntitiesDir'))
             $this->setEntitiesDir();
@@ -101,6 +134,10 @@ class OjsScenarioTester
             $this->untarOjsDir();
             Registry::get('ConfigPreprocessor')->createConfigFile();
         }
+
+        if (\array_key_exists('createTables', $args))
+            $this->createTables($args['createTables']);
+        
     }
 
     public function removeSandbox()
@@ -110,8 +147,21 @@ class OjsScenarioTester
         );
     }
 
+    public function dropCreatedTables()
+    {
+        if (!Registry::hasKey('createdTables'))
+            return;
+
+        Registry::get('createdTables')->forEachValue(function($table) {
+            Registry::get('DbHandler')->dropTableIfExists($table);
+        });
+
+        Registry::remove('createdTables');
+    }
+
     public function tearDownStage()
     {
+        $this->dropCreatedTables();
         $this->removeSandbox();
         Registry::get('SchemaHandler')->removeSchemaDir();
     }

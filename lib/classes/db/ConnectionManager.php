@@ -5,6 +5,14 @@ use \BeAmado\OjsMigrator\Registry;
 
 class ConnectionManager
 {
+    public function supportedDrivers()
+    {
+        return array(
+            'mysql',
+            'sqlite',
+        );
+    }
+
     public function setConnection()
     {
         Registry::set(
@@ -22,8 +30,23 @@ class ConnectionManager
 
     public function getDbDriver()
     {
-        return Registry::get('ConfigHandler')
-                       ->getConnectionSettings()['driver'];
+        $settings = Registry::get('ConfigHandler')->getConnectionSettings();
+
+        if (!\array_key_exists('driver', $settings))
+            return 'sqlite';
+
+        return $settings['driver'];
+    }
+
+    protected function filterDbName($name)
+    {
+        if (\strpos($name, \BeAmado\OjsMigrator\DIR_SEPARATOR) !== false)
+            $name = \basename($name);
+
+        if (\strtolower(\substr($name, -3)) === '.db')
+            $name = substr($name, 0, -3);
+
+        return $name;
     }
 
     /**
@@ -34,7 +57,7 @@ class ConnectionManager
     protected function createMySqlConnection($connData = array())
     {
         $host = $connData['host'];
-        $db = $connData['name'];
+        $db = $this->filterDbName($connData['name']);
         $user = $connData['username'];
         $pass = $connData['password'];
         return new \PDO("mysql:host=$host;dbname=$db", $user, $pass);

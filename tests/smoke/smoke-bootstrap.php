@@ -14,17 +14,36 @@ require_once(
     . $sep . 'bootstrap.php'
 );
 
+$fsm = new \BeAmado\OjsMigrator\Util\FileSystemManager();
+
 foreach (array(
     'ConfigPreprocessor',
     'OjsScenarioTester',
 ) as $classname) {
     require_once(
-        dirname(__FILE__)
+        $fsm->formPathFromBaseDir(array(
+            'tests',
+            'include',
+            'classes',
+            $classname . '.php'
+        ))
+        /*dirname(__FILE__)
         . $sep . '..'
         . $sep . 'includes'
         . $sep . 'classes'
-        . $sep . $classname . '.php'
+        . $sep . $classname . '.php'*/
     );
 }
 
-(new \BeAmado\OjsMigrator\OjsScenarioTester())->setUpStage();
+$dbDriver = (new \BeAmado\OjsMigrator\Util\FileHandler())->read(
+    $fsm->formPathFromBaseDir(array(
+        'tests',
+        'dbdriver'
+    ))
+);
+
+(new \BeAmado\OjsMigrator\OjsScenarioTester())->setUpStage(
+    in_array($dbDriver, array('mysql', 'sqlite')) 
+        ? array('dbDriver' => $dbDriver)
+        : null
+);

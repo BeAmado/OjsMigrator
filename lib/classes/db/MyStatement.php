@@ -168,12 +168,18 @@ class MyStatement extends MyObject
      */
     public function fetch($callback)
     {
+        $success = true;
         while ($data = $this->fetchData()) {
-            if (!$callback($data))
-                return false;
+            if (!$callback($data)) {
+                $success = false;
+                break;
+            }
         }
 
-        return true;
+        if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+            $this->closeCursor();
+
+        return $success;
     }
 
     /**
@@ -184,6 +190,16 @@ class MyStatement extends MyObject
     public function execute()
     {
         return $this->getStmt()->execute();
+    }
+
+    /**
+     * Wrapper method for PDOStatement::closeCursor
+     *
+     * @return boolean
+     */
+    public function closeCursor()
+    {
+        return $this->getStmt()->closeCursor();
     }
 
     /**

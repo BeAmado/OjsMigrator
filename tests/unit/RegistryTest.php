@@ -28,7 +28,6 @@ class RegistryTest extends TestCase
 
     public function testClearRegistry()
     {
-        $this->markTestSkipped('Clear the Registry might cause a lot of problems');
         Registry::set('color', 'green');
         Registry::set('band', 'Helloween');
         Registry::clear();

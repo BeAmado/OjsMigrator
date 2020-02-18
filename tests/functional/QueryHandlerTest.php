@@ -2,6 +2,7 @@
 
 use BeAmado\OjsMigrator\FunctionalTest;
 use BeAmado\OjsMigrator\Db\QueryHandler;
+use BeAmado\OjsMigrator\Util\ConfigHandler;
 use BeAmado\OjsMigrator\TestStub;
 use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\Registry;
@@ -45,11 +46,26 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
 
     public function testGetTheQueryForCreatingAuthSourcesTableInMysql()
     {
-        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        if (!array_search('pdo_mysql', get_loaded_extensions()))
+            $this->markTestSkipped('The driver for mysql is not present');
 
-        if (!\array_key_exists('driver', $connData) ||
-            $connData['driver'] !== 'mysql')
-            $this->markTestSkipped('The driver is not mysql');
+        $ch = Registry::get('ConfigHandler');
+        $connData = $ch->getConnectionSettings();
+
+        $originalDriver = $connData['driver'];
+
+        if (\strtolower($originalDriver) !== 'mysql')
+            Registry::set(
+                'ConfigHandler',
+                new class extends ConfigHandler {
+                    public function getConnectionSettings()
+                    {
+                        $settings = parent::getConnectionSettings();
+                        $settings['driver'] = 'mysql';
+                        return $settings;
+                    }
+                }
+            );
 
         $expected = 'CREATE TABLE `auth_sources` ('
         . '`auth_id` BIGINT AUTO_INCREMENT, '
@@ -64,6 +80,9 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
             Registry::get('SchemaHandler')->getTableDefinition('auth_sources')
         );
 
+        if (\strtolower($originalDriver) !== 'mysql')
+            Registry::set('ConfigHandler', $ch);
+
         $this->assertSame(
             $expected,
             $query
@@ -72,12 +91,27 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
 
     public function testGetTheQueryForCreatingAuthSourcesTableInSqlite()
     {
-        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        if (!array_search('pdo_sqlite', get_loaded_extensions()))
+            $this->markTestSkipped('The driver for sqlite is not present');
 
-        if (!\array_key_exists('driver', $connData) ||
-            $connData['driver'] !== 'sqlite')
-            $this->markTestSkipped('The driver is not sqlite');
-        
+        $ch = Registry::get('ConfigHandler');
+        $connData = $ch->getConnectionSettings();
+
+        $originalDriver = $connData['driver'];
+
+        if (\strtolower($originalDriver) !== 'sqlite')
+            Registry::set(
+                'ConfigHandler',
+                new class extends ConfigHandler {
+                    public function getConnectionSettings()
+                    {
+                        $settings = parent::getConnectionSettings();
+                        $settings['driver'] = 'sqlite';
+                        return $settings;
+                    }
+                }
+            );
+
         $expected = 'CREATE TABLE `auth_sources` ('
         . '`auth_id` INTEGER , '
         . '`title` VARCHAR(60) NOT NULL, '
@@ -90,6 +124,9 @@ class QueryHandlerTest extends FunctionalTest implements StubInterface
         $query = Registry::get('QueryHandler')->generateQueryCreateTable(
             Registry::get('SchemaHandler')->getTableDefinition('auth_sources')
         );
+
+        if (\strtolower($originalDriver) !== 'sqlite')
+            Registry::set('ConfigHandler', $ch);
 
         $this->assertSame(
             $expected,

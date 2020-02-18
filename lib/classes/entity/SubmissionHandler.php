@@ -325,7 +325,7 @@ class SubmissionHandler extends EntityHandler
 
         // import the submission history
         if ($submission->hasAttribute('history'))
-            $this->importSubmissionHistory($submission->get('history');
+            $this->importSubmissionHistory($submission->get('history'));
 
         // import the review assignments
         if ($submission->hasAttribute('review_assignments'))
@@ -359,15 +359,17 @@ class SubmissionHandler extends EntityHandler
     protected function getSubmissionSettings($submission)
     {
         return $this->getEntityDAO($this->formTableName('settings'))->read(
-            $this->formIdField() => $this->getSubmissionId($submission)
+            array(
+                $this->formIdField() => $this->getSubmissionId($submission)
+            )
         );
     }
 
     protected function getSubmissionFiles($submission)
     {
-        return $this->getEntityDAO($this->formTableName('files'))->read(
+        return $this->getEntityDAO($this->formTableName('files'))->read(array(
             $this->formIdField() => $this->getSubmissionId($submission)
-        );
+        ));
     }
 
     protected function getSubmissionSupplementaryFiles($submission)

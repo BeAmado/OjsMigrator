@@ -19,12 +19,27 @@ class MigrationManager
         $this->setValidMigrationOptions();
         $this->setEntities();
 
-        foreach ($this->validMigrationOptions as $name => $struct) {
-            $this->setMigrationOption(
-                $name, 
-                Factory::create($struct->get('type')->getValue())
-            );
+        foreach ($this->validMigrationOptions->listKeys() as $option) {
+            if (!$this->migrationOptionIsSet($option))
+                $this->setMigrationOption(
+                    $option,
+                    (new Factory())->create(
+                        $this->validMigrationOptions->get($option)
+                                                    ->get('type')->getValue()
+                    )
+                );
         }
+    }
+    
+    protected function migrationOptionsCreated()
+    {
+        return Registry::hasKey('MigrationOptions');
+    }
+
+    protected function migrationOptionIsSet($name)
+    {
+        return $this->migrationOptionsCreated() && 
+            $this->getMigrationOptions()->hasAttribute($name);
     }
 
     protected function setValidMigrationOptions()
@@ -88,8 +103,17 @@ class MigrationManager
 
     public function getMigrationOption($name)
     {
-        if ($this->validMigrationOptions->hasAttribute($name))
-            return $this->getMigrationOptions()->get($name)->getValue();
+        if (!$this->validMigrationOptions->hasAttribute($name))
+            return;
+
+        if (\in_array(
+            \strtolower($this->validMigrationOptions->get($name)
+                                                    ->get('type')->getValue()),
+            array('array', 'myobject')
+        ))
+            return $this->getMigrationOptions()->get($name);
+
+        return $this->getMigrationOptions()->get($name)->getValue();
     }
 
     protected function setMigrationOption($name, $value)

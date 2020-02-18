@@ -11,6 +11,7 @@ phpunit-end()
     rm -rf "$(dirname $0)/_data/ojs2"
     rm -rf "$(dirname $0)/_data/db_sandbox"
     rm -rf "$(dirname $0)/_data/sandbox"
+    rm -rf "$(dirname $0)/dbdriver"
     echo
     echo 
     echo "========= End of $1 tests ========="
@@ -86,8 +87,20 @@ functional-tests()
     fi
 }
 
+set-test-db-driver()
+{
+    echo $1 > "$(dirname $0)/dbdriver"
+}
+
 run-tests()
 {
+    if [[ $@ =~ '--mysql' ]]
+    then
+        set-test-db-driver 'mysql'
+    else
+        set-test-db-driver 'sqlite'
+    fi
+
     if [[ $@ =~ '--bootstrap' ]]
     then
         form-filename bootstrap $2

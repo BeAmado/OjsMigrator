@@ -76,10 +76,16 @@ class ConnectionManagerTest extends FunctionalTest implements StubInterface
      */
     public function testConnectToMysql()
     {
-        if (array_search('pdo_sqlite', get_loaded_extensions())) {
+        /*if (array_search('pdo_sqlite', get_loaded_extensions())) {
             $this->markTestSkipped('The driver used is sqlite');
-        }
+        }*/
+        if (!array_search('pdo_mysql', get_loaded_extensions()))
+            $this->markTestSkipped('The driver for mysql is not present');
 
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        if ($connData['driver'] !== 'mysql')
+            $this->markTestSkipped('Is not mysql');
+        
         $connData = Registry::get('ConfigHandler')->getConnectionSettings();
 
         $this->assertInstanceOf(
@@ -96,15 +102,24 @@ class ConnectionManagerTest extends FunctionalTest implements StubInterface
      */
     public function testCreateMysqlConnection()
     {
-        if (array_search('pdo_sqlite', get_loaded_extensions())) {
+        /*if (array_search('pdo_sqlite', get_loaded_extensions())) {
             $this->markTestSkipped('The driver used is sqlite');
-        }
+        }*/
+        if (!array_search('pdo_mysql', get_loaded_extensions()))
+            $this->markTestSkipped('The driver for mysql is not present');
 
         $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        if ($connData['driver'] !== 'mysql')
+            $this->markTestSkipped('Is not mysql');
         
         $this->assertInstanceOf(
             \PDO::class,
-            Registry::get('ConnectionManager')->createConnection($connData)
+            $this->getStub()->callMethod(
+                'createMySqlConnection',
+                array(
+                    'connData' => $connData
+                )
+            )
         );
     }
 
@@ -113,6 +128,13 @@ class ConnectionManagerTest extends FunctionalTest implements StubInterface
      */
     public function testConnectToSqlite()
     {
+        if (!array_search('pdo_sqlite', get_loaded_extensions()))
+            $this->markTestSkipped('The driver for sqlite is not present');
+        
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        if ($connData['driver'] !== 'sqlite')
+            $this->markTestSkipped('Is not sqlite');
+        
         $this->assertInstanceOf(
             \PDO::class,
             $this->getStub()->callMethod(
@@ -127,6 +149,13 @@ class ConnectionManagerTest extends FunctionalTest implements StubInterface
      */
     public function testCreateSqliteConnection()
     {
+        if (!array_search('pdo_sqlite', get_loaded_extensions()))
+            $this->markTestSkipped('The driver for sqlite is not present');
+
+        $connData = Registry::get('ConfigHandler')->getConnectionSettings();
+        if ($connData['driver'] !== 'sqlite')
+            $this->markTestSkipped('Is not sqlite');
+        
         $this->assertInstanceOf(
             \PDO::class,
             Registry::get('ConnectionManager')->createConnection(array(

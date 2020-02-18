@@ -9,10 +9,14 @@ class FileHandler
      * Reads the whole content of the file into a string.
      *
      * @param $filename string - The file to be read
+     * @param $trim boolean - Whether or not to trim whitespaces at the beginning and end
      * @return string
      */
-    public function read($filename)
+    public function read($filename, $trim = true)
     {
+        if ($trim)
+            return \trim(\file_get_contents($filename));
+
         return \file_get_contents($filename);
     }
 

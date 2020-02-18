@@ -16,11 +16,21 @@ class MigrationManagerTest extends FunctionalTest implements StubInterface
         };
     }
 
-    public function testCanAccessTheMigrationManagerInTheRegistry()
+    public function testTheMigrationOptionsAreInitiallySet()
     {
-        $this->assertInstanceOf(
-            MigrationManager::class,
-            Registry::get('MigrationManager')
+        $options = Registry::get('MigrationManager')->getMigrationOptions();
+        $this->assertSame(
+            '1-1',
+            implode('-', array(
+                (int) $this->areEqual(
+                    '',
+                    $options->get('action')->getValue()
+                ),
+                (int) is_a(
+                    $options->get('entitiesToMigrate'),
+                    \BeAmado\OjsMigrator\MyObject::class
+                )
+            ))
         );
     }
 
@@ -53,8 +63,7 @@ class MigrationManagerTest extends FunctionalTest implements StubInterface
     {
         $entities = array('journals', 'issues');
         foreach ($entities as $entity) {
-            $this->getStub()->callMethod(
-                'getMigrationOption',
+            Registry::get('MigrationManager')->getMigrationOption(
                 'entitiesToMigrate'
             )->push($entity);
         }

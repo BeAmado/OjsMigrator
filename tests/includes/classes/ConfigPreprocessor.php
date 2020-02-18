@@ -9,10 +9,25 @@ class ConfigPreprocessor
      */
     private $vars;
 
-    public function __construct()
+    protected function parseDbDriver($args)
+    {
+        if (
+            !\array_key_exists('dbDriver', $args) ||
+            !\in_array(
+                $args['dbDriver'],
+                Registry::get('ConnectionManager')->supportedDrivers()
+            )
+        )
+            return 'sqlite';
+
+        return $args['dbDriver'];
+    }
+
+    public function __construct($args = array())
     {
         $this->vars = Registry::get('MemoryManager')->create(array(
             'OjsScenarioTester' => new OjsScenarioTester(),
+            'dbDriver' => $this->parseDbDriver($args),
         ));
     }
 
@@ -44,11 +59,12 @@ class ConfigPreprocessor
 
     protected function getDbDriver()
     {
-        if (array_search('pdo_sqlite', get_loaded_extensions())) {
+        return $this->vars->get('dbDriver')->getValue();
+        /*if (array_search('pdo_sqlite', get_loaded_extensions())) {
             return 'sqlite';
         } else if (array_search('pdo_mysql', get_loaded_extensions())) {
             return 'mysql';
-        }
+        }*/
     }
 
     protected function setDbDriver()

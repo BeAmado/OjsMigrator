@@ -97,6 +97,24 @@ class DbHandlerTest extends FunctionalTest implements StubInterface
         );
     }
 
+    /**
+     * @depends testCanCreateTableUserInterests
+     */
+    public function testCanDropTheTableUserInterests()
+    {
+        $existedBefore = Registry::get('DbHandler')->tableExists(
+            'user_interests'
+        );
+
+        $this->getStub()->callMethod('dropTable', 'user_interests');
+
+        $existsNow = Registry::get('DbHandler')->tableExists(
+            'user_interests'
+        );
+
+        $this->assertTrue($existedBefore && !$existsNow);
+    }
+
     public function testCreateTableAuthSourcesWithCreateIfTableNotExists()
     {
         $existedBefore = Registry::get('DbHandler')->tableExists(
@@ -126,4 +144,35 @@ class DbHandlerTest extends FunctionalTest implements StubInterface
         $this->assertTrue($existedBefore && $existsNow);
     }
 
+    /**
+     * @depends testCreateTableAuthSourcesWithCreateIfTableNotExists
+     */
+    public function testDropTableAuthSourcesWithDropTableIfExists()
+    {
+        $existedBefore = Registry::get('DbHandler')->tableExists(
+            'auth_sources'
+        );
+
+        Registry::get('DbHandler')->dropTableIfExists('auth_sources');
+
+        $existsNow = Registry::get('DbHandler')->tableExists('auth_sources');
+
+        $this->assertTrue($existedBefore && !$existsNow);
+    }
+
+    /**
+     * @depends testDropTableAuthSourcesWithDropTableIfExists
+     */
+    public function testDoesThrowAnyErrorWhenTryingToDropANonExistantTable()
+    {
+        $existedBefore = Registry::get('DbHandler')->tableExists(
+            'auth_sources'
+        );
+
+        Registry::get('DbHandler')->dropTableIfExists('auth_sources');
+
+        $existsNow = Registry::get('DbHandler')->tableExists('auth_sources');
+
+        $this->assertTrue(!$existedBefore && !$existsNow);
+    }
 }
