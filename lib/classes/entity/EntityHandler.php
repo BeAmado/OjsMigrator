@@ -356,9 +356,9 @@ class EntityHandler
     {
         return \is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class) &&
             $entity->getTableName() != null &&
-            Registry::get('DataMapper')->isMappable($entity) ?
+            (Registry::get('DataMapper')->isMappable($entity) ?
                 $entity->getId() != null
-                : true;
+                : true);
     }
 
     /**

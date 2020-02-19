@@ -29,7 +29,7 @@ class FileHandlerTest extends TestCase implements StubInterface
     {
         $str = (new FileHandler())->read($this->getHumptyDumptyFile());
         $this->assertSame(
-            'Humpty Dumpty sat on a wall' . PHP_EOL,
+            'Humpty Dumpty sat on a wall',
             (new FileHandler())->read($this->getHumptyDumptyFile())
         );
     }

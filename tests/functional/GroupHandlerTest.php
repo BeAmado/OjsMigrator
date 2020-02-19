@@ -17,10 +17,8 @@ use BeAmado\OjsMigrator\UserMock;
 
 class GroupHandlerTest extends FunctionalTest
 {
-    public static function setUpBeforeClass() : void
-    {
-        parent::setUpBeforeClass();
-        foreach (array(
+    public static function setUpBeforeClass($args = array(
+        'createTables' => array(
             'journals',
             'users',
             'user_settings',
@@ -32,9 +30,9 @@ class GroupHandlerTest extends FunctionalTest
             'groups',
             'group_settings',
             'group_memberships',
-        ) as $table) {
-            Registry::get('DbHandler')->createTableIfNotExists($table);
-        }
+        ),
+    )) : void {
+        parent::setUpBeforeClass($args);
 
         Registry::get('EntityHandler')->createOrUpdateInDatabase(
             (new JournalMock())->getTestJournal()

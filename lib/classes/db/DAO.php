@@ -285,6 +285,9 @@ class DAO
         $commitOnSuccess = false,
         $rollbackOnError = false
     ) {
+        if (empty($conditions))
+            return 0;
+
         if (
             \is_array($conditions) && 
             !\array_key_exists('where', $conditions) &&

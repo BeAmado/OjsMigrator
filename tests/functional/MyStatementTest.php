@@ -23,6 +23,7 @@ class MyStatementTest extends FunctionalTest
         $query = 'SELECT * FROM users '
             . 'WHERE first_name = "Bernardo" AND last_name = "Amado"';
         $stmt = new MyStatement($query);
+        Registry::get('DbHandler')->dropTableIfExists('users');
 
         $this->assertInstanceOf(
             MyStatement::class,

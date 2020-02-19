@@ -24,18 +24,18 @@ abstract class FunctionalTest extends TestCase
         );
     }
 
-    public static function setUpBeforeClass() : void
+    public static function setUpBeforeClass($args = array()) : void
     {
         Registry::clear();
-        (new OjsScenarioTester())->setUpStage();
+        (new OjsScenarioTester())->setUpStage($args);
         (new DataMappingTester())->setUpDataMappingStage();
     }
 
-    public static function tearDownAfterClass() : void
+    public static function tearDownAfterClass($args = array()) : void
     {
         //(new OjsScenarioTester())->removeSandbox();
         (new DataMappingTester())->tearDownDataMappingStage();
-        (new OjsScenarioTester())->tearDownStage();
+        (new OjsScenarioTester())->tearDownStage($args);
         Registry::clear();
     }
 

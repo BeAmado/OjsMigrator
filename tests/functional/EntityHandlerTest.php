@@ -12,6 +12,15 @@ use BeAmado\OjsMigrator\TestStub;
 
 class EntityHandlerTest extends FunctionalTest implements StubInterface
 {
+    public static function setUpBeforeClass($args = array(
+        'createTables' => array(
+            'announcements',
+            'groups',
+        ),
+    )) : void {
+        parent::setUpBeforeClass($args);
+    }
+
     public function getStub()
     {
         return new class extends EntityHandler {
@@ -191,17 +200,32 @@ class EntityHandlerTest extends FunctionalTest implements StubInterface
                 array(
                     'announcement_id' => 2458,
                     'assoc_id' => 4,
-                    'date_posted' => '2009-08-13',
+                    'date_posted' => '2009-08-13 10:21:44',
                     'assoc_type' => 256,
                 )
             )
         );
 
-        $this->assertTrue(
+        /*$this->assertTrue(
             $created === true &&
             Registry::get('DataMapper')->getMapping('announcements', 2458) === '2' &&
             Registry::get('DataMapper')->getMapping('announcements', 12) === '1'
+        );*/
+        $this->assertSame(
+            '1-2-1',
+            implode('-', array(
+                (int) $created,
+                Registry::get('DataMapper')->getMapping(
+                    'announcements',
+                    2458
+                ),
+                Registry::get('DataMapper')->getMapping(
+                    'announcements',
+                    12
+                ),
+            ))
         );
+
     }
 
     /**

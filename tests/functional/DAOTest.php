@@ -6,7 +6,17 @@ use BeAmado\OjsMigrator\Db\DAO;
 
 class DAOTest extends FunctionalTest
 {
-    public static function tearDownAfterClass() : void
+    public static function setUpBeforeClass($args = array(
+        'createTables' => array(
+            'users',
+            'user_settings',
+            'sections',
+        ),
+    )) : void {
+        parent::setUpBeforeClass($args);
+    }
+
+    public static function tearDownAfterClass($args = array()) : void
     {
         parent::tearDownAfterClass();
         Registry::get('FileSystemManager')->removeWholeDir(
@@ -196,9 +206,16 @@ class DAOTest extends FunctionalTest
 
         $users = Registry::get('UsersDAO')->read();
 
-        $this->assertTrue(
+        /*$this->assertTrue(
             $users->length() === 3 &&
             $deletions === 0
+        );*/
+        $this->assertSame(
+            '3-0',
+            implode('-', array(
+                $users->length(),
+                (int) $deletions
+            ))
         );
     }
 

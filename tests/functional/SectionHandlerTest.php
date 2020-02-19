@@ -18,20 +18,17 @@ use BeAmado\OjsMigrator\UserMock;
 
 class SectionHandlerTest extends FunctionalTest implements StubInterface
 {
-    public static function setUpBeforeClass() : void
-    {
-        parent::setUpBeforeClass();
-
-        foreach(array(
+    public static function setUpBeforeClass($args = array(
+        'createTables' => array(
             'journals',
             'review_forms',
             'users',
             'sections',
             'section_settings',
             'section_editors',
-        ) as $table) {
-            Registry::get('DbHandler')->createTableIfNotExists($table);
-        }
+        ),
+    )) : void {
+        parent::setUpBeforeClass($args);
 
         Registry::get('EntityHandler')->createOrUpdateInDatabase(
             (new JournalMock())->getTestJournal()
@@ -510,8 +507,6 @@ class SectionHandlerTest extends FunctionalTest implements StubInterface
 
         $mockedSportsSection = $this->getMappedSection('sports');
         $mockedSciencesSection = $this->getMappedSection('sciences');
-
-        $this->assertTrue($exportedSportsSection->hasAttribute('settings'));
 
         $this->assertSame(
             '2-1-1-1-1-1-1',

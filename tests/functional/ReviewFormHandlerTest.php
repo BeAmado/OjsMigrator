@@ -16,18 +16,16 @@ use BeAmado\OjsMigrator\JournalMock;
 
 class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
 {
-    public static function setUpBeforeClass() : void
-    {
-        parent::setUpBeforeClass();
-
-        self::useTables(array(
+    public static function setUpBeforeClass($args = array(
+        'createTables' => array(
             'journals',
             'review_forms',
             'review_form_settings',
             'review_form_elements',
             'review_form_element_settings',
-        ));
-
+        ),
+    )) : void {
+        parent::setUpBeforeClass($args);
         self::setUpTestJournal();
     }
 

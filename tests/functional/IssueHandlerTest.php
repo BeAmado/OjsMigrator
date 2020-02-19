@@ -33,11 +33,8 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
         });
     }
 
-    public static function setUpBeforeClass() : void
-    {
-        parent::setUpBeforeClass();
-
-        foreach(array(
+    public static function setUpBeforeClass($args = array(
+        'createTables' => array(
             'journals',
             'sections',
             'issues',
@@ -47,9 +44,9 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
             'issue_files',
             'custom_issue_orders',
             'custom_section_orders',
-        ) as $table) {
-            Registry::get('DbHandler')->createTableIfNotExists($table);
-        }
+        ),
+    )) : void {
+        parent::setUpBeforeClass($args);
 
         $testJournal = (new JournalMock())->getTestJournal();
         Registry::get('EntityHandler')->createOrUpdateInDatabase($testJournal);
@@ -83,7 +80,6 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
 
             self::createTheIssueFiles($issue);
         }
-
 
     }
 

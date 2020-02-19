@@ -48,7 +48,18 @@ class ConfigHandlerTest extends FunctionalTest implements StubInterface
             'password' => 'ojs',
         );
 
-        if (array_search('pdo_sqlite', get_loaded_extensions())) {
+        switch(Registry::get('ConnectionManager')->getDbDriver()) {
+            case 'sqlite':
+                $expected['name'] = $this->getOjsDir() 
+                    . $this->sep() . 'tests_ojs.db';
+                $expected['driver'] = 'sqlite';
+                break;
+            case 'mysql':
+                $expected['name'] = 'tests_ojs';
+                $expected['driver'] = 'mysql';
+        }
+
+        /*if (array_search('pdo_sqlite', get_loaded_extensions())) {
             $expected['driver'] = 'sqlite';
             $expected['name'] = $this->getOjsDir() 
                 . $this->sep() . 'tests_ojs.db';
@@ -57,7 +68,7 @@ class ConfigHandlerTest extends FunctionalTest implements StubInterface
             $expected['name'] = 'tests_ojs';
         } else {
             $this->markTestSkipped('Does not have either sqlite or mysql');
-        }
+        }*/
 
         $this->assertEquals(
             $expected,

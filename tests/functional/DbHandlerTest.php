@@ -17,13 +17,13 @@ class DbHandlerTest extends FunctionalTest implements StubInterface
     use WorkWithFiles;
     use WorkWithSqlite;
 
-    public static function setUpBeforeClass() : void
+    public static function setUpBeforeClass($args = array()) : void
     {
         parent::setUpBeforeClass();
         (new class { use WorkWithSqlite; })->createDbSandbox();
     }
 
-    public static function tearDownAfterClass() : void
+    public static function tearDownAfterClass($args = array()) : void
     {
         parent::tearDownAfterClass();
         (new class { use WorkWithSqlite; })->removeDbSandbox();

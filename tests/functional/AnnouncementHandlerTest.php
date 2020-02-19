@@ -12,24 +12,23 @@ use BeAmado\OjsMigrator\TestStub;
 
 class AnnouncementHandlerTest extends FunctionalTest
 {
-    public static function setUpBeforeClass() : void
-    {
-        parent::setUpBeforeClass();
-        foreach (array(
+    public static function setUpBeforeClass($args = array(
+        'createTables' => array(
             'announcements',
             'announcement_settings',
             'announcement_types',
             'announcement_type_settings',
             'journals',
-        ) as $table) {
-            Registry::get('DbHandler')->createTableIfNotExists($table);
-        }
+        ),
+    )) : void {
+        parent::setUpBeforeClass($args);
 
-        $eh = Registry::get('EntityHandler');
-        $eh->createOrUpdateInDatabase($eh->create('journals', array(
-            'journal_id' => 289,
-            'path' => 'test_journal',
-        )));
+        Registry::get('EntityHandler')->createOrUpdateInDatabase(
+            Registry::get('EntityHandler')->create('journals', array(
+                'journal_id' => 289,
+                'path' => 'test_journal',
+            ))
+        );
     }
 
     protected function createAnnouncements()

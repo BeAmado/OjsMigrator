@@ -87,7 +87,7 @@ class OjsScenarioTester
 
     protected function createTables($tables = array())
     {
-        if (!Registry::keyExists('createdTables'))
+        if (!Registry::hasKey('createdTables'))
             Registry::set(
                 'createdTables', 
                 Registry::get('MemoryManager')->create()
@@ -153,13 +153,13 @@ class OjsScenarioTester
             return;
 
         Registry::get('createdTables')->forEachValue(function($table) {
-            Registry::get('DbHandler')->dropTableIfExists($table);
+            Registry::get('DbHandler')->dropTableIfExists($table->getValue());
         });
 
         Registry::remove('createdTables');
     }
 
-    public function tearDownStage()
+    public function tearDownStage($args = array())
     {
         $this->dropCreatedTables();
         $this->removeSandbox();

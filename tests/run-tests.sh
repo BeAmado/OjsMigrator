@@ -11,7 +11,7 @@ phpunit-end()
     rm -rf "$(dirname $0)/_data/ojs2"
     rm -rf "$(dirname $0)/_data/db_sandbox"
     rm -rf "$(dirname $0)/_data/sandbox"
-    rm -rf "$(dirname $0)/dbdriver"
+    rm -f "$(dirname $0)/dbdriver"
     echo
     echo 
     echo "========= End of $1 tests ========="
@@ -45,6 +45,8 @@ all-tests()
         --colors=always \
         --testdox \
         $(dirname $0)
+
+    phpunit-end
 }
 
 unit-tests()

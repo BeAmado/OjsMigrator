@@ -11,6 +11,14 @@ class StatementHandlerTest extends FunctionalTest
 {
     use WorkWithOjsDir;
 
+    public static function setUpBeforeClass($args = array(
+        'createTables' => array(
+            'journals',
+            'journal_settings',
+            'users',
+        ),
+    )) : void { parent::setUpBeforeClass($args); }
+
     public function testCanCreateAStatement()
     {
         if (

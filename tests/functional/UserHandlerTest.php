@@ -20,10 +20,8 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
         $this->importedUsers = 0;
     }
 
-    public static function setUpBeforeClass() : void
-    {
-        parent::setUpBeforeClass();
-        foreach (array(
+    public static function setUpBeforeClass($args = array(
+        'createTables' => array(
             'users',
             'user_settings',
             'user_interests',
@@ -32,9 +30,9 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
             'controlled_vocab_entry_settings',
             'roles',
             'journals',
-        ) as $table) {
-            Registry::get('DbHandler')->createTableIfNotExists($table);
-        }
+        ),
+    )) : void {
+        parent::setUpBeforeClass($args);
 
         $eh = Registry::get('EntityHandler');
         $eh->createOrUpdateInDatabase($eh->create('journals', array(

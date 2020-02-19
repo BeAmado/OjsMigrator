@@ -30,7 +30,7 @@ class SchemaHandlerTest extends FunctionalTest implements StubInterface
     use WorkWithXmlSchema;
     use WorkWithOjsDir;
 
-    public static function tearDownAfterClass() : void
+    public static function tearDownAfterClass($args = array()) : void
     {
         parent::tearDownAfterClass();
         Registry::get('SchemaHandler')->removeSchemaDir();
