@@ -396,7 +396,7 @@ class IssueHandler extends EntityHandler
         );
 
         $issue->get('files')->forEachValue(function($issueFile) {
-            Registry::get('FileSystemManager')->copyDir(
+            Registry::get('FileSystemManager')->copyFile(
                 $this->formIssueFilenameFullpath(
                     $issueFile,
                     Registry::get('__copyIssueFiles_journalId__')

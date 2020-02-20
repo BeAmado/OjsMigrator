@@ -376,7 +376,8 @@ class GroupHandlerTest extends FunctionalTest
     {
         Registry::get('GroupHandler')->exportGroupsFromJournal(
             Registry::get('JournalsDAO')->read(array(
-                'path' => (new JournalMock())->getTestJournal()->get('path')->getValue(),
+                'path' => (new JournalMock())->getTestJournal()->get('path')
+                                                               ->getValue(),
             ))->get(0)
         );
 

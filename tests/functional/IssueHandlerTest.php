@@ -27,6 +27,13 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
                     $issueFile->get('issue_id')->getValue(),
                     $issueFile->get('file_name')->getValue(),
                 )),
+                /*Registry::get('IssueHandler')->formIssueFilenameFullpath(
+                    $issueFile,
+                    Registry::get('DataMapper')->getMapping(
+                        'journals',
+                        (new JournalMock())->getTestJournal()->getId()
+                    )
+                ),*/
                 'This is the issue with original file name '
                     . $issueFile->get('file_name')->getValue()
             );
@@ -48,8 +55,8 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
     )) : void {
         parent::setUpBeforeClass($args);
 
-        $testJournal = (new JournalMock())->getTestJournal();
-        Registry::get('EntityHandler')->createOrUpdateInDatabase($testJournal);
+        $journal = (new JournalMock())->getTestJournal();
+        Registry::get('EntityHandler')->createOrUpdateInDatabase($journal);
 
         foreach(array(
             'sciences',
@@ -65,7 +72,7 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
         $fsm->createDir(Registry::get('IssueHandler')->getJournalIssuesDir(
             Registry::get('DataMapper')->getMapping(
                 'journals',
-                $testJournal->getId()
+                $journal->getId()
             )
         ));
 
@@ -74,13 +81,13 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
             (new IssueMock())->getRWC2011Issue(),
         ) as $issue) {
             $fsm->createDir($fsm->formPath(array(
+                //Registry::get('IssueHandler')->getJournalIssuesDir($journal),
                 Registry::get('EntityHandler')->getEntityDataDir('issues'),
                 $issue->getId(),
             )));
 
             self::createTheIssueFiles($issue);
         }
-
     }
 
     public function getStub()
@@ -717,5 +724,100 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
                 ),
             ))
         );
+    }
+    
+    protected function getOldEntitiesDir()
+    {
+        return \str_replace(
+            'entities', 
+            'old_entities', 
+            Registry::get('EntityHandler')->getEntityDataDir('issues')
+        );
+    }
+
+    protected function moveOldEntities()
+    {
+        $oldEntitiesDir = $this->getOldEntitiesDir();
+        foreach (Registry::get('FileSystemManager')->listdir(
+            Registry::get('EntityHandler')->getEntityDataDir('issues')
+        ) as $issueDir) {
+            Registry::get('FileSystemManager')->move(
+                $issueDir,
+                $oldEntitiesDir . \BeAmado\OjsMigrator\DIR_SEPARATOR 
+                    . \basename($issueDir)
+            );
+        }
+    }
+
+    protected function formExpectedFiles()
+    {
+        $expectedFiles = array();
+        foreach (array(
+            $this->getMappedIssue('rwc2015', array('issue_files')),
+            $this->getMappedIssue('rwc2011', array('issue_files')),
+        ) as $issue) {
+            $expectedFiles[] = Registry::get('FileSystemManager')
+            ->formPath(array(
+                Registry::get('EntityHandler')->getEntityDataDir('issues'),
+                $issue->getId(),
+                $issue->getId() . '.json'
+            ));
+
+            foreach ($issue->get('files')->toArray() as $arrIssueFile) {
+                $expectedFiles[] = Registry::get('FileSystemManager')
+                ->formPath(array(
+                    Registry::get('EntityHandler')->getEntityDataDir('issues'),
+                    $issue->getId(),
+                    $arrIssueFile['file_name']
+                ));
+            }
+        }
+
+        return $expectedFiles;
+    }
+
+    /**
+     * @depends testCanImportTheRugbyWorldCup2015Issue
+     * @depends testCanImportTheRugbyWorldCup2011Issue
+     */
+    public function testCanExportTheIssuesFromTheTestJournal()
+    {
+        $testJournal = Registry::get('JournalsDAO')->read(array(
+            'path' => (new JournalMock())->getTestJournal()->getData('path')
+        ))->get(0);
+        $fsm = Registry::get('FileSystemManager');
+        $ih = Registry::get('IssueHandler');
+
+        $ih->setMappedData($testJournal, array(
+            'journals' => 'journal_id',
+        ));
+
+
+        $this->moveOldEntities();
+        $exported = $ih->exportIssuesFromJournal($testJournal);
+
+        $list = $fsm->listdir($ih->getEntityDataDir('issues'));
+
+        $files = array();
+        foreach ($list as $dir) {
+            $files = Registry::get('ArrayHandler')->union(
+                $files,
+                $fsm->listdir($dir)
+            );
+        }
+
+        $this->assertSame(
+            '1-1-2-1',
+            implode('-', array(
+                (int) $exported,
+                $testJournal->getId(),
+                count($list),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $this->formExpectedFiles(),
+                    $files
+                )
+            ))
+        );
+
     }
 }
