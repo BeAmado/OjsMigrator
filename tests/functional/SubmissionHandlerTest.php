@@ -26,4 +26,12 @@ class SubmissionHandlerTest extends FunctionalTest
             $this->getStub()->getEntityAlias()
         );
     }
+
+    public function testCanFormTheTableNameForTheArticleFiles()
+    {
+        $this->assertSame(
+            'article_files',
+            Registry::get('SubmissionHandler')->formTableName('files')
+        );
+    }
 }

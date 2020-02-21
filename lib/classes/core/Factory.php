@@ -110,6 +110,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Db\StatementHandler();
     }
 
+    protected function createSubmissionHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\SubmissionHandler();
+    }
+
     protected function createTableDefinitionHandler()
     {
         return new \BeAmado\OjsMigrator\Db\TableDefinitionHandler();
@@ -260,6 +265,8 @@ class Factory
                 return 'SectionHandler';
             case \strtolower('StatementHandler'):
                 return 'StatementHandler';
+            case \strtolower('SubmissionHandler'):
+                return 'SubmissionHandler';
             case \strtolower('UserHandler'):
                 return 'UserHandler';
             case \strtolower('TableDefinitionHandler'):

@@ -8,11 +8,23 @@ return array(
     'journal_id' => '[test_journal_id]',
     'section_id' => '[sports_section_id]',
     'language' => 'en',
-    'comments_to_ed' => '',
+    'comments_to_ed' => null,
     'citations' => null,
     'date_submitted' => '2015-12-09 13:15:26',
     'last_modified' => '2015-12-20 23:14:57',
     'date_status_modified' => '2015-12-09 19:09:34',
+    'status' => 3,
+    'submission_progress' => 0,
+    'current_round' => 1,
+    'submission_file_id' => 336,
+    'revised_file_id' => 337,
+    'review_file_id' => null,
+    'editor_file_id' => null,
+    'pages' => '27-40',
+    'fast_tracked' => 0,
+    'hide_author' => 0,
+    'comments_status' => 0,
+
     /* 
      * remaining submission fields
      */
@@ -30,11 +42,44 @@ return array(
          */
     ),
     'files' => array(
-        array(),
-        /*
-         * other files
-         */
-    ),
+        // submission_file
+        array(
+            '__tableName_' => '[submission_files_table]',
+            'file_id' => 336,
+            'revision' => 1,
+            'source_file_id' => null,
+            'source_revision' => null,
+            '[submission_id]' => 7384,
+            'file_name' => '',
+            'file_type' => '',
+            'file_size' => 123412,
+            'original_file_name' => 'rwc2015-pre',
+            'file_stage' => 1,
+            'viewable' => null,
+            'date_uploaded' => '2015-10-12 12:34:56',
+            'date_modified' => '2015-10-12 12:34:56',
+            'round' => 1,
+            'assoc_id' => null,
+        ),
+        // revised_file
+        array(
+            '__tableName_' => '[submission_files_table]',
+            'file_id' => 337,
+            'revision' => 1,
+            'source_file_id' => null,
+            'source_revision' => null,
+            '[submission_id]' => 7384,
+            'file_name' => '',
+            'file_type' => '',
+            'file_size' => 123980,
+            'original_file_name' => 'rwc2015-rev',
+            'file_stage' => 1,
+            'viewable' => null,
+            'date_uploaded' => '2015-10-12 12:34:56',
+            'date_modified' => '2015-10-12 12:34:56',
+            'round' => 1,
+            'assoc_id' => null,
+        ),
     'supplementary_files' => array(
         array(
             '__tableName_' => '[supplementary_files_table]',
