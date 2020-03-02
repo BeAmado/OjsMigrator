@@ -2,8 +2,9 @@
 
 namespace BeAmado\OjsMigrator\Entity;
 use \BeAmado\OjsMigrator\Registry;
+use \BeAmado\OjsMigrator\ImportExport;
 
-class GroupHandler extends EntityHandler
+class GroupHandler extends EntityHandler implements ImportExport
 {
     public function create($data, $extra = null)
     {
@@ -146,5 +147,15 @@ class GroupHandler extends EntityHandler
                 $group
             );
         }
+    }
+
+    public function import($group)
+    {
+        return $this->importGroup($group);
+    }
+
+    public function export($journal)
+    {
+        return $this->exportGroupsFromJournal($journal);
     }
 }

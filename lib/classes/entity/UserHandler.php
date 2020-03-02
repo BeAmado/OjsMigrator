@@ -2,8 +2,9 @@
 
 namespace BeAmado\OjsMigrator\Entity;
 use \BeAmado\OjsMigrator\Registry;
+use \BeAmado\OjsMigrator\ImportExport;
 
-class UserHandler extends EntityHandler
+class UserHandler extends EntityHandler implements ImportExport
 {
     public function create($data, $extra = null)
     {
@@ -284,7 +285,7 @@ class UserHandler extends EntityHandler
     {
         try {
             if (!\is_a($user, \BeAmado\OjsMigrator\Entity\Entity::class))
-                $user = new Entity($user, 'users');
+                $user = $this->create($user);
     
             if ($user->getTableName() !== 'users')
                 return false;
@@ -611,5 +612,15 @@ class UserHandler extends EntityHandler
         $this->dumpEntity(Registry::get('user'));
 
         Registry::remove('user');
+    }
+
+    public function import($user)
+    {
+        return $this->importUser($user);
+    }
+
+    public function export($journal)
+    {
+        return $this->exportUsersFromJournal($journal);
     }
 }

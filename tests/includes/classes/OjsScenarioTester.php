@@ -85,15 +85,19 @@ class OjsScenarioTester
         );
     }
 
-    protected function createTables($tables = array())
+    public function createTables($tables = array())
     {
         if (!Registry::hasKey('createdTables'))
             Registry::set(
                 'createdTables', 
                 Registry::get('MemoryManager')->create()
-        );
+            );
 
         foreach ($tables as $table) {
+            if (\strpos($table, 'submission') !== false)
+                $table = Registry::get('SubmissionHandler')
+                                 ->formTableName($table);
+
             if (Registry::get('DbHandler')->createTableIfNotExists($table))
                 Registry::get('createdTables')->push($table);
         }

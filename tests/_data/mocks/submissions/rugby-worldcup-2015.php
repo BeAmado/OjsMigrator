@@ -80,6 +80,7 @@ return array(
             'round' => 1,
             'assoc_id' => null,
         ),
+    ),
     'supplementary_files' => array(
         array(
             '__tableName_' => '[supplementary_files_table]',

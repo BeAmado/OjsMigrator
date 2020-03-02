@@ -50,6 +50,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\FileHandler();
     }
 
+    protected function createGrammarHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\GrammarHandler();
+    }
+
     protected function createGroupHandler()
     {
         return new \BeAmado\OjsMigrator\Entity\GroupHandler();
@@ -241,6 +246,8 @@ class Factory
                 return 'EntityHandler';
             case \strtolower('FileHandler'):
                 return 'FileHandler';
+            case \strtolower('GrammarHandler'):
+                return 'GrammarHandler';
             case \strtolower('GroupHandler'):
                 return 'GroupHandler';
             case \strtolower('IndexDefinitionHandler'):

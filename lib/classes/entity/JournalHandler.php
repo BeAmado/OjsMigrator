@@ -1,8 +1,10 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Entity;
+use \BeAmado\OjsMigrator\Registry;
+use \BeAmado\OjsMigrator\ImportExport;
 
-class JournalHandler extends EntityHandler
+class JournalHandler extends EntityHandler implements ImportExport
 {
     public function create($data, $extra = null)
     {
@@ -130,5 +132,15 @@ class JournalHandler extends EntityHandler
         // export the sections
         // export the issues
         // export articles
+    }
+
+    public function import($journal)
+    {
+        return $this->importJournal($journal);
+    }
+
+    public function export($journal)
+    {
+        return $this->exportJournal($journal);
     }
 }

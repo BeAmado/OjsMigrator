@@ -2,8 +2,9 @@
 
 namespace BeAmado\OjsMigrator\Entity;
 use \BeAmado\OjsMigrator\Registry;
+use \BeAmado\OjsMigrator\ImportExport;
 
-class AnnouncementHandler extends EntityHandler
+class AnnouncementHandler extends EntityHandler implements ImportExport
 {
     public function create($data, $extra = null)
     {
@@ -112,5 +113,15 @@ class AnnouncementHandler extends EntityHandler
                 $announcement
             );
         }
+    }
+
+    public function import($announcement)
+    {
+        return $this->importAnnouncement($announcement);
+    }
+
+    public function export($journal)
+    {
+        return $this->exportAnnouncementsFromJournal($journal);
     }
 }

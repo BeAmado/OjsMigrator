@@ -16,6 +16,11 @@ class SubmissionHandler extends EntityHandler
         $this->setEntityAlias();
     }
 
+    public function create($data, $extra = null)
+    {
+        return new Entity($data, $this->getEntityAlias());
+    }
+
     protected function setEntityAlias()
     {
         if (Registry::get('SchemaHandler')->tableIsDefined('articles'))
@@ -33,16 +38,8 @@ class SubmissionHandler extends EntityHandler
         return $this->alias;
     }
 
-    public function formTableName($name)
+    public function formTableName($name = null)
     {
-        /*switch(Registry::get('CaseHandler')->transformCaseTo('lower', $name)) {
-            case 'settings':
-                return \implode('_', array(
-                    $this->alias . 's',
-                    'settings',
-                ));
-        }*/
-
         if (
             $name == null || 
             \in_array(\strtolower($name), array(

@@ -27,11 +27,13 @@ class GrammarHandler
      */
     protected function englishSingle($noun)
     {
-        if (substr($noun, -3) === 'ies') {
-            return substr($noun, 0, -3) . 'y';
-        }
+        if (\substr($noun, -3) === 'ies')
+            return \substr($noun, 0, -3) . 'y';
 
-        return substr($noun, 0, -1);
+        if (\substr($noun, -1) === 's' && \substr($noun, -2, 1) !== 'u')
+            return \substr($noun, 0, -1);
+
+        return $noun;
     }
 
     /**
