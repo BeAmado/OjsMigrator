@@ -1,6 +1,6 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Test;
 
 interface AutoIncrementInterface
 {

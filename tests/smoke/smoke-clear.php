@@ -1,3 +1,3 @@
 <?php
 
-(new \BeAmado\OjsMigrator\OjsScenarioHandler())->tearDownStage();
+(new \BeAmado\OjsMigrator\Test\OjsScenarioHandler())->tearDownStage();

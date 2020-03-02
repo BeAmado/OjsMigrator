@@ -1,20 +1,20 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Entity\SectionHandler;
 
 // interfaces
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
 // traits
-use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\Test\TestStub;
 
 // mocks
-use BeAmado\OjsMigrator\SectionMock;
-use BeAmado\OjsMigrator\JournalMock;
-use BeAmado\OjsMigrator\ReviewFormMock;
-use BeAmado\OjsMigrator\UserMock;
+use BeAmado\OjsMigrator\Test\SectionMock;
+use BeAmado\OjsMigrator\Test\JournalMock;
+use BeAmado\OjsMigrator\Test\ReviewFormMock;
+use BeAmado\OjsMigrator\Test\UserMock;
 
 class SectionHandlerTest extends FunctionalTest implements StubInterface
 {

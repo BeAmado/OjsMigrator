@@ -3,8 +3,12 @@
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Util\TimeKeeper;
-use BeAmado\OjsMigrator\StubInterface;
-use BeAmado\OjsMigrator\TestStub;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
 
 class TimeKeeperTest extends TestCase implements StubInterface
 {

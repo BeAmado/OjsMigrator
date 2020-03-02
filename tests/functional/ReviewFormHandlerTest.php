@@ -1,18 +1,18 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Entity\ReviewFormHandler;
 
 // interfaces
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
 // traits
-use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\Test\TestStub;
 
 // mocks
-use BeAmado\OjsMigrator\ReviewFormMock;
-use BeAmado\OjsMigrator\JournalMock;
+use BeAmado\OjsMigrator\Test\ReviewFormMock;
+use BeAmado\OjsMigrator\Test\JournalMock;
 
 class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
 {

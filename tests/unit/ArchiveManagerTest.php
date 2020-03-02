@@ -2,17 +2,23 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\ArchiveManager;
-use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\Util\FileHandler;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\WorkWithFiles;
 
 class ArchiveManagerTest extends TestCase implements StubInterface
 {
     public function getStub()
     {
         return new class extends ArchiveManager {
-            use BeAmado\OjsMigrator\TestStub;
-            use BeAmado\OjsMigrator\WorkWithFiles;
+            use TestStub;
+            use WorkWithFiles;
         };
     }
 

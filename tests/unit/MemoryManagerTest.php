@@ -2,14 +2,19 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\MemoryManager;
-use BeAmado\OjsMigrator\StubInterface;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
 
 class MemoryManagerTest extends TestCase implements StubInterface
 {
     public function getStub()
     {
         return new class extends MemoryManager {
-            use BeAmado\OjsMigrator\TestStub;
+            use TestStub;
         };
     }
     

@@ -42,7 +42,7 @@ $dbDriver = (new \BeAmado\OjsMigrator\Util\FileHandler())->read(
     ))
 );
 
-(new \BeAmado\OjsMigrator\OjsScenarioHandler())->setUpStage(
+(new \BeAmado\OjsMigrator\Test\OjsScenarioHandler())->setUpStage(
     in_array($dbDriver, array('mysql', 'sqlite')) 
         ? array('dbDriver' => $dbDriver)
         : null

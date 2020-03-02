@@ -1,16 +1,18 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Db\DbHandler;
-use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\Util\ConfigHandler;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
 use BeAmado\OjsMigrator\Registry;
 
-//////// traits ////////////
-use BeAmado\OjsMigrator\TestStub;
-use BeAmado\OjsMigrator\WorkWithFiles;
-use BeAmado\OjsMigrator\WorkWithSqlite;
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits 
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\WorkWithFiles;
+use BeAmado\OjsMigrator\Test\WorkWithSqlite;
 
 class DbHandlerTest extends FunctionalTest implements StubInterface
 {

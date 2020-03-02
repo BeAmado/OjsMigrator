@@ -1,6 +1,6 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Test;
 
 trait WorkWithFiles
 {
@@ -488,6 +488,6 @@ trait WorkWithFiles
 
     public function getFileFullpath($filename)
     {
-        return $this->getDataDir() . '/' . $filename;
+        return $this->getDataDir() . $this->sep() . $filename;
     }
 }

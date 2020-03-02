@@ -3,16 +3,22 @@
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\ZipHandler;
 use BeAmado\OjsMigrator\Util\FileHandler;
-use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+//traits
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\WorkWithFiles;
 
 class ZipHandlerTest extends TestCase implements StubInterface
 {
     public function getStub()
     {
         return new class extends ZipHandler {
-            use BeAmado\OjsMigrator\TestStub;
-            use BeAmado\OjsMigrator\WorkWithFiles;
+            use TestStub;
+            use WorkWithFiles;
         };
     }
 

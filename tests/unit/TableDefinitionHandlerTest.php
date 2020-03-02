@@ -2,8 +2,10 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Db\TableDefinitionHandler;
-use BeAmado\OjsMigrator\WorkWithXmlSchema;
 use BeAmado\OjsMigrator\Registry;
+
+// traits
+use BeAmado\OjsMigrator\Test\WorkWithXmlSchema;
 
 class TableDefinitionHandlerTest extends TestCase
 {

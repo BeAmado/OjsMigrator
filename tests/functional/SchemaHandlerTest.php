@@ -1,21 +1,9 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Db\SchemaHandler;
 use BeAmado\OjsMigrator\Db\Schema;
 use BeAmado\OjsMigrator\Db\TableDefinition;
-
-/////////// interfaces ///////////////////
-use BeAmado\OjsMigrator\StubInterface;
-//////////////////////////////////////////
-
-///////////// traits /////////////////////
-use BeAmado\OjsMigrator\TestStub;
-use BeAmado\OjsMigrator\WorkWithFiles;
-use BeAmado\OjsMigrator\WorkWithXmlSchema;
-use BeAmado\OjsMigrator\WorkWithOjsDir;
-//////////////////////////////////////////
-
 use BeAmado\OjsMigrator\Util\FileSystemManager;
 use BeAmado\OjsMigrator\Util\XmlHandler;
 use BeAmado\OjsMigrator\Registry;
@@ -23,6 +11,15 @@ use BeAmado\OjsMigrator\Maestro;
 use BeAmado\OjsMigrator\Db\TableDefinitionHandler;
 use BeAmado\OjsMigrator\Db\ColumnDefinitionHandler;
 use BeAmado\OjsMigrator\Db\IndexDefinitionHandler;
+
+// interfaces 
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\WorkWithFiles;
+use BeAmado\OjsMigrator\Test\WorkWithXmlSchema;
+use BeAmado\OjsMigrator\Test\WorkWithOjsDir;
 
 class SchemaHandlerTest extends FunctionalTest implements StubInterface
 {

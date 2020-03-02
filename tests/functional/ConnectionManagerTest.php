@@ -2,14 +2,14 @@
 
 use BeAmado\OjsMigrator\Db\ConnectionManager;
 use BeAmado\OjsMigrator\Registry;
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 
 // interfaces
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
 // traits
-use BeAmado\OjsMigrator\TestStub;
-use BeAmado\OjsMigrator\WorkWithSqlite;
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\WorkWithSqlite;
 
 class ConnectionManagerTest extends FunctionalTest implements StubInterface
 {

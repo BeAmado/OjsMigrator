@@ -4,14 +4,14 @@ use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\DataMapper;
 use BeAmado\OjsMigrator\Registry;
 
-// test interfaces
-use BeAmado\OjsMigrator\StubInterface;
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
 
-// test traits
-use BeAmado\OjsMigrator\TestStub;
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
 
-// test helper classes
-use BeAmado\OjsMigrator\DataMappingHandler;
+// helper 
+use BeAmado\OjsMigrator\Test\DataMappingHandler;
 
 class DataMapperTest extends TestCase implements StubInterface
 {

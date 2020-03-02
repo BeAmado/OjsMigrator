@@ -81,7 +81,7 @@ class EntityTest extends TestCase
 
     public function testGetUserId()
     {
-        $stageMaster = new \BeAmado\OjsMigrator\OjsScenarioHandler();
+        $stageMaster = new \BeAmado\OjsMigrator\Test\OjsScenarioHandler();
         $stageMaster->setUpStage();
         $entity = Registry::get('EntityHandler')->create('users', array(
             'user_id' => 312,

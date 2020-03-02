@@ -1,8 +1,11 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Db\DAO;
+
+// traits
+use \BeAmado\OjsMigrator\Test\TestStub;
 
 class DAOTest extends FunctionalTest
 {
@@ -252,7 +255,7 @@ class DAOTest extends FunctionalTest
         ));
 
         $stub = new class('sections') extends DAO {
-            use \BeAmado\OjsMigrator\TestStub;
+            use TestStub;
         };
 
         $filename = $stub->callMethod(

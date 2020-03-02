@@ -2,14 +2,19 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\MyObject;
-use BeAmado\OjsMigrator\StubInterface;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
 
 class MyObjectTest extends TestCase implements StubInterface
 {
     public function getStub()
     {
         return new class extends MyObject {
-            use BeAmado\OjsMigrator\TestStub;
+            use TestStub;
         };
     }
 

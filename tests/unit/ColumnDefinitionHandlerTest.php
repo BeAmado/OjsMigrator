@@ -3,7 +3,9 @@
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Db\ColumnDefinitionHandler;
 use BeAmado\OjsMigrator\Registry;
-use BeAmado\OjsMigrator\WorkWithXmlSchema;
+
+// traits
+use BeAmado\OjsMigrator\Test\WorkWithXmlSchema;
 
 class ColumnDefinitionHandlerTest extends TestCase
 {

@@ -1,8 +1,8 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use BeAmado\OjsMigrator\OjsScenarioHandler;
-use BeAmado\OjsMigrator\ConfigPreprocessor;
+use BeAmado\OjsMigrator\Test\OjsScenarioHandler;
+use BeAmado\OjsMigrator\Test\ConfigPreprocessor;
 use BeAmado\OjsMigrator\Registry;
 
 class BootstrapTest extends TestCase
@@ -24,7 +24,7 @@ class BootstrapTest extends TestCase
 
     public function testWeHaveTestStubTrait()
     {
-        $this->assertTrue(trait_exists('BeAmado\OjsMigrator\TestStub'));
+        $this->assertTrue(trait_exists('BeAmado\OjsMigrator\Test\TestStub'));
     }
 
     public function testWeHaveAutoloaderClass()

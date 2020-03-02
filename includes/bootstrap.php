@@ -16,12 +16,14 @@ if (!defined(__namespace__ . '\DIR_SEPARATOR')) {
     }
 }
 
-require_once(dirname(__FILE__) . DIR_SEPARATOR
-    . '..' . DIR_SEPARATOR
-    . 'lib' . DIR_SEPARATOR
-    . 'classes' . DIR_SEPARATOR
-    . 'util' . DIR_SEPARATOR
-    . 'FileSystemManager.php');
+require_once(implode(DIR_SEPARATOR, array(
+    dirname(__FILE__), 
+    '..', 
+    'lib', 
+    'classes', 
+    'util', 
+    'FileSystemManager.php',
+)));
 
 if (!defined(__namespace__ . '\BASE_DIR')) {
     define(
@@ -41,7 +43,6 @@ if (!defined(__namespace__ . '\LIB_DIR')) {
     );
 }
 
-//require_once(LIB_DIR . '/classes/util/Autoloader.php');
 require_once((new \BeAmado\OjsMigrator\Util\FileSystemManager())->formPath(
     array(LIB_DIR, 'classes', 'util', 'Autoloader.php')
 ));

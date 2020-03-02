@@ -2,8 +2,14 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
-use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\Registry;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\WorkWithFiles;
 
 class FileSystemManagerTest extends TestCase implements StubInterface
 {
@@ -21,8 +27,8 @@ class FileSystemManagerTest extends TestCase implements StubInterface
     public function getStub()
     {
         return new class extends FileSystemManager {
-            use BeAmado\OjsMigrator\TestStub;
-            use BeAmado\OjsMigrator\WorkWithFiles;
+            use TestStub;
+            use WorkWithFiles;
         };
     }
 

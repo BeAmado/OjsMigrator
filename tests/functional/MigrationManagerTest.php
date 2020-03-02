@@ -1,11 +1,14 @@
 <?php
 
 use BeAmado\OjsMigrator\MigrationManager;
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 
-use BeAmado\OjsMigrator\StubInterface;
-use BeAmado\OjsMigrator\TestStub;
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
 
 class MigrationManagerTest extends FunctionalTest implements StubInterface
 {

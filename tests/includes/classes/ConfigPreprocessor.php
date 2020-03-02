@@ -1,6 +1,7 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Test;
+use \BeAmado\OjsMigrator\Registry;
 
 class ConfigPreprocessor
 {
@@ -51,7 +52,8 @@ class ConfigPreprocessor
         switch($this->getDbDriver()) {
             case 'sqlite':
                 return 'name = ' . $this->getOjsScenarioHandler()->getOjsDir()
-                    . DIR_SEPARATOR . 'tests_ojs.db' . PHP_EOL;
+                    . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'tests_ojs.db' 
+                    . PHP_EOL;
             case 'mysql':
                 return 'name = tests_ojs' . PHP_EOL;
         }

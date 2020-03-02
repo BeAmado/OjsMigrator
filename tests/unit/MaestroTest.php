@@ -3,7 +3,9 @@
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Maestro;
 use BeAmado\OjsMigrator\Registry;
-use BeAmado\OjsMigrator\WorkWithFiles;
+
+// traits
+use BeAmado\OjsMigrator\Test\WorkWithFiles;
 
 class MaestroTest extends TestCase
 {

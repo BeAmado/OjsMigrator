@@ -2,16 +2,23 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\XmlHandler;
-use BeAmado\OjsMigrator\StubInterface;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\WorkWithFiles;
 
 class XmlHandlerTest extends TestCase implements StubInterface
 {
-    use BeAmado\OjsMigrator\WorkWithFiles;
+    use WorkWithFiles;
 
     public function getStub()
     {
         return new class extends XmlHandler {
-            use BeAmado\OjsMigrator\TestStub;
+            use TestStub;
+            use WorkWithFiles;
         };
     }
 

@@ -2,7 +2,13 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\IoManager;
-use BeAmado\OjsMigrator\StubInterface;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
+
 
 class IoManagerTest extends TestCase implements StubInterface
 {
@@ -10,7 +16,7 @@ class IoManagerTest extends TestCase implements StubInterface
     public function getStub()
     {
         return new class extends IoManager {
-            use BeAmado\OjsMigrator\TestStub;
+            use TestStub;
         };
     }
 

@@ -1,6 +1,7 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Test;
+use \BeAmado\OjsMigrator\Registry;
 
 trait WorkWithSqlite
 {
@@ -32,7 +33,8 @@ trait WorkWithSqlite
 
     public function getSqliteDbFilename()
     {
-        return $this->getDbSandbox() . DIR_SEPARATOR . 'tests_ojs2.db';
+        return $this->getDbSandbox() . 
+            \BeAmado\OjsMigrator\DIR_SEPARATOR . 'tests_ojs2.db';
     }
 
     public function getAutoIncrement()

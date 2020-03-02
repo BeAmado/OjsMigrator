@@ -1,14 +1,14 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Entity\EntityHandler;
 use BeAmado\OjsMigrator\Registry;
 
 // interfaces
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
 // traits
-use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\Test\TestStub;
 
 class EntityHandlerTest extends FunctionalTest implements StubInterface
 {

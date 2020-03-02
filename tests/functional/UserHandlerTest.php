@@ -1,15 +1,15 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Entity\UserHandler;
-use BeAmado\OjsMigrator\UserMock;
+use BeAmado\OjsMigrator\Test\UserMock;
 
 // interfaces 
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
 // traits
-use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\Test\TestStub;
 
 class UserHandlerTest extends FunctionalTest implements StubInterface
 {

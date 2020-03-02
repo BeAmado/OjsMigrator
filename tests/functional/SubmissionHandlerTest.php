@@ -1,19 +1,18 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Entity\SubmissionHandler;
-
-use BeAmado\OjsMigrator\FixtureHandler;
+use BeAmado\OjsMigrator\Test\FixtureHandler;
 
 // interfaces 
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
 // traits
-use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\Test\TestStub;
 
 // mocks
-use BeAmado\OjsMigrator\SubmissionMock;
+use BeAmado\OjsMigrator\Test\SubmissionMock;
 
 class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 {

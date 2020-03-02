@@ -16,10 +16,10 @@ class Autoloader
         $full = \BeAmado\OjsMigrator\LIB_DIR;
         
         foreach ($args as $dir) {
-            $full .= '/' . $dir;
+            $full .= \BeAmado\OjsMigrator\DIR_SEPARATOR . $dir;
         }
 
-        $full .= '/' . $classname . '.php';
+        $full .= \BeAmado\OjsMigrator\DIR_SEPARATOR . $classname . '.php';
         return $full;
     }
 
@@ -31,7 +31,7 @@ class Autoloader
      */
     protected function includeElement($fullpath)
     {
-        if (is_file($fullpath)) {
+        if (\is_file($fullpath)) {
             include_once($fullpath);
             return true;
         }
@@ -54,8 +54,6 @@ class Autoloader
                 array('classes', 'core')
             )
         )) return true;
-
-        if (\count($parts) < 1) return false;
 
         \array_splice($parts, 0, 0, array('classes')); //puts classes in the beginning of the array 
 
@@ -93,40 +91,6 @@ class Autoloader
                 $name, 
                 array('traits')
             )
-        );
-    }
-
-    /**
-     * Checks if the specified namespace is an interface 
-     *
-     * @param string $namespacedStr
-     * @return boolean
-     */
-    protected function nameIsInterface($namespacedStr)
-    {
-        return in_array(
-            'interface',
-            explode('/', strtolower($namespacedStr))
-        ) || in_array(
-            'interfaces',
-            explode('/', strtolower($namespacedStr))
-        );
-    }
-
-    /**
-     * Checks if the specified namespace is a trait
-     *
-     * @param string $namespacedStr
-     * @return boolean
-     */
-    protected function nameIsTrait($namespacedStr)
-    {
-        return in_array(
-            'trait',
-            explode('/', strtolower($namespacedStr))
-        ) || in_array(
-            'traits',
-            explode('/', strtolower($namespacedStr))
         );
     }
 

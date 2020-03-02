@@ -1,7 +1,17 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Test;
 use \BeAmado\OjsMigrator\Registry;
+
+// mocks
+use \BeAmado\OjsMigrator\Test\AnnouncementMock;
+use \BeAmado\OjsMigrator\Test\GroupMock;
+use \BeAmado\OjsMigrator\Test\IssueMock;
+use \BeAmado\OjsMigrator\Test\JournalMock;
+use \BeAmado\OjsMigrator\Test\ReviewFormMock;
+use \BeAmado\OjsMigrator\Test\SectionMock;
+use \BeAmado\OjsMigrator\Test\SubmissionMock;
+use \BeAmado\OjsMigrator\Test\UserMock;
 
 class FixtureHandler
 {
@@ -94,21 +104,21 @@ class FixtureHandler
     protected function getMockerInstance($entityName)
     {
         if (\strpos(\strtolower($entityName), 'announcement') !== false)
-            return new \BeAmado\OjsMigrator\AnnouncementMock();
+            return new AnnouncementMock();
         if (\strpos(\strtolower($entityName), 'group') !== false)
-            return new \BeAmado\OjsMigrator\GroupMock();
+            return new GroupMock();
         if (\strpos(\strtolower($entityName), 'issue') !== false)
-            return new \BeAmado\OjsMigrator\IssueMock();
+            return new IssueMock();
         if (\strpos(\strtolower($entityName), 'journal') !== false)
-            return new \BeAmado\OjsMigrator\JournalMock();
+            return new JournalMock();
         if (\strpos(\strtolower($entityName), 'review') !== false)
-            return new \BeAmado\OjsMigrator\ReviewFormMock();
+            return new ReviewFormMock();
         if (\strpos(\strtolower($entityName), 'section') !== false)
-            return new \BeAmado\OjsMigrator\SectionMock();
+            return new SectionMock();
         if (\strpos(\strtolower($entityName), 'submission') !== false)
-            return new \BeAmado\OjsMigrator\SubmissionMock();
+            return new SubmissionMock();
         if (\strpos(\strtolower($entityName), 'user') !== false)
-            return new \BeAmado\OjsMigrator\UserMock();
+            return new UserMock();
     }
 
     protected function getMock($entity, $mock)

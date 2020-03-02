@@ -1,10 +1,12 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Db\MyStatement;
 use BeAmado\OjsMigrator\Db\ConnectionManager;
 use BeAmado\OjsMigrator\Registry;
-use BeAmado\OjsMigrator\WorkWithOjsDir;
+
+// traits
+use BeAmado\OjsMigrator\Test\WorkWithOjsDir;
 
 class MyStatementTest extends FunctionalTest
 {

@@ -1,34 +1,39 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Test;
+use \BeAmado\OjsMigrator\Registry;
 
 class OjsScenarioHandler
 {
+    protected function sep()
+    {
+        return \BeAmado\OjsMigrator\DIR_SEPARATOR;
+    }
+
     public function getOjsDir()
     {
-        return $this->getSandboxDir() . DIR_SEPARATOR . 'ojs2'; 
+        return $this->getSandboxDir() . $this->sep() . 'ojs2'; 
     }
 
     public function getOjsPublicHtmlDir()
     {
-        return $this->getOjsDir() . DIR_SEPARATOR . 'public_html';
+        return $this->getOjsDir() . $this->sep() . 'public_html';
     }
 
     public function getOjsFilesDir()
     {
-        return $this->getOjsDir() . DIR_SEPARATOR . 'files';
+        return $this->getOjsDir() . $this->sep() . 'files';
     }
 
     public function getOjsConfigFile()
     {
-        return $this->getOjsPublicHtmlDir() 
-            . DIR_SEPARATOR . 'config.inc.php';
+        return $this->getOjsPublicHtmlDir() . $this->sep() . 'config.inc.php';
     }
 
     public function getOjsConfigTemplateFile()
     {
         return $this->getOjsPublicHtmlDir()
-            . DIR_SEPARATOR . 'config.TEMPLATE.inc.php';
+            . $this->sep() . 'config.TEMPLATE.inc.php';
     }
 
     public function getSandboxDir()

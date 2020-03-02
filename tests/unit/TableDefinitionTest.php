@@ -2,7 +2,9 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Db\TableDefinition;
-use BeAmado\OjsMigrator\WorkWithXmlSchema;
+
+// traits
+use BeAmado\OjsMigrator\Test\WorkWithXmlSchema;
 
 class TableDefinitionTest extends TestCase
 {

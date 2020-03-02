@@ -1,28 +1,32 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Test;
+use \BeAmado\OjsMigrator\Registry;
 
 trait WorkWithOjsDir
 {
     public function getOjsDir()
     {
-        return $this->getSandboxDir() . DIR_SEPARATOR . 'ojs2'; 
+        return $this->getSandboxDir() 
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'ojs2'; 
     }
 
     public function getOjsPublicHtmlDir()
     {
-        return $this->getOjsDir() . DIR_SEPARATOR . 'public_html';
+        return $this->getOjsDir() 
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'public_html';
     }
 
     public function getOjsFilesDir()
     {
-        return $this->getOjsDir() . DIR_SEPARATOR . 'files';
+        return $this->getOjsDir() 
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'files';
     }
 
     public function getOjsConfigFile()
     {
         return $this->getOjsPublicHtmlDir() 
-            . DIR_SEPARATOR . 'config.inc.php';
+            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'config.inc.php';
     }
 
     public function getSandboxDir()

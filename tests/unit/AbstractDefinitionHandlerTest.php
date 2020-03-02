@@ -5,10 +5,10 @@ use BeAmado\OjsMigrator\Db\AbstractDefinitionHandler;
 use BeAmado\OjsMigrator\Registry;
 
 // traits
-use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\Test\TestStub;
 
 // interfaces
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
 class AbstractDefinitionHandlerTest extends TestCase implements StubInterface
 {

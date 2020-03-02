@@ -5,15 +5,21 @@ use BeAmado\OjsMigrator\Util\JsonHandler;
 use BeAmado\OjsMigrator\Util\MemoryManager;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
 use BeAmado\OjsMigrator\Util\FileHandler;
-use BeAmado\OjsMigrator\StubInterface;
+
+// interfaces 
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\WorkWithFiles;
 
 class JsonHandlerTest extends TestCase implements StubInterface
 {
     public function getStub()
     {
         return new class extends JsonHandler {
-            use BeAmado\OjsMigrator\TestStub;
-            use BeAmado\OjsMigrator\WorkWithFiles;
+            use TestStub;
+            use WorkWithFiles;
         };
     }
 

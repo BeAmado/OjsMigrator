@@ -1,6 +1,7 @@
 <?php
 
-namespace BeAmado\OjsMigrator;
+namespace BeAmado\OjsMigrator\Test;
+use \BeAmado\OjsMigrator\Registry;
 
 class ReviewFormMock extends EntityMock
 {

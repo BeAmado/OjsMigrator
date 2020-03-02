@@ -2,14 +2,19 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\GrammarHandler;
-use BeAmado\OjsMigrator\StubInterface;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
 
 class GrammarHandlerTest extends TestCase implements StubInterface
 {
     public function getStub()
     {
         return new class extends GrammarHandler {
-            use BeAmado\OjsMigrator\TestStub;
+            use TestStub;
         };
     }
 

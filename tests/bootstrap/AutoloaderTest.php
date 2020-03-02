@@ -3,12 +3,19 @@
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\Autoloader;
 
-class AutoloaderTest extends TestCase
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
+
+
+class AutoloaderTest extends TestCase implements StubInterface
 {
-    private function getStub()
+    public function getStub()
     {
         return new class extends Autoloader {
-            use BeAmado\OjsMigrator\TestStub;
+            use TestStub;
         };
     }
 
@@ -22,46 +29,6 @@ class AutoloaderTest extends TestCase
                     'classname' => 'Lilili',
                     'args' => array('lalala', 'lelele')
                 )
-            )
-        );
-    }
-
-    public function testNameIsAnInterface()
-    {
-        $this->assertTrue(
-            $this->getStub()->callMethod(
-                'nameIsInterface', 
-                'labareda/do/bpde/Interfaces/chaparres'
-            )
-        );
-    }
-
-    public function testNameIsNotAnInterface()
-    {
-        $this->assertFalse(
-            $this->getStub()->callMethod(
-                'nameIsInterface', 
-                'labareda/do/bpde/Interes/chaparres'
-            )
-        );
-    }
-
-    public function testNameIsATrait()
-    {
-        $this->assertTrue(
-            $this->getStub()->callMethod(
-                'nameIsTrait', 
-                'labareda/do/bpde/Traits/chaparres'
-            )
-        );
-    }
-
-    public function testNameIsNotATrait()
-    {
-        $this->assertFalse(
-            $this->getStub()->callMethod(
-                'nameIsTrait', 
-                'labareda/do/bps/chaparres'
             )
         );
     }

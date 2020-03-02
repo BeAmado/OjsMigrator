@@ -4,7 +4,7 @@ require_once(dirname(__FILE__) . '/../../includes/bootstrap.php');
 require_once(dirname(__FILE__) . '/../includes/traits/TestStub.php');
 
 $io = new class extends \BeAmado\OjsMigrator\Util\IoManager {
-    use \BeAmado\OjsMigrator\TestStub;
+    use \BeAmado\OjsMigrator\Test\TestStub;
 };
 
 $names = array(

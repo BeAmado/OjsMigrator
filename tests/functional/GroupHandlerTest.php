@@ -1,24 +1,24 @@
 <?php
 
-use BeAmado\OjsMigrator\FunctionalTest;
+use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Entity\GroupHandler;
 
 // interfaces
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
 // traits
-use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\Test\TestStub;
 
 //mocks
-use BeAmado\OjsMigrator\JournalMock;
-use BeAmado\OjsMigrator\GroupMock;
-use BeAmado\OjsMigrator\UserMock;
+use BeAmado\OjsMigrator\Test\JournalMock;
+use BeAmado\OjsMigrator\Test\GroupMock;
+use BeAmado\OjsMigrator\Test\UserMock;
 
 class GroupHandlerTest extends FunctionalTest
 {
-    public static function setUpBeforeClass($args = array(
-        'createTables' => array(
+    public static function setUpBeforeClass($args = [
+        'createTables' => [
             'journals',
             'users',
             'user_settings',
@@ -30,8 +30,8 @@ class GroupHandlerTest extends FunctionalTest
             'groups',
             'group_settings',
             'group_memberships',
-        ),
-    )) : void {
+        ],
+    ]) : void {
         parent::setUpBeforeClass($args);
 
         Registry::get('EntityHandler')->createOrUpdateInDatabase(
@@ -41,14 +41,14 @@ class GroupHandlerTest extends FunctionalTest
 
     protected function importUsers()
     {
-        foreach (array(
+        foreach ([
             'ironman',
             'batman',
             'hulk',
             'thor',
             'hawkeye',
             'greenlantern',
-        ) as $username) {
+        ] as $username) {
             Registry::get('UserHandler')->importUser(
                 (new UserMock())->getUser($username)
             );
@@ -92,7 +92,7 @@ class GroupHandlerTest extends FunctionalTest
 
         $this->assertSame(
             '1-1-1-1-1-1',
-            implode('-', array(
+            implode('-', [
                 (int) ($backs->get('assoc_id')
                             ->getValue()
                    === $testJournal->get('journal_id')
@@ -119,7 +119,7 @@ class GroupHandlerTest extends FunctionalTest
                                 ->get('user_id')
                                 ->getValue() 
                   === $thor->get('user_id')->getValue()),
-            ))
+            ])
         );
     }
 
@@ -135,12 +135,12 @@ class GroupHandlerTest extends FunctionalTest
             $forwards
         );
 
-        $group = Registry::get('GroupsDAO')->read(array(
+        $group = Registry::get('GroupsDAO')->read([
             'group_id' => Registry::get('DataMapper')->getMapping(
                 'groups',
                 $forwards->getId()
             )
-        ))->get(0);
+        ])->get(0);
 
         $journal = Registry::get('JournalsDAO')->read(array(
             'path' => 'test_journal',

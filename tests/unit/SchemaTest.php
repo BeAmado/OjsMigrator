@@ -2,9 +2,13 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Db\Schema;
-use BeAmado\OjsMigrator\StubInterface;
-use BeAmado\OjsMigrator\TestStub;
-use BeAmado\OjsMigrator\WorkWithXmlSchema;
+
+// interfaces
+use BeAmado\OjsMigrator\Test\StubInterface;
+
+// traits
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\WorkWithXmlSchema;
 
 class SchemaTest extends TestCase implements StubInterface
 {

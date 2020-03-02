@@ -5,10 +5,10 @@ use BeAmado\OjsMigrator\Util\CaseHandler;
 use BeAmado\OjsMigrator\Registry;
 
 // traits
-use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\Test\TestStub;
 
 // interfaces
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
 class CaseHandlerTest extends TestCase implements StubInterface
 {
