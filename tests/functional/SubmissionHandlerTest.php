@@ -7,17 +7,13 @@ use BeAmado\OjsMigrator\Entity\SubmissionHandler;
 use BeAmado\OjsMigrator\FixtureHandler;
 
 // interfaces 
-use BeAmado\OjsMigrator\TestStub;
+use BeAmado\OjsMigrator\StubInterface;
 
 // traits
-use BeAmado\OjsMigrator\StubInterface;
+use BeAmado\OjsMigrator\TestStub;
 
 // mocks
 use BeAmado\OjsMigrator\SubmissionMock;
-use BeAmado\OjsMigrator\JournalMock;
-use BeAmado\OjsMigrator\SectionMock;
-use BeAmado\OjsMigrator\IssueMock;
-use BeAmado\OjsMigrator\UserMock;
 
 class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 {

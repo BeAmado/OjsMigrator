@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use BeAmado\OjsMigrator\OjsScenarioTester;
+use BeAmado\OjsMigrator\OjsScenarioHandler;
 use BeAmado\OjsMigrator\ConfigPreprocessor;
 use BeAmado\OjsMigrator\Registry;
 
@@ -9,12 +9,12 @@ class BootstrapTest extends TestCase
 {
     public static function setUpBeforeClass() : void
     {
-        (new OjsScenarioTester())->setUpStage();
+        (new OjsScenarioHandler())->setUpStage();
     }
 
     public static function tearDownAfterClass() : void
     {
-        (new OjsScenarioTester())->tearDownStage();
+        (new OjsScenarioHandler())->tearDownStage();
     }
 
     public function testBootstrapFileExists()
@@ -35,7 +35,7 @@ class BootstrapTest extends TestCase
     public function testCreateConfigFile()
     {
         $this->assertFileExists(
-            (new OjsScenarioTester())->getOjsConfigFile()
+            (new OjsScenarioHandler())->getOjsConfigFile()
         );
     }
 

@@ -2,7 +2,7 @@
 
 namespace BeAmado\OjsMigrator;
 
-class DataMappingTester
+class DataMappingHandler
 {
     public function setDataMappingDir()
     {

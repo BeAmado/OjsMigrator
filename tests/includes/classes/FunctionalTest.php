@@ -27,15 +27,15 @@ abstract class FunctionalTest extends TestCase
     public static function setUpBeforeClass($args = array()) : void
     {
         Registry::clear();
-        (new OjsScenarioTester())->setUpStage($args);
-        (new DataMappingTester())->setUpDataMappingStage();
+        (new OjsScenarioHandler())->setUpStage($args);
+        (new DataMappingHandler())->setUpDataMappingStage();
     }
 
     public static function tearDownAfterClass($args = array()) : void
     {
-        //(new OjsScenarioTester())->removeSandbox();
-        (new DataMappingTester())->tearDownDataMappingStage();
-        (new OjsScenarioTester())->tearDownStage($args);
+        //(new OjsScenarioHandler())->removeSandbox();
+        (new DataMappingHandler())->tearDownDataMappingStage();
+        (new OjsScenarioHandler())->tearDownStage($args);
         Registry::clear();
     }
 

@@ -14,7 +14,6 @@ use BeAmado\OjsMigrator\WorkWithOjsDir;
 /////////////////////////////////////////////
 
 use BeAmado\OjsMigrator\Registry;
-use BeAmado\OjsMigrator\OjsScenarioTester;
 
 class ConfigHandlerTest extends FunctionalTest implements StubInterface
 {

@@ -11,18 +11,18 @@ use BeAmado\OjsMigrator\StubInterface;
 use BeAmado\OjsMigrator\TestStub;
 
 // test helper classes
-use BeAmado\OjsMigrator\DataMappingTester;
+use BeAmado\OjsMigrator\DataMappingHandler;
 
 class DataMapperTest extends TestCase implements StubInterface
 {
     public static function setUpBeforeClass() : void
     {
-        (new DataMappingTester())->setUpDataMappingStage();
+        (new DataMappingHandler())->setUpDataMappingStage();
     }
 
     public static function tearDownAfterClass() : void
     {
-        (new DataMappingTester())->tearDownDataMappingStage();
+        (new DataMappingHandler())->tearDownDataMappingStage();
     }
 
     public function getStub()

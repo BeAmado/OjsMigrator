@@ -6,13 +6,13 @@ use \BeAmado\OjsMigrator\Registry;
 class FixtureHandler
 {
     /**
-     * @var \BeAmado\OjsMigrator\OjsScenarioTester
+     * @var \BeAmado\OjsMigrator\OjsScenarioHandler
      */
     private $scenario;
 
     public function __construct()
     {
-        $this->scenario = new OjsScenarioTester();
+        $this->scenario = new OjsScenarioHandler();
     }
 
     public function createTablesForUsers()
@@ -50,15 +50,28 @@ class FixtureHandler
         ]);
     }
 
+    public function createTablesForJournals()
+    {
+        $this->scenario->createTables([
+            'journals',
+            'journal_settings',
+            'plugin_settings',
+        ]);
+    }
+
     protected function createTablesForEntities($entities = [])
     {
         foreach ($entities as $entity) {
-            if (\strpos(\strtolower($entity), 'user') !== false)
-                $this->createTablesForUsers();
-            else if (\strpos(\strtolower($entity), 'section') !== false)
-                $this->createTablesForSections();
+            if (!\is_string($entity))
+                ;// do nothing
             else if (\strpos(\strtolower($entity), 'issue') !== false)
                 $this->createTablesForIssues();
+            else if (\strpos(\strtolower($entity), 'journal') !== false)
+                $this->createTablesForJournals();
+            else if (\strpos(\strtolower($entity), 'section') !== false)
+                $this->createTablesForSections();
+            else if (\strpos(\strtolower($entity), 'user') !== false)
+                $this->createTablesForUsers();
         }
     }
 
@@ -111,14 +124,28 @@ class FixtureHandler
     public function createSingle(
         $entityName,
         $entity,
+        $importWholeEntity = false,
         $createTables = true
     ) {
+        if (
+            !\is_string($entity) && 
+            !\is_a($entity, \BeAmado\OjsMigrator\MyObject::class)
+        )
+            return false;
+
         if ($createTables)
             $this->createTablesForEntities([$entityName]);
 
-        return $this->getHandler($entityName)->import(
-            \is_string($entity) 
-                ? $this->getMock($entityName, $entity) 
+        if ($importWholeEntity)
+            return $this->getHandler($entityName)->import(
+                \is_string($entity) 
+                    ? $this->getMock($entityName, $entity) 
+                    : $entity
+            );
+        
+        return Registry::get('EntityHandler')->createOrUpdateInDatabase(
+            \is_string($entity)
+                ? $this->getMock($entityName, $entity)
                 : $entity
         );
     }
@@ -128,14 +155,22 @@ class FixtureHandler
         foreach ($data as $entityName => $entities) {
             $this->createTablesForEntities([$entityName]);
             foreach($entities as $entity) {
-                $this->createSingle($entityName, $entity, false);
+                $this->createSingle($entityName, $entity, false, false);
             }
         }
     }
         
-    public function createUser($user, $createTables = true)
-    {
-        return $this->createSingle('user', $user, $createTables);
+    public function createUser(
+        $user, 
+        $importWholeUser = false, 
+        $createTables = true
+    ) {
+        return $this->createSingle(
+            'user', 
+            $user, 
+            $importWholeUser, 
+            $createTables
+        );
     }
 
     public function createUsers($users = [])

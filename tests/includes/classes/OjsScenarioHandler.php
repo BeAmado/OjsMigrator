@@ -2,7 +2,7 @@
 
 namespace BeAmado\OjsMigrator;
 
-class OjsScenarioTester
+class OjsScenarioHandler
 {
     public function getOjsDir()
     {

@@ -18,7 +18,7 @@ $fsm = new \BeAmado\OjsMigrator\Util\FileSystemManager();
 
 foreach (array(
     'ConfigPreprocessor',
-    'OjsScenarioTester',
+    'OjsScenarioHandler',
 ) as $classname) {
     require_once(
         $fsm->formPathFromBaseDir(array(
@@ -42,7 +42,7 @@ $dbDriver = (new \BeAmado\OjsMigrator\Util\FileHandler())->read(
     ))
 );
 
-(new \BeAmado\OjsMigrator\OjsScenarioTester())->setUpStage(
+(new \BeAmado\OjsMigrator\OjsScenarioHandler())->setUpStage(
     in_array($dbDriver, array('mysql', 'sqlite')) 
         ? array('dbDriver' => $dbDriver)
         : null

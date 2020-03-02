@@ -26,7 +26,7 @@ class ConfigPreprocessor
     public function __construct($args = array())
     {
         $this->vars = Registry::get('MemoryManager')->create(array(
-            'OjsScenarioTester' => new OjsScenarioTester(),
+            'OjsScenarioHandler' => new OjsScenarioHandler(),
             'dbDriver' => $this->parseDbDriver($args),
         ));
     }
@@ -41,7 +41,7 @@ class ConfigPreprocessor
     {
         return str_replace(
             '[ojs2_dir]',
-            $this->getOjsScenarioTester()->getOjsDir(),
+            $this->getOjsScenarioHandler()->getOjsDir(),
             $str
         ) . PHP_EOL;
     }
@@ -50,7 +50,7 @@ class ConfigPreprocessor
     {
         switch($this->getDbDriver()) {
             case 'sqlite':
-                return 'name = ' . $this->getOjsScenarioTester()->getOjsDir()
+                return 'name = ' . $this->getOjsScenarioHandler()->getOjsDir()
                     . DIR_SEPARATOR . 'tests_ojs.db' . PHP_EOL;
             case 'mysql':
                 return 'name = tests_ojs' . PHP_EOL;
@@ -89,9 +89,9 @@ class ConfigPreprocessor
         return false;
     }
 
-    protected function getOjsScenarioTester()
+    protected function getOjsScenarioHandler()
     {
-        return $this->vars->get('OjsScenarioTester')->getValue();
+        return $this->vars->get('OjsScenarioHandler')->getValue();
     }
 
     public function createConfigFile()
@@ -104,7 +104,7 @@ class ConfigPreprocessor
 
         foreach (
             \file(
-                $this->getOjsScenarioTester()
+                $this->getOjsScenarioHandler()
                      ->getOjsConfigTemplateFile()
             ) as $line
         ) {
@@ -119,7 +119,7 @@ class ConfigPreprocessor
         }
 
         return Registry::get('FileHandler')->write(
-            $this->getOjsScenarioTester()->getOjsConfigFile(),
+            $this->getOjsScenarioHandler()->getOjsConfigFile(),
             $this->vars->get('config')->toArray()
         );
     }

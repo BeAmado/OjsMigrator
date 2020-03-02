@@ -3,7 +3,7 @@
 use BeAmado\OjsMigrator\FunctionalTest;
 use BeAmado\OjsMigrator\Entity\IssueHandler;
 use BeAmado\OjsMigrator\Registry;
-use BeAmado\OjsMigrator\OjsScenarioTester;
+use BeAmado\OjsMigrator\OjsScenarioHandler;
 
 // interfaces
 use BeAmado\OjsMigrator\StubInterface;
@@ -101,7 +101,7 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
     {
         parent::__construct();
         $this->issueMock = new IssueMock();
-        $this->scenario = new OjsScenarioTester();
+        $this->scenario = new OjsScenarioHandler();
     }
 
     public function testCanGetTheDirectoryWhereTheIssueFilesAreStored()
