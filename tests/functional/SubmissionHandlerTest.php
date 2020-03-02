@@ -34,6 +34,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                 '2011',
                 '2015',
             ],
+            'submissions' => [],
         ]);
     }
 
@@ -70,9 +71,26 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         $submission = $this->createRWC2015();
         $this->assertSame(
             '1',
-            implode('-', array(
+            implode('-', [
                 (int) Registry::get('EntityHandler')->isEntity($submission),
-            ))
+            ])
+        );
+    }
+
+    public function testCanRegisterTheRugbyWorldCup2015Submission()
+    {
+        $submission = $this->createRWC2015();
+
+        $registered = $this->getStub()->callMethod(
+            'registerSubmission',
+            $submission
+        );
+
+        $this->assertSame(
+            '1',
+            implode('-', [
+                (int) $registered,
+            ])
         );
     }
 }

@@ -69,6 +69,15 @@ class FixtureHandler
         ]);
     }
 
+    public function createTablesForSubmissions()
+    {
+        $this->scenario->createTables([
+            Registry::get('SubmissionHandler')->formTableName(),
+            Registry::get('SubmissionHandler')->formTableName('settings'),
+            Registry::get('SubmissionHandler')->formTableName('files'),
+        ]);
+    }
+
     protected function createTablesForEntities($entities = [])
     {
         foreach ($entities as $entity) {
@@ -80,6 +89,8 @@ class FixtureHandler
                 $this->createTablesForJournals();
             else if (\strpos(\strtolower($entity), 'section') !== false)
                 $this->createTablesForSections();
+            else if (\strpos(\strtolower($entity), 'submission') !== false)
+                $this->createTablesForSubmissions();
             else if (\strpos(\strtolower($entity), 'user') !== false)
                 $this->createTablesForUsers();
         }
