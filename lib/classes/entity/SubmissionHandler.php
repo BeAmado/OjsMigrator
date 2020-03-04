@@ -12,13 +12,12 @@ class SubmissionHandler extends EntityHandler
     
     public function __construct()
     {
-        //parent::__construct();
         $this->setEntityAlias();
     }
 
     public function create($data, $extra = null)
     {
-        return new Entity($data, $this->getEntityAlias());
+        return new Entity($data, $this->formTableName());
     }
 
     protected function setEntityAlias()
@@ -95,6 +94,11 @@ class SubmissionHandler extends EntityHandler
             $this->formTableName('settings'),
             array($this->formTableName() => $this->formIdField())
         );
+    }
+
+    public function getJournalArticlesDir()
+    {
+
     }
 
     protected function importSubmissionFile($data)

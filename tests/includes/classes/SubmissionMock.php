@@ -14,16 +14,22 @@ class SubmissionMock extends EntityMock
         parent::__construct('submissions');
     }
 
+    protected function formTableName($entity)
+    { 
+        return Registry::get('SubmissionHandler')->formTableName(
+            \str_replace(
+                array('[', ']', '_table'),
+                '',
+                $entity->get('__tableName_')->getValue()
+            )
+        );
+    }
+
     protected function fillTableName($entity)
     {
         $entity->set(
             '__tableName_',
-            Registry::get('SubmissionHandler')->formTableName(
-                \str_replace(
-                    array('[', ']', '_table'),
-                    '',
-                    $entity->get('__tableName_')->getValue())
-            )
+            $this->formTableName($entity)
         );
     }
 
