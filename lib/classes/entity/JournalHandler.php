@@ -143,4 +143,35 @@ class JournalHandler extends EntityHandler implements ImportExport
     {
         return $this->exportJournal($journal);
     }
-}
+
+    protected function journalFilesDir($journal)
+    {
+        if (
+            !\is_numeric($journal) &&
+            !Registry::get('EntityHandler')->isEntity($journal)
+        )
+            return;
+
+        return Registry::get('FileSystemHandler')->formPath(array(
+            Registry::get('ConfigHandler')->getFilesDir(),
+            'journals',
+            \is_numeric($journal) ? $journal : $journal->getId(),
+        ));
+    }
+
+    public function getSubmissionsDir($journal)
+    {
+        return \implode(\BeAmado\OjsMigrator\DIR_SEPARATOR, array(
+            $this->journalFilesDir($journal),
+            Registry::get('SubmissionHandler')->formTableName(),
+        ));
+    }
+
+    public function getIssuesDir($journal)
+    {
+        return \implode(\BeAmado\OjsMigrator\DIR_SEPARATOR, array(
+            $this->journalFilesDir($journal),
+            'issues',
+        ));
+    }
+
