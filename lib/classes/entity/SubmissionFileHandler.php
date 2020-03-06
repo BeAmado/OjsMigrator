@@ -10,13 +10,32 @@ class SubmissionFileHandler extends EntityHandler
      */
     private $filesSchema;
 
-    protected function formPath($dirs = array())
+    protected function formPath($parts = array())
     {
-        if (\is_string($dirs))
-            return $dirs;
+        if (\is_string($parts))
+            return $parts;
 
-       if (\is_array($dirs))
-            return \implode(\BeAmado\OjsMigrator\DIR_SEPARATOR, $dirs);
+       if (\is_array($parts))
+            return \implode(\BeAmado\OjsMigrator\DIR_SEPARATOR, $parts);
+    }
+
+    protected function smHr()
+    {
+        return Registry::get('SubmissionHandler');
+    }
+
+    public function create($data, $name = 'files')
+    {
+        if (\is_a($data, \BeAmado\OjsMigrator\MyObject::class))
+            return new Entity(
+                $data,
+                $this->smHr()->formTableName($name)
+            );
+
+        return parent::create(
+            $this->smHr()->formTableName($name),
+            $data
+        );
     }
 
     public function __construct()
@@ -75,7 +94,7 @@ class SubmissionFileHandler extends EntityHandler
         return \explode(
             ' ', 
             \trim(\array_reduce($this->filesSchema, function($carry, $item) {
-                return '' . $carry . ' ' . $item;
+                return '' . $carry . ' ' . $item['abbrev'];
             }))
         );
     }
@@ -127,23 +146,33 @@ class SubmissionFileHandler extends EntityHandler
         return $this->searchFileSchemaByStage($stage)['path'];
     }
 
+    protected function formTableName()
+    {
+        return $this->smHr()->formTableName('files');
+    }
+
+    protected function getDAO()
+    {
+        return $this->smHr()->getDAO('files');
+    }
+
     protected function getMappedFileName($filename)
     {
-        $parts = \explode('_', $filename);
+        $parts = \explode('-', $filename);
         $parts[0] = Registry::get('DataMapper')->getMapping(
-            Registry::get('SubmissionHandler')->formTableName(),
+            $this->smHr()->formTableName(),
             $parts[0]
         );
 
         $parts[1] = Registry::get('DataMapper')->getMapping(
-            Registry::get('SubmissionHandler')->formTableName('files'),
+            $this->formTableName(),
             $parts[1]
         );
 
         if ($parts[0] == null || $parts[1] == null)
             return null;
 
-        return \implode('_', $parts);
+        return \implode('-', $parts);
     }
 
     public function getSubmissionFileByName($filename, $map = false)
@@ -151,8 +180,7 @@ class SubmissionFileHandler extends EntityHandler
         if ($map)
             $filename = $this->getMappedFileName($filename);
         
-        $files = Registry::get('SubmissionHandler')->getDAO('files')
-                                                   ->read(array(
+        $files = $this->getDAO()->read(array(
             'file_name' => $filename,
         ));
 
@@ -165,39 +193,69 @@ class SubmissionFileHandler extends EntityHandler
         return $files->get(0);
     }
 
-    protected function getJournalIdFromSubmissionFile($file)
-    {
-        
-    }
-
     public function fileStageOk($file)
     {
-        return $file->hasAttribute('stage') &&
-            \is_numeric($file->get('stage')->getValue()) &&
-            $file->get('stage')->getValue() > 0;
+        return $file->hasAttribute('file_stage') &&
+            \is_numeric($file->get('file_stage')->getValue()) &&
+            $file->get('file_stage')->getValue() >= 1 &&
+            $file->get('file_stage')->getValue() <= 9;
+    }
+
+    protected function getAbbrevFromFileName($filename)
+    {
+        return \explode(
+            '.',
+            \explode('-', $filename)[3]
+        )[0];
+    }
+    
+    protected function abbrevIsValid($filename)
+    {
+        return \in_array(
+            $this->getAbbrevFromFileName($filename),
+            $this->getValidAbbrevs()
+        );
     }
 
     protected function fileNameIsValid($filename)
     {
-        $parts = \explode('-', $filename);
-        if (\count($parts) !== 4)
-            return false;
-
-        if (!$this->abbrevIsValid(\substr($parts[3], 0, 2)))
-            return false;
+        return \count(\explode('-', $filename)) === 4 &&
+            $this->abbrevIsValid($filename);
     }
 
     public function fileNameOk($file)
     {
         return $file->hasAttribute('file_name') &&
             \is_string($file->get('file_name')->getValue()) &&
-            \count(\explode('-', $file->get('file_name')->getValue()) === 4 &&
+            \count(\explode('-', $file->get('file_name')->getValue())) === 4 &&
             \in_array(
                 \explode('-', $file->get('file_name')->getValue())[2],
                 $this->getValidAbbrevs()
             );
     }
+    
+    protected function getJournalSubmissionsDir($journal)
+    {
+        return Registry::get('JournalHandler')->getSubmissionsDir($journal);
+    }
 
+    protected function formPathByFileStage($file, $journal)
+    {
+        return $this->formPath(array(
+            $this->getJournalSubmissionsDir($journal),
+            $this->getPathByFileStage($file->get('stage')->getValue()),
+        ));
+    }
+
+    protected function formPathByFileName($file, $journal)
+    {
+        return $this->formPath(array(
+            $this->getJournalSubmissionsDir($journal),
+            $this->getPathByFileName($file->get('file_name')->getValue()),
+        ));
+    }
+
+    /*
     public function formSubmissionFilePath($file, $journal)
     {
         if (\is_string($file))
@@ -211,14 +269,60 @@ class SubmissionFileHandler extends EntityHandler
             return;
 
         if ($this->fileStageOk($file))
-            return $this->formPath(array(
-                Registry::get('JournalHandler')->getSubmissionsDir($journal),
-                $this->getPathByFileStage($file->get('stage')->getValue()),
-            ));
+            return $this->formPathByFileStage($file, $journal);
+
+        if ($this->fileNameOk($file))
+            return $this->formPathByFileName($file, $journal);
+    }
+    */
+
+    protected function updateFileNameInDatabase($filename)
+    {
+        return $this->getDAO()->update(array(
+            'set' => array(
+                'file_name' => $filename,
+            ),
+            'where' => array(
+                'file_id' => \explode('-', $filename)[0],
+                'revision' => \explode('-', $filename)[2],
+            ),
+        ));
     }
 
-    public function importSubmissionFile($file)
+    protected function formFilePathInEntitiesDir($filename)
     {
+        return $this->formPath(array(
+            $this->getEntitiesDir($this->smHr()->formTableName()),
+            \explode('-', $filename)[0], // submission_id
+            $filename,
+        ));
+    }
+
+    protected function copyFileToJournalSubmissionsDir($filename, $journal)
+    {
+        return Registry::get('FileSystemManager')->copyFile(
+            $this->formFilePathInEntitiesDir($filename),
+            $this->formPathByFileName($filename, $journal)
+        );
+    }
+
+    public function importSubmissionFile($file, $journal)
+    {
+        return $this->importEntity(
+            $file,
+            $this->getTableName(),
+            array(
+                $this->formTableName() => 'source_file_id',
+                $this->smHr()->formTableName() => $this->smHr()->formIdField(),
+            )
+        ) &&
+        $this->updateFileNameInDatabase($this->getMappedFileName(
+            $file->get('file_name')->getValue()
+        )) &&
+        $this->copyFileToJournalSubmissionsDir(
+            $file->get('file_name')->getValue(),
+            $journal
+        );
     }
 
     public function exportSubmissionFile($file)

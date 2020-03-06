@@ -96,21 +96,46 @@ class SubmissionHandler extends EntityHandler
         );
     }
 
-    public function getJournalArticlesDir()
+    protected function setMapJournalIdInRegistry($journalId)
     {
-
-    }
-
-    protected function importSubmissionFile($data)
-    {
-        return $this->importEntity(
-            $data,
-            $this->formTableName('files'),
-            array($this->formTableName() => $this->formIdField())
+        Registry::set(
+            '__mappedJournalId__',
+            Registry::get('DataMapper')->getMapping(
+                'journals',
+                $journalId
+            )
         );
     }
 
-    protected function importSubmissionSupplementaryFile($data)
+    protected function getJournalIdFromRegistry()
+    {
+        return Registry::get('__mappedJournalId__');
+    }
+
+    protected function mappedJournalIdIsSetInRegistry()
+    {
+        return Registry::hasKey('__mappedJournalId__');
+    }
+
+    protected function importSubmissionFiles($submission)
+    {
+        if (!$submission->hasAttribute('files'))
+            return;
+
+        if ($this->mappedJournalIdIsSetInRegistry())
+            $this->setMapJournalIdInRegistry(
+                $submission->getData('journal_id')
+            );
+
+        $submission->get('files')->forEachValue(function($file) {
+            Registry::get('SubmissionFileHandler')->importSubmissionFile(
+                $file,
+                $this->journalIdFromRegistry()
+            );
+        });
+    }
+
+    protected function importSubmissionSuppFiles($submission)
     {
         return $this->importEntity(
             $data,
@@ -119,15 +144,6 @@ class SubmissionHandler extends EntityHandler
                 $this->formTableName() => $this->formIdField(),
                 $this->formTableName('files') => 'file_id',
             )
-        );
-    }
-
-    protected function importSubmissionSuppFileSetting($data)
-    {
-        return $this->importEntity(
-            $ydata,
-            $this->formTableName('supp_file_settings'),
-            array($this->formTableName('supplementary_files') => 'supp_id')
         );
     }
 
@@ -278,15 +294,15 @@ class SubmissionHandler extends EntityHandler
 
         // import the submission files
         if ($submission->hasAttribute('files'))
-            $submission->get('files')->forEachValue(function($file) {
-                $this->importSubmissionFile($file);
-            });
+            $this->importSubmissionFiles($submission);
         
         // import the submission supplementary files
         if ($submission->hasAttribute('supplementary_files'))
-            $submission->get('supplementary_files')->forEachValue(function($f) {
-                $this->importSubmissionSupplementaryFile($f);
-            });
+            $this->importSubmissionSuppFiles($submission);
+        
+        // import the submission notes
+        if ($submission->hasAttribute('notes'))
+            $this->importSubmissionNotes($submission);
 
         // import the submission galleys
         if ($submission->hasAttribute('galleys'))

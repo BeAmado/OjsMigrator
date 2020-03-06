@@ -174,4 +174,4 @@ class JournalHandler extends EntityHandler implements ImportExport
             'issues',
         ));
     }
-
+}
