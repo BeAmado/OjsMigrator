@@ -229,7 +229,9 @@ class SubmissionFileHandler extends EntityHandler
             \is_string($file->get('file_name')->getValue()) &&
             \count(\explode('-', $file->get('file_name')->getValue())) === 4 &&
             \in_array(
-                \explode('-', $file->get('file_name')->getValue())[2],
+                $this->getAbbrevFromFileName(
+                    $file->get('file_name')->getValue()
+                ),
                 $this->getValidAbbrevs()
             );
     }
@@ -243,38 +245,34 @@ class SubmissionFileHandler extends EntityHandler
     {
         return $this->formPath(array(
             $this->getJournalSubmissionsDir($journal),
-            $this->getPathByFileStage($file->get('stage')->getValue()),
+            $file->get($this->smHr()->formIdField())->getValue(),
+            $this->getPathByFileStage($file->get('file_stage')->getValue()),
+            $file->get('file_name')->getValue(),
         ));
+    }
+
+    protected function getPathByFileName($filename)
+    {
+        return $this->getPathByFileAbbrev(
+            $this->getAbbrevFromFileName($filename)
+        );
     }
 
     protected function formPathByFileName($file, $journal)
     {
         return $this->formPath(array(
             $this->getJournalSubmissionsDir($journal),
-            $this->getPathByFileName($file->get('file_name')->getValue()),
+            \is_string($file) 
+                ? \explode('-', $file)[0]
+                : $file->get($this->smHr()->formIdField())->getValue(),
+            $this->getPathByFileName(
+                \is_string($file) ? $file : $file->get('file_name')->getValue()
+            ),
+            \is_string($file)
+                ? $file
+                : $file->get('file_name')->getValue(),
         ));
     }
-
-    /*
-    public function formSubmissionFilePath($file, $journal)
-    {
-        if (\is_string($file))
-            $file = $this->getSubmissionFileByName($file);
-
-        if (
-            !\is_a($file, \BeAmado\OjsMigrator\MyObject::class) ||
-            !$file->hasAttribute('stage') ||
-            !$file->hasAttribute('file_name')
-        )
-            return;
-
-        if ($this->fileStageOk($file))
-            return $this->formPathByFileStage($file, $journal);
-
-        if ($this->fileNameOk($file))
-            return $this->formPathByFileName($file, $journal);
-    }
-    */
 
     protected function updateFileNameInDatabase($filename)
     {
@@ -292,17 +290,23 @@ class SubmissionFileHandler extends EntityHandler
     protected function formFilePathInEntitiesDir($filename)
     {
         return $this->formPath(array(
-            $this->getEntitiesDir($this->smHr()->formTableName()),
+            $this->getEntityDataDir($this->smHr()->formTableName()),
             \explode('-', $filename)[0], // submission_id
             $filename,
         ));
     }
 
-    protected function copyFileToJournalSubmissionsDir($filename, $journal)
-    {
+    protected function copyFileToJournalSubmissionsDir(
+        $filename,
+        $journal,
+        $mapFilename = false
+    ) {
         return Registry::get('FileSystemManager')->copyFile(
             $this->formFilePathInEntitiesDir($filename),
-            $this->formPathByFileName($filename, $journal)
+            $this->formPathByFileName(
+                $mapFilename ? $this->getMappedFileName($filename) : $filename, 
+                $journal
+            )
         );
     }
 
@@ -310,7 +314,7 @@ class SubmissionFileHandler extends EntityHandler
     {
         return $this->importEntity(
             $file,
-            $this->getTableName(),
+            $file->getTableName(),
             array(
                 $this->formTableName() => 'source_file_id',
                 $this->smHr()->formTableName() => $this->smHr()->formIdField(),
@@ -321,11 +325,11 @@ class SubmissionFileHandler extends EntityHandler
         )) &&
         $this->copyFileToJournalSubmissionsDir(
             $file->get('file_name')->getValue(),
-            $journal
+            $journal,
+            true // map the file_name
         );
     }
 
-    public function exportSubmissionFile($file)
-    {
-    }
+    public function copyFileFromJournalIntoEntitiesDir()
+    {}
 }

@@ -152,7 +152,7 @@ class JournalHandler extends EntityHandler implements ImportExport
         )
             return;
 
-        return Registry::get('FileSystemHandler')->formPath(array(
+        return Registry::get('FileSystemManager')->formPath(array(
             Registry::get('ConfigHandler')->getFilesDir(),
             'journals',
             \is_numeric($journal) ? $journal : $journal->getId(),
