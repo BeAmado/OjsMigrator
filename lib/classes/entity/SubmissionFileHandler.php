@@ -241,7 +241,7 @@ class SubmissionFileHandler extends EntityHandler
         return Registry::get('JournalHandler')->getSubmissionsDir($journal);
     }
 
-    protected function formPathByFileStage($file, $journal)
+    public function formPathByFileStage($file, $journal)
     {
         return $this->formPath(array(
             $this->getJournalSubmissionsDir($journal),
@@ -258,7 +258,7 @@ class SubmissionFileHandler extends EntityHandler
         );
     }
 
-    protected function formPathByFileName($file, $journal)
+    public function formPathByFileName($file, $journal)
     {
         return $this->formPath(array(
             $this->getJournalSubmissionsDir($journal),
@@ -287,7 +287,7 @@ class SubmissionFileHandler extends EntityHandler
         ));
     }
 
-    protected function formFilePathInEntitiesDir($filename)
+    public function formFilePathInEntitiesDir($filename)
     {
         return $this->formPath(array(
             $this->getEntityDataDir($this->smHr()->formTableName()),
@@ -314,7 +314,7 @@ class SubmissionFileHandler extends EntityHandler
     {
         return $this->importEntity(
             $file,
-            $file->getTableName(),
+            $this->entityTableName($file),
             array(
                 $this->formTableName() => 'source_file_id',
                 $this->smHr()->formTableName() => $this->smHr()->formIdField(),

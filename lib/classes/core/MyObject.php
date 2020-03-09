@@ -107,8 +107,6 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
             }
         }
         unset($this->values);
-
-        Registry::remove('objClass');
     }
 
     /**
@@ -135,7 +133,7 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
      * Iterates over the values
      *
      * @param callable $callback
-     * @return void
+     * @return boolean
      */
     public function forEachValue($callback)
     {
@@ -143,11 +141,13 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
             return;
         }
 
-        foreach ($this->values as $value) {
-            $callback($value);
-        }
-
-        unset($value);
+        return \array_reduce(
+            \array_map($callback, $this->values),
+            function($carry, $item) {
+                return $carry && $item;
+            },
+            true
+        );
     }
 
     protected function getInnerValue($obj)

@@ -144,6 +144,13 @@ class MyStatement extends MyObject
                     ? $obj->getData($field) 
                     : $obj->get($field)->getValue()
             );
+            echo "\n\nbound: \n";
+            var_dump(array(
+                'param' => $param,
+                'field' => $field,
+                'value' => $obj->get($field)->getValue(),
+            ));
+            echo "\n\n";
 
             if (!$bound)
                 return false;

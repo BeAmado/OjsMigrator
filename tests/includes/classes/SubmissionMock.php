@@ -8,6 +8,7 @@ class SubmissionMock extends EntityMock
     use JournalFiller;
     use UserFiller;
     use SectionFiller;
+    use IssueFiller;
 
     public function __construct($name = null)
     {
@@ -48,6 +49,17 @@ class SubmissionMock extends EntityMock
         
         if ($entity->hasAttribute('[submission_id]'))
             $this->setSubmissionIdField($entity);
+    }
+
+    protected function fillPublished($pub)
+    {
+        $this->basicFill($pub);
+        $pub->set(
+            Registry::get('SubmissionHandler')->formIdField('published'),
+            $pub->get('[published_submission_id]')->getValue()
+        );
+        $pub->remove('[published_submission_id]');
+        $this->fillIssueId($pub);
     }
 
     protected function fillSettings($submission)
@@ -114,6 +126,10 @@ class SubmissionMock extends EntityMock
         $this->fillSectionId($submission);
         $this->fillSettings($submission);
         $this->fillFiles($submission);
+
+        if ($submission->hasAttribute('published'))
+            $this->fillPublished($submission->get('published'));
+
         return $submission;
     }
 

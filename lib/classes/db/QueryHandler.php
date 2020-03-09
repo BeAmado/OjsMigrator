@@ -187,6 +187,9 @@ class QueryHandler
      */
     protected function generateParametersInsert($td)
     {
+        if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+            return $td->getColumnNames();
+
         $columns = array();
 
         foreach($td->getColumnNames() as $column) {

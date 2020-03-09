@@ -28,6 +28,15 @@ class IssueMock extends EntityMock
 
     public function getIssue($name)
     {
+        switch(\strtolower($name)) {
+            case 'rwc2011':
+                return $this->getRWC2011Issue();
+            case 'rwc2015':
+                return $this->getRWC2015Issue();
+            case 'rwc2019':
+                break;
+        }
+
         return Registry::get('IssueHandler')->create(
             $this->fill($this->get($name))
         );

@@ -3,6 +3,7 @@
 use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Entity\SubmissionHandler;
+use BeAmado\OjsMigrator\Entity\SubmissionFileHandler;
 use BeAmado\OjsMigrator\Test\FixtureHandler;
 
 // interfaces 
@@ -16,8 +17,43 @@ use BeAmado\OjsMigrator\Test\SubmissionMock;
 
 class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 {
-    public static function setUpBeforeClass($args = []) : void
+    public static function formContent($file)
     {
+        return 'This is the file with name "' 
+            . $file->get('file_name')->getValue() . '"';
+    }
+
+    protected static function formPathInEntitiesDir($file)
+    {
+        return Registry::get('SubmissionFileHandler')
+                       ->formFilePathInEntitiesDir(
+            $file->get('file_name')->getValue()
+        );
+    }
+
+    protected static function createTheSubmissionFiles()
+    {
+        foreach ([
+            'rugby-worldcup-2015',
+        ] as $name) {
+            $sm = (new SubmissionMock())->getSubmission($name);
+            if ($sm->hasAttribute('files'))
+                $sm->get('files')->forEachValue(function($file){
+                    Registry::get('FileHandler')->write(
+                        self::formPathInEntitiesDir($file),
+                        self::formContent($file)
+                    );
+                });
+        }
+    }
+
+    public static function setUpBeforeClass($args = [
+        'createTables' => [
+            'submissions',
+            'submission_settings',
+            'submission_files',
+        ],
+    ]) : void {
         parent::setUpBeforeClass($args);
         (new FixtureHandler())->createSeveral([
             'journals' => [
@@ -34,13 +70,21 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                 '2011',
                 '2015',
             ],
-            'submissions' => [],
         ]);
+
+        self::createTheSubmissionFiles();
     }
 
     public function getStub()
     {
         return new class extends SubmissionHandler {
+            use TestStub;
+        };
+    }
+
+    protected function smfHrStub()
+    {
+        return new class extends SubmissionFileHandler {
             use TestStub;
         };
     }
@@ -159,6 +203,55 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                     $fromDb->get(0),
                     $setting
                 )
+            ])
+        );
+    }
+
+    protected function mapFileName($file)
+    {
+        return $this->smfHrStub()->callMethod(
+            'getMappedFileName',
+            $file->get('file_name')->getValue()
+        );
+    }
+
+    public function testCanImportTheSubmissionFiles()
+    {
+        $submission = $this->createRWC2015();
+
+        $imported = $this->getStub()->callMethod(
+            'importSubmissionFiles',
+            $submission
+        );
+
+        $journalId = Registry::get('DataMapper')->getMapping(
+            'journals',
+            $submission->getData('journal_id')
+        );
+
+        $file1 = $submission->get('files')->get(0);
+        $file2 = $submission->get('files')->get(1);
+
+        $this->assertSame(
+            implode(';', [
+                1,
+                self::formContent($file1),
+                self::formContent($file2),
+            ]),
+            implode(';', [
+                (int) $imported,
+                Registry::get('FileHandler')->read(
+                    Registry::get('SubmissionFileHandler')->formPathByFileName(
+                        $this->mapFileName($file1),
+                        $journalId
+                    )
+                ),
+                Registry::get('FileHandler')->read(
+                    Registry::get('SubmissionFileHandler')->formPathByFileName(
+                        $this->mapFileName($file2),
+                        $journalId
+                    )
+                ),
             ])
         );
     }

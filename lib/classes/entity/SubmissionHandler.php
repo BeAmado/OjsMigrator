@@ -46,6 +46,8 @@ class SubmissionHandler extends EntityHandler
             ))
         )
             return $this->getEntityAlias() . 's';
+        else if (\strpos(\strtolower($name), 'publish') !== false)
+            return 'published_' . $this->formTableName();
         else if (!\in_array(\strtolower(\explode('_', $name)[0]), array(
             'article', 'submission'
         )))
@@ -58,8 +60,11 @@ class SubmissionHandler extends EntityHandler
         return \implode('_', $parts);
     }
 
-    public function formIdField()
+    public function formIdField($name = null)
     {
+        if ($name === 'published')
+            return 'published_' . $this->formIdField();
+
         return $this->getEntityAlias() . '_id';
     }
 
@@ -84,6 +89,18 @@ class SubmissionHandler extends EntityHandler
                 'journals' => 'journal_id',
             ),
             true
+        );
+    }
+
+    protected function importPublished($data)
+    {
+        return $this->importEntity(
+            $data,
+            $this->formTableName('published'),
+            array(
+                $this->formTableName() => $this->formIdField(),
+                'issues' => 'issue_id',
+            )
         );
     }
 
@@ -122,20 +139,21 @@ class SubmissionHandler extends EntityHandler
         if (!$submission->hasAttribute('files'))
             return;
 
-        if ($this->mappedJournalIdIsSetInRegistry())
+        if (!$this->mappedJournalIdIsSetInRegistry())
             $this->setMapJournalIdInRegistry(
                 $submission->getData('journal_id')
             );
 
-        $submission->get('files')->forEachValue(function($file) {
-            Registry::get('SubmissionFileHandler')->importSubmissionFile(
+        return $submission->get('files')->forEachValue(function($file) {
+            return Registry::get('SubmissionFileHandler')
+                           ->importSubmissionFile(
                 $file,
-                $this->journalIdFromRegistry()
+                $this->getJournalIdFromRegistry()
             );
         });
     }
 
-    protected function importSubmissionSuppFiles($submission)
+    protected function importSubmissionSuppFile($data)
     {
         return $this->importEntity(
             $data,
@@ -144,7 +162,19 @@ class SubmissionHandler extends EntityHandler
                 $this->formTableName() => $this->formIdField(),
                 $this->formTableName('files') => 'file_id',
             )
-        );
+        ) &&
+        ($data->hasAttribute('settings') 
+            ? $data->get('settings')->forEachValue(function($setting) {
+                return $this->importEntity(
+                    $setting,
+                    $this->formTableName('supp_file_settings'),
+                    array(
+                        $this->formTableName('supplementary_files')
+                            => 'supp_id',
+                    )
+                );
+            })
+            : true);
     }
 
     protected function importSubmissionGalley($data)
@@ -157,9 +187,21 @@ class SubmissionHandler extends EntityHandler
                 $this->formTableName('files') => 'file_id',
                 //$this->formTableName('files') => 'style_file_id',
             )
-        );
+        ) &&
+        ($data->hasAttribute('settings')
+            ? $data->get('settings')->forEachValue(function($setting) {
+                return $this->importEntity(
+                    $setting,
+                    $this->formTableName('galley_settings'),
+                    array(
+                        $this->formTableName('galleys') => 'galley_id',
+                    )
+                );
+            })
+            : true);
     }
 
+    /*
     protected function importSubmissionGalleySetting($data)
     {
         return $this->importEntity(
@@ -168,6 +210,7 @@ class SubmissionHandler extends EntityHandler
             array($this->formTableName('galleys') => 'galley_id')
         );
     }
+    */
 
     protected function importSubmissionComment($data)
     {
@@ -286,6 +329,18 @@ class SubmissionHandler extends EntityHandler
         )
             return false;
 
+        // import the published submission
+        if (
+            $submission->hasAttribute('published') &&
+            !Registry::get('DataMapper')->isMapped(
+                $this->formTableName('published'),
+                $submission->get('published')->get(
+                    $this->formIdField('published')
+                )->getValue()
+            )
+        )
+            $this->importPublished($submission->get('published'));
+
         // import the submission settings
         if ($submission->hasAttribute('settings'))
             $submission->get('settings')->forEachValue(function($setting) {
@@ -300,10 +355,6 @@ class SubmissionHandler extends EntityHandler
         if ($submission->hasAttribute('supplementary_files'))
             $this->importSubmissionSuppFiles($submission);
         
-        // import the submission notes
-        if ($submission->hasAttribute('notes'))
-            $this->importSubmissionNotes($submission);
-
         // import the submission galleys
         if ($submission->hasAttribute('galleys'))
             $submission->get('galleys')->forEachValue(function($galley) {
@@ -318,9 +369,7 @@ class SubmissionHandler extends EntityHandler
 
         // import the keywords
         if ($submission->hasAttribute('keywords'))
-            $submission->get('keywords')->forEachValue(function($keywordObj) {
-                $this->importSubmissionKeyword($keywordObj);
-            });
+            $this->importSubmissionKeywords($submission);
 
         // import the authors
         if ($submission->hasAttribute('authors'))

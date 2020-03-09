@@ -14,6 +14,7 @@ class DAOTest extends FunctionalTest
             'users',
             'user_settings',
             'sections',
+            'submission_files',
         ),
     )) : void {
         parent::setUpBeforeClass($args);
@@ -329,6 +330,27 @@ class DAOTest extends FunctionalTest
                 $candidates->get(0)->getData('first_name'),
                 $candidates->get(0)->getData('last_name'),
             ))
+        );
+    }
+
+    public function testCanGetTheLastIdForTheSubmissionFile()
+    {
+        $dao = Registry::get('SubmissionHandler')->getDAO('files');
+        $firstId = $dao->formManualIncrementedId();
+        $file = $dao->create(Registry::get('SubmissionFileHandler')->create([
+            'file_id' => 372,
+            'revision' => 3,
+        ]));
+
+//        var_dump($file);
+
+        $this->assertSame(
+            '1-1-2',
+            implode('-', [
+                $firstId,
+                $file->getId(),
+                $dao->formManualIncrementedId(),
+            ])
         );
     }
 }

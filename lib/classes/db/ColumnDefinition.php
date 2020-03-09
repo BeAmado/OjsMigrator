@@ -82,6 +82,12 @@ class ColumnDefinition extends MyObject implements MyStringRepr
         if ($this->hasAttribute('sql_type'))
             return $this->get('sql_type')->getValue();
     }
+    
+    protected function sqliteAutoIncrement()
+    {
+//        return 'AUTOINCREMENT';
+        return '';
+    }
 
     protected function autoIncrement()
     {
@@ -91,7 +97,7 @@ class ColumnDefinition extends MyObject implements MyStringRepr
             \array_key_exists('driver', $connData) &&
             $connData['driver'] === 'sqlite'
         )
-            return '';
+            return $this->sqliteAutoIncrement();
 
         return 'AUTO_INCREMENT';
     }

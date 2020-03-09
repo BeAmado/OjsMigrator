@@ -548,21 +548,24 @@ class EntityHandler
 
         foreach ($args as $table => $field) {
             if (
-                $entity->hasAttribute($field) && 
-                !Registry::get('DataMapper')->isMapped(
-                    $table,
+                !$entity->hasAttribute($field) ||
+                $entity->get($field)->getValue() == null
+            )
+                continue;
+
+            if (!Registry::get('DataMapper')->isMapped(
+                $table,
+                $entity->get($field)->getValue()
+            ))
+                return false;
+
+            $entity->set(
+                $field,
+                Registry::get('DataMapper')->getMapping(
+                    $table, 
                     $entity->get($field)->getValue()
                 )
-            )
-                return false;
-            else if ($entity->hasAttribute($field))
-                $entity->set(
-                    $field,
-                    Registry::get('DataMapper')->getMapping(
-                        $table, 
-                        $entity->get($field)->getValue()
-                    )
-                );
+            );
         }
 
         return true;

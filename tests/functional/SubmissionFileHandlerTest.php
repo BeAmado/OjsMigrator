@@ -435,7 +435,8 @@ class SubmissionFileHandlerTest extends FunctionalTest implements StubInterface
             'revision' => 1,
         ]);
 
-        $smHr->createOrUpdateInDatabase($file);
+        echo "\n\n\nBadabadu: "; var_dump(
+        $smHr->createOrUpdateInDatabase($file));
 
         $mappedName = $this->getStub()->callMethod(
             'getMappedFileName',
@@ -576,6 +577,8 @@ class SubmissionFileHandlerTest extends FunctionalTest implements StubInterface
             $file,
             $journal
         );
+
+        echo "\n\n\nImported? "; var_dump($imported); echo "\n\n";
 
         $mappedFilename = $this->getStub()->callMethod(
             'getMappedFileName',
