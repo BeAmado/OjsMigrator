@@ -344,6 +344,9 @@ class Factory
 
     protected function createDao($tableName)
     {
+        if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+            return new \BeAmado\OjsMigrator\Db\Sqlite\SqliteDAO($tableName);
+
         return new \BeAmado\OjsMigrator\Db\DAO($tableName);
     }
 

@@ -13,31 +13,6 @@ class DAO
      */
     protected $tableName;
 
-    protected function hasToManuallyIncrement()
-    {
-        return \in_array(
-            Registry::get('ConnectionManager')->getDbDriver(), 
-            array(
-                'sqlite',
-            )
-        ) && \in_array(
-            $this->getTableName(), 
-            array(
-                Registry::get('SubmissionHandler')->formTableName('files'),
-            )
-        );
-    }
-
-    protected function formIdFieldToIncrement()
-    {
-        switch($this->getTableName()) {
-            case Registry::get('SubmissionHandler')->formTableName('files'):
-                return 'file_id';
-        }
-
-        return '';
-    }
-
     /**
      *
      * @param string $name - The name of the table
@@ -112,64 +87,6 @@ class DAO
         );
     }
 
-    protected function lastIdStatementName()
-    {
-        return 'lastIdFor' . Registry::get('CaseHandler')->transformCaseTo(
-            'Pascal',
-            $this->getTableName()
-        );
-    }
-
-    protected function createStatementGetLastId()
-    {
-        Registry::set(
-            $this->lastIdStatementName(),
-            Registry::get('StatementHandler')->create(
-                'SELECT ' . $this->formIdFieldToIncrement() . ' AS id'
-                    . ' FROM ' . $this->getTableName()
-                    . ' ORDER BY ' . $this->formIdFieldToIncrement()
-                    . ' DESC LIMIT 1'
-            )
-        );
-    }
-
-    protected function getStatementGetLastId()
-    {
-        if (!Registry::hasKey($this->lastIdStatementName()))
-            $this->createStatementGetLastId();
-        
-        return Registry::get($this->lastIdStatementName());
-    }
-
-    public function formManualIncrementedId()
-    {
-        Registry::remove('__lastId__');
-        Registry::get('StatementHandler')->execute(
-            $this->getStatementGetLastId(),
-            null,
-            function($res) {
-                Registry::set('__lastId__', $res['id']);
-            }
-        );
-
-        if (\is_numeric(Registry::get('__lastId__')))
-            return Registry::get('__lastId__') + 1;
-
-        return 1;
-    }
-
-    protected function manuallyIncrementId()
-    {
-//        echo "\n\n\nIncrementing the id: \n";
-//        echo "\nEntity Before: "; var_dump(Registry::get('entityToInsert'));
-        Registry::get('entityToInsert')->set(
-            $this->formIdFieldToIncrement(),
-            $this->formManualIncrementedId()
-        );
-
-//        echo "\n\nEntity After: ";var_dump(Registry::get('entityToInsert'));
-    }
-
     /**
      * Inserts the entity's data into the corresponding database table.
      *
@@ -193,9 +110,6 @@ class DAO
                 $entity
             )
         );
-
-        if ($this->hasToManuallyIncrement())
-            $this->manuallyIncrementId();
 
         Registry::get('StatementHandler')->execute(
             'insert' . Registry::get('CaseHandler')->transformCaseTo(

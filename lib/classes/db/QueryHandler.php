@@ -180,6 +180,23 @@ class QueryHandler
     }
 
     /**
+     * Generates the parameters for the insert query when the database driver
+     * is sqlite. This is necessary when the primary key is formed with more
+     * than one column and at least one of them must be autoincremented.
+     *
+     * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
+     * @return array
+     */
+    protected function modifiedParametersInsertForSqlite($td)
+    {
+        return $this->generateParameterNames(
+            'insert',
+            $td->getTableName(),
+            $td->getColumnNames()
+        );
+    }
+
+    /**
      * Generate the parameters for the insert query
      *
      * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
@@ -188,7 +205,7 @@ class QueryHandler
     protected function generateParametersInsert($td)
     {
         if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
-            return $td->getColumnNames();
+            return $this->modifiedParametersInsertForSqlite($td);
 
         $columns = array();
 

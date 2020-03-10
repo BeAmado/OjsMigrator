@@ -2,12 +2,12 @@
 
 use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
-use BeAmado\OjsMigrator\Db\DAO;
+use BeAmado\OjsMigrator\Db\Sqlite\SqliteDAO as DAO;
 
 // traits
 use \BeAmado\OjsMigrator\Test\TestStub;
 
-class DAOTest extends FunctionalTest
+class SqliteDAOTest extends FunctionalTest
 {
     public static function setUpBeforeClass($args = array(
         'createTables' => array(
@@ -17,14 +17,44 @@ class DAOTest extends FunctionalTest
             'submission_files',
         ),
     )) : void {
+
+        $dbDvrFile = Registry::get('FileSystemManager')->formPathFromBaseDir([
+            'tests',
+            'dbdriver',
+        ]);
+
+        Registry::set(
+            'dbdriver',
+            Registry::get('FileHandler')->read($dbDvrFile)
+        );
+
+        Registry::get('FileHandler')->write(
+            $dbDvrFile,
+            'sqlite'
+        );
+
         parent::setUpBeforeClass($args);
     }
 
     public static function tearDownAfterClass($args = array()) : void
     {
+        $dbDvrFile = Registry::get('FileSystemManager')->formPathFromBaseDir([
+            'tests',
+            'dbdriver',
+        ]);
+
+        Registry::get('FileHandler')->write(
+            $dbDvrFile,
+            Registry::get('dbdriver')
+        );
         parent::tearDownAfterClass();
-        Registry::get('FileSystemManager')->removeWholeDir(
-            Registry::get('FileSystemManager')->formPathFromBaseDir('_data')
+    }
+
+    public function testTheDaoIsSqlite()
+    {
+        $this->assertInstanceOf(
+            \BeAmado\OjsMigrator\Db\Sqlite\SqliteDAO::class,
+            Registry::get('UsersDAO')
         );
     }
 
@@ -330,6 +360,25 @@ class DAOTest extends FunctionalTest
                 $candidates->get(0)->getData('first_name'),
                 $candidates->get(0)->getData('last_name'),
             ))
+        );
+    }
+
+    public function testCanGetTheLastIdForTheSubmissionFile()
+    {
+        $dao = Registry::get('SubmissionHandler')->getDAO('files');
+        $firstId = $dao->formManualIncrementedId();
+        $file = $dao->create(Registry::get('SubmissionFileHandler')->create([
+            'file_id' => 372,
+            'revision' => 3,
+        ]));
+
+        $this->assertSame(
+            '1-1-2',
+            implode('-', [
+                $firstId,
+                $file->getId(),
+                $dao->formManualIncrementedId(),
+            ])
         );
     }
 }
