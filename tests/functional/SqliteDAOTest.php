@@ -16,6 +16,7 @@ class SqliteDAOTest extends FunctionalTest
             'sections',
             'submission_files',
         ),
+        'clearRegistry' => false,
     )) : void {
 
         $dbDvrFile = Registry::get('FileSystemManager')->formPathFromBaseDir([
@@ -27,6 +28,8 @@ class SqliteDAOTest extends FunctionalTest
             'dbdriver',
             Registry::get('FileHandler')->read($dbDvrFile)
         );
+
+        echo "\n\n\nThe dbdriver is '" . Registry::get('dbdriver') . "'\n\n\n";
 
         Registry::get('FileHandler')->write(
             $dbDvrFile,
@@ -42,6 +45,8 @@ class SqliteDAOTest extends FunctionalTest
             'tests',
             'dbdriver',
         ]);
+
+        echo "\n\nThe dbdriver is '" . Registry::get('dbdriver') . "'\n\n";
 
         Registry::get('FileHandler')->write(
             $dbDvrFile,

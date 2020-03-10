@@ -196,6 +196,24 @@ class QueryHandler
         );
     }
 
+    protected function hasToGetModifiedParametersForSqlite($td)
+    {
+        return Registry::get('ConnectionManager')->getDbDriver() == 'sqlite' &&
+            \array_reduce(
+                $td->getColumns($td->getPrimaryKeys()),
+                function($carry, $pk) {
+                    return $carry + 1 + (
+                        (\is_a(
+                            $pk, 
+                            \BeAmado\OjsMigrator\Db\ColumnDefinition::class
+                        ) && $pk->isAutoIncrement()) 
+                            ? 1000 : 0
+                    );
+                }, 
+                0
+            ) <= 1001;
+    }
+
     /**
      * Generate the parameters for the insert query
      *
@@ -204,7 +222,7 @@ class QueryHandler
      */
     protected function generateParametersInsert($td)
     {
-        if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+        if ($this->hasToGetModifiedParametersForSqlite($td))
             return $this->modifiedParametersInsertForSqlite($td);
 
         $columns = array();

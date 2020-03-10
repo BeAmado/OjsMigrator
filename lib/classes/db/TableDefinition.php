@@ -89,7 +89,7 @@ class TableDefinition extends MyObject implements MyStringRepr
     }
 
     /**
-     * Gets the definiction of the specified column.
+     * Gets the definition of the specified column.
      *
      * @param string $colName
      * @return \BeAmado\OjsMigrator\Db\ColumnDefinition
@@ -113,6 +113,26 @@ class TableDefinition extends MyObject implements MyStringRepr
         return $this->get('primary_keys')->toArray();
     }
 
+    /**
+     * Gets the specified column definitions
+     *
+     * @param array $columnNames
+     * @return \BeAmado\OjsMigrator\MyObject
+     */
+    public function getColumns($columnNames)
+    {
+        return \array_map(function($column) {
+            return $this->hasColumn($column) 
+                ? $this->getColumn($column) 
+                : null;
+        }, $columnNames);
+    }
+
+    /**
+     * Returns the string representation of the table definition.
+     *
+     * @return string
+     */
     public function toString()
     {
         $repr = '`' . $this->getTableName() . '` (';

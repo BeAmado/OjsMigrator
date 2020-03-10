@@ -25,9 +25,14 @@ abstract class FunctionalTest extends TestCase
         );
     }
 
-    public static function setUpBeforeClass($args = array()) : void
-    {
-        Registry::clear();
+    public static function setUpBeforeClass($args = array(
+        'clearRegistry' => true,
+    )) : void {
+        if (!\array_key_exists('clearRegistry', $args))
+            $args['clearRegistry'] = true;
+
+        if ($args['clearRegistry'])
+            Registry::clear();
         (new OjsScenarioHandler())->setUpStage($args);
         (new DataMappingHandler())->setUpDataMappingStage();
     }
