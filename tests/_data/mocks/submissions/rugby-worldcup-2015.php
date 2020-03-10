@@ -31,7 +31,7 @@ return array(
         '[published_submission_id]' => 77,
         '[submission_id]' => 7384,
         'issue_id' => '[rwc2015_issue_id]',
-        'date_published' => '',
+        'date_published' => '2015-12-30 12:00:23',
         'seq' => 1,
         'access_status' => 0,
     ),

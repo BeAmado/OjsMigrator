@@ -52,6 +52,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'submissions',
             'submission_settings',
             'submission_files',
+            'published_submissions',
         ],
     ]) : void {
         parent::setUpBeforeClass($args);
@@ -251,6 +252,45 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                         $this->mapFileName($file2),
                         $journalId
                     )
+                ),
+            ])
+        );
+    }
+
+    public function testCanImportThePublishedSubmissionData()
+    {
+        $submission = $this->createRWC2015();
+        $pub = $submission->get('published');
+        $idField = $this->handler()->formIdField('published');
+
+        $imported = $this->getStub()->callMethod(
+            'importPublished',
+            $pub
+        );
+
+        $mappedId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName('published'),
+            $pub->get($idField)->getValue()
+        );
+        $fromDb = $this->handler()->getDAO('published')->read([
+             $idField => $mappedId,
+        ]);
+        $this->handler()->setMappedData($pub, [
+            'issues' => 'issue_id',
+            $this->handler()->formTableName('published') => $idField,
+            $this->handler()->formTableName() => 
+                $this->handler()->formIdField(),
+        ]);
+
+        $this->assertSame(
+            '1-1-1-1',
+            implode('-', [
+                (int) $imported,
+                $fromDb->length(),
+                (int) is_numeric($mappedId),
+                (int) $this->handler()->areEqual(
+                    $fromDb->get(0),
+                    $pub
                 ),
             ])
         );
