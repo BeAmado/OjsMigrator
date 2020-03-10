@@ -53,6 +53,10 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'submission_settings',
             'submission_files',
             'published_submissions',
+            'submission_supplementary_files',
+            'submission_supp_file_settings',
+            'submission_galleys',
+            'submission_galley_settings',
         ],
     ]) : void {
         parent::setUpBeforeClass($args);
@@ -296,4 +300,79 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         );
     }
 
+    public function testCanImportASubmissionSupplementaryFileData()
+    {
+        $submission = $this->createRWC2015();
+        $suppFile = $submission->get('supplementary_files')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importSubmissionSuppFile',
+            $suppFile
+        );
+
+        $suppId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName('supplementary_files'),
+            $suppFile->get('supp_id')->getValue()
+        );
+
+        $fromDb = $this->handler()->getDAO('supplementary_files')->read([
+            'supp_id' => $suppId,
+        ]);
+
+        $settings = $this->handler()->getDAO('supp_file_settings')->read([
+            'supp_id' => $suppId,
+        ]);
+
+        $this->assertSame(
+            '1-1-1-1-2-1',
+            implode('-', [
+                (int) $suppFile->hasAttribute($this->handler()->formIdField()),
+                (int) $imported,
+                (int) is_numeric($suppId),
+                $fromDb->length(),
+                $settings->length(),
+                $this->areEqual(
+                    Registry::get('DataMapper')->getMapping(
+                        $this->handler()->formTableName(),
+                        $submission->getId()
+                    ),
+                    $fromDb->get(0)->getData($this->handler()->formIdField())
+                ),
+            ])
+        );
+    }
+
+    public function testCanImportASubmissionGalley()
+    {
+        $galley = $this->createRWC2015()->get('galleys')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importSubmissionGalley',
+            $galley
+        );
+
+        $galleyId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName('galleys'),
+            $galley->get('galley_id')->getValue()
+        );
+
+        $galleys = $this->handler()->getDAO('galleys')->read([
+            'galley_id' => $galleyId,
+        ]);
+
+        $settings = $this->handler()->getDAO('galley_settings')->read([
+            'galley_id' => $galleyId,
+        ]);
+
+        $this->assertSame(
+            '1-1-1-1-1',
+            implode('-', [
+                (int) $galley->hasAttribute($this->handler()->formIdField()),
+                (int) $imported,
+                (int) is_numeric($galleyId),
+                $galleys->length(),
+                $settings->length(),
+            ])
+        );
+    }
 }

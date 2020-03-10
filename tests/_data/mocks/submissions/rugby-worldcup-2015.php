@@ -94,11 +94,29 @@ return array(
             'source_file_id' => 337,
             'source_revision' => 1,
             '[submission_id]' => 7384,
-            'file_name' => '7384-337-1-PB.pdf',
+            'file_name' => '7384-338-1-PB.pdf',
             'file_type' => 'application/pdf',
             'file_size' => 123139,
             'original_file_name' => 'rwc2015-final',
             'file_stage' => 7,
+            'viewable' => null,
+            'date_uploaded' => '2015-10-12 12:34:56',
+            'date_modified' => '2015-10-12 12:34:56',
+            'round' => 1,
+            'assoc_id' => null,
+        ),
+        array(
+            '__tableName_' => '[submission_files_table]',
+            'file_id' => 338,
+            'revision' => 1,
+            'source_file_id' => 336,
+            'source_revision' => 1,
+            '[submission_id]' => 7384,
+            'file_name' => '7384-338-1-SP.pdf',
+            'file_type' => 'application/pdf',
+            'file_size' => 123980,
+            'original_file_name' => 'rwc2015-supp',
+            'file_stage' => 6,
             'viewable' => null,
             'date_uploaded' => '2015-10-12 12:34:56',
             'date_modified' => '2015-10-12 12:34:56',
@@ -110,38 +128,78 @@ return array(
         array(
             '__tableName_' => '[supplementary_files_table]',
             'supp_id' => 2187,
-            /*
-             * remaining submission_supplementary_files fields
-             */
-            'settings' => array(),
+            'file_id' => 338,
+            '[submission_id]' => 7384,
+            'type' => null,
+            'language' => null,
+            'date_created' => '2015-12-22',
+            'show_reviewers' => 0,
+            'date_submitted' => '2015-12-22 12:09:38',
+            'seq' => 0,
+            'remote_url' => null,
+            'settings' => array(
+                array(
+                    '__tableName_' => '[supp_file_settings_table]',
+                    'supp_id' => 2187,
+                    'locale' => 'en_NZ',
+                    'setting_name' => 'subject',
+                    'setting_value' => 'Rugby',
+                    'setting_type' => 'string',
+                ),
+                array(
+                    '__tableName_' => '[supp_file_settings_table]',
+                    'supp_id' => 2187,
+                    'locale' => 'en_NZ',
+                    'setting_name' => 'title',
+                    'setting_value' => 'New comers',
+                    'setting_type' => 'string',
+                ),
+            ),
         ),
-        /*
-         * other supplementary files
-         */
     ),
     'galleys' => array(
         array(
             '__tableName_' => '[galleys_table]',
             'galley_id' => 22,
-            /*
-             * remaining submission_galleys fields
-             */
-            'settings' => array(),
+            'locale' => 'en_NZ',
+            '[submission_id]' => 7384,
+            'file_id' => 338,
+            'label' => 'PDF',
+            'html_galley' => 0,
+            'style_file_id' => null,
+            'seq' => 0,
+            'remote_url' => null,
+            'settings' => array(
+                array(
+                    '__tableName_' => '[galley_settings_table]',
+                    'galley_id' => 22,
+                    'locale' => 'en_NZ',
+                    'setting_name' => 'excludeDoi',
+                    'setting_value' => 0,
+                    'setting_type' => 'int',
+                ),
+            ),
         ),
     ),
     'comments' => array(
         array(
             '__tableName_' => '[comments_table]',
             'comment_id' => 33,
-            /*
-             * remaining submission comments fields
-             */
+            'comment_type' => 2,
+            'role_id' => 256,
+            '[submission_id]' => 7384,
+            'assoc_id' => 7384,
+            'author_id' => '[hulk_user_id]',
+            'comment_title' => 'Simple comment',
+            'comments' => 'Just commenting',
+            'date_posted' => '2015-12-20 12:09:09',
+            'date_modified' => null,
+            'viewable' => 1,
         ),
         /*
          * other submission comments
          */
     ),
-    'html_galley_images' => array(),
     'keywords' => array(
         array(
             '__tableName_' => '[search_objects_table]',

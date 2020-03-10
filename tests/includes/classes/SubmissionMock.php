@@ -82,15 +82,27 @@ class SubmissionMock extends EntityMock
     {
         if ($submission->hasAttribute('supplementary_files'))
             $submission->get('supplementary_files')->forEachValue(function($s) {
-                
+                $this->basicFill($s);
+                if ($s->hasAttribute('settings'))
+                    $s->get('settings')->forEachValue(function($setting) {
+                        $this->basicFill($setting);
+                    });
             });
     }
 
-    protected function fillGalleys($galleys)
+    protected function fillGalleys($submission)
     {
+        if ($submission->hasAttribute('galleys'))
+            $submission->get('galleys')->forEachValue(function($galley) {
+                $this->basicFill($galley);
+                if ($galley->hasAttribute('settings'))
+                    $galley->get('settings')->forEachValue(function($setting) {
+                        $this->basicFill($setting);
+                    });
+            });
     }
 
-    protected function fillComments($comments)
+    protected function fillComments($submission)
     {
     }
 
@@ -129,6 +141,9 @@ class SubmissionMock extends EntityMock
 
         if ($submission->hasAttribute('published'))
             $this->fillPublished($submission->get('published'));
+
+        $this->fillSupplementaryFiles($submission);
+        $this->fillGalleys($submission);
 
         return $submission;
     }
