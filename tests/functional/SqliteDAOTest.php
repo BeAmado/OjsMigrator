@@ -19,20 +19,22 @@ class SqliteDAOTest extends FunctionalTest
         'clearRegistry' => false,
     )) : void {
 
-        $dbDvrFile = Registry::get('FileSystemManager')->formPathFromBaseDir([
-            'tests',
-            'dbdriver',
-        ]);
 
         Registry::set(
             'dbdriver',
-            Registry::get('FileHandler')->read($dbDvrFile)
+            Registry::get('FileHandler')->read(
+                Registry::get('FileSystemManager')->formPathFromBaseDir([
+                    'tests',
+                    'dbdriver',
+                ])
+            )
         );
 
-        echo "\n\n\nThe dbdriver is '" . Registry::get('dbdriver') . "'\n\n\n";
-
         Registry::get('FileHandler')->write(
-            $dbDvrFile,
+            Registry::get('FileSystemManager')->formPathFromBaseDir([
+                'tests',
+                'dbdriver',
+            ]),
             'sqlite'
         );
 
@@ -41,17 +43,15 @@ class SqliteDAOTest extends FunctionalTest
 
     public static function tearDownAfterClass($args = array()) : void
     {
-        $dbDvrFile = Registry::get('FileSystemManager')->formPathFromBaseDir([
-            'tests',
-            'dbdriver',
-        ]);
-
-        echo "\n\nThe dbdriver is '" . Registry::get('dbdriver') . "'\n\n";
 
         Registry::get('FileHandler')->write(
-            $dbDvrFile,
+            Registry::get('FileSystemManager')->formPathFromBaseDir([
+                'tests',
+                'dbdriver',
+            ]),
             Registry::get('dbdriver')
         );
+
         parent::tearDownAfterClass();
     }
 
@@ -372,10 +372,13 @@ class SqliteDAOTest extends FunctionalTest
     {
         $dao = Registry::get('SubmissionHandler')->getDAO('files');
         $firstId = $dao->formManualIncrementedId();
-        $file = $dao->create(Registry::get('SubmissionFileHandler')->create([
+        $file = Registry::get('SubmissionFileHandler')->create([
             'file_id' => 372,
             'revision' => 3,
-        ]));
+        ]);
+
+
+        $fileInDb = $dao->create($file);
 
         $this->assertSame(
             '1-1-2',

@@ -435,8 +435,7 @@ class SubmissionFileHandlerTest extends FunctionalTest implements StubInterface
             'revision' => 1,
         ]);
 
-        echo "\n\n\nBadabadu: "; var_dump(
-        $smHr->createOrUpdateInDatabase($file));
+        $smHr->createOrUpdateInDatabase($file);
 
         $mappedName = $this->getStub()->callMethod(
             'getMappedFileName',
@@ -578,8 +577,6 @@ class SubmissionFileHandlerTest extends FunctionalTest implements StubInterface
             $journal
         );
 
-        echo "\n\n\nImported? "; var_dump($imported); echo "\n\n";
-
         $mappedFilename = $this->getStub()->callMethod(
             'getMappedFileName',
             $filename
@@ -605,8 +602,6 @@ class SubmissionFileHandlerTest extends FunctionalTest implements StubInterface
                 'journal' => $journal,
             ]
         );
-
-        //Registry::get('TimeKeeper')->wait(5000);
 
         $this->assertSame(
             "1;1;1;$mappedFilename;1;$content",
