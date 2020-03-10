@@ -104,6 +104,11 @@ class SubmissionMock extends EntityMock
 
     protected function fillComments($submission)
     {
+        if ($submission->hasAttribute('comments'))
+            $submission->get('comments')->forEachValue(function($comment) {
+                $this->basicFill($comment);
+                $this->fillUserId($comment, 'author_id');
+            });
     }
 
     protected function fillKeywords($keywords)
@@ -144,6 +149,7 @@ class SubmissionMock extends EntityMock
 
         $this->fillSupplementaryFiles($submission);
         $this->fillGalleys($submission);
+        $this->fillComments($submission);
 
         return $submission;
     }

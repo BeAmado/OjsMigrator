@@ -375,4 +375,9 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             ])
         );
     }
+
+    public function testCanImportASubmissionComment()
+    {
+        
+    }
 }
