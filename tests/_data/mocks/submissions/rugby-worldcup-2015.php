@@ -196,9 +196,6 @@ return array(
             'date_modified' => null,
             'viewable' => 1,
         ),
-        /*
-         * other submission comments
-         */
     ),
     'keywords' => array(
         array(
@@ -299,19 +296,43 @@ return array(
             'edit_id' => 1000,
             '[submission_id]' => 7384,
             'editor_id' => '[greenlantern_user_id]',
-            /*
-             * remaining edit_assigments fields
-             */
+            'can_edit' => 1,
+            'can_review' => 1,
+            'date_assigned' => '2015-10-21 13:30:11',
+            'date_notified' => '2015-10-21 13:34:22',
+            'date_underway' => '2015-10-23 09:09:23',
         ),
-        /*
-         * other edit assignments
-         */
+        array(
+            '__tableName_' => 'edit_assignments',
+            'edit_id' => 1000,
+            '[submission_id]' => 7384,
+            'editor_id' => '[thor_user_id]',
+            'can_edit' => 1,
+            'can_review' => 1,
+            'date_assigned' => '2015-11-01 13:30:11',
+            'date_notified' => '2015-11-01 13:34:22',
+            'date_underway' => '2015-11-03 09:09:23',
+        ),
     ),
     'edit_decisions' => array(
-        array(),
-        /*
-         * other edit decisions
-         */
+        array(
+            '__tableName_' => 'edit_decisions',
+            'edit_decision_id' => 900,
+            '[submission_id]' => 7384,
+            'round' => 1,
+            'editor_id' => '[greenlantern_user_id]',
+            'decision' => 0,
+            'date_decided' => '2015-10-30 13:20:11',
+        ),
+        array(
+            '__tableName_' => 'edit_decisions',
+            'edit_decision_id' => 2000,
+            '[submission_id]' => 7384,
+            'round' => 2,
+            'editor_id' => '[thor_user_id]',
+            'decision' => 1,
+            'date_decided' => '2015-11-06 13:20:11',
+        ),
     ),
     'history' => array(
         'event_logs' => array(

@@ -267,7 +267,7 @@ class SubmissionHandler extends EntityHandler
     {
         return $this->importEntity(
             $data,
-            'edit_decision',
+            'edit_decisions',
             array(
                 $this->formTableName() => $this->formIdField(),
                 'users' => 'editor_id',

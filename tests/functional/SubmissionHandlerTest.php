@@ -60,6 +60,8 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'submission_comments',
             'authors',
             'author_settings',
+            'edit_assignments',
+            'edit_decisions',
         ],
     ]) : void {
         parent::setUpBeforeClass($args);
@@ -70,6 +72,8 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'users' => [
                 'ironman',
                 'hulk',
+                'greenlantern',
+                'thor',
             ],
             'sections' => [
                 'sports',
@@ -473,6 +477,70 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                 (int) Registry::get('ArrayHandler')->areEquivalent(
                     $settingsFromDb->toArray(),
                     $author->get('settings')->toArray()
+                ),
+            ])
+        );
+    }
+
+    public function testCanImportAnEditAssignment()
+    {
+        $submission = $this->createRWC2015();
+        $assign = $submission->get('edit_assignments')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importEditAssignment',
+            $assign
+        );
+
+        $editId = Registry::get('DataMapper')->getMapping(
+            'edit_assignments',
+            $assign->get('edit_id')->getValue()
+        );
+
+        $fromDb = Registry::get('EditAssignmentsDAO')->read([
+            'edit_id' => $editId,
+        ]);
+
+        $this->assertSame(
+            '1-1-1',
+            implode('-', [
+                (int) $imported,
+                $fromDb->length(),
+                (int) $this->handler()->areEqual(
+                    $fromDb->get(0),
+                    $assign,
+                    [$this->handler()->formIdField(), 'editor_id']
+                )
+            ])
+        );
+    }
+
+    public function testCanImportAnEditDecision()
+    {
+        $submission = $this->createRWC2015();
+        $decision = $submission->get('edit_decisions')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importEditDecision',
+            $decision
+        );
+
+        $fromDb = Registry::get('EditDecisionsDAO')->read([
+            'edit_decision_id' => Registry::get('DataMapper')->getMapping(
+                'edit_decisions',
+                $decision->get('edit_decision_id')->getValue()
+            )
+        ]);
+
+        $this->assertSame(
+            '1-1-1',
+            implode('-', [
+                (int) $imported,
+                $fromDb->length(),
+                (int) $this->handler()->areEqual(
+                    $fromDb->get(0),
+                    $decision,
+                    [$this->handler()->formIdField(), 'editor_id']
                 ),
             ])
         );

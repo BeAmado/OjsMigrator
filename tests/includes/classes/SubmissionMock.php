@@ -115,16 +115,22 @@ class SubmissionMock extends EntityMock
     {
     }
 
-    protected function fillAuthors($authors)
+    protected function fillEditAssignments($submission)
     {
+        if ($submission->hasAttribute('edit_assignments'))
+            $submission->get('edit_assignments')->forEachValue(function($ea) {
+                $this->setSubmissionIdField($ea);
+                $this->fillUserId($ea, 'editor_id');
+            });
     }
 
-    protected function fillEditAssignments($edits)
+    protected function fillEditDecisions($submission)
     {
-    }
-
-    protected function fillEditDecisions($edits)
-    {
+        if ($submission->hasAttribute('edit_decisions'))
+            $submission->get('edit_decisions')->forEachValue(function($ed) {
+                $this->setSubmissionIdField($ed);
+                $this->fillUserId($ed, 'editor_id');
+            });
     }
 
     protected function fillHistory($history)
@@ -150,6 +156,8 @@ class SubmissionMock extends EntityMock
         $this->fillSupplementaryFiles($submission);
         $this->fillGalleys($submission);
         $this->fillComments($submission);
+        $this->fillEditAssignments($submission);
+        $this->fillEditDecisions($submission);
 
         return $submission;
     }
