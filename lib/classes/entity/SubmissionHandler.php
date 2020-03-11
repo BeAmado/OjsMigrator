@@ -201,49 +201,34 @@ class SubmissionHandler extends EntityHandler
             : true);
     }
 
-    /*
-    protected function importSubmissionGalleySetting($data)
-    {
-        return $this->importEntity(
-            $data,
-            $this->formTableName('galley_settings'),
-            array($this->formTableName('galleys') => 'galley_id')
-        );
-    }
-    */
-
     protected function importSubmissionComment($data)
     {
         return $this->importEntity(
             $data,
             $this->formTableName('comments'),
             array(
-                'roles' => 'role_id',
                 $this->formTableName() => $this->formIdField(),
-                'authors' => 'author_id',
+                'users' => 'author_id',
             )
         );
     }
 
-    protected function importSubmissionHtmlGalleyImage($data)
-    {
-        return $this->importEntity(
-            $data,
-            $this->formTableName('html_galley_images'),
-            array(
-                $this->formTableName('galleys') => 'galley_id',
-                $this->formTableName('files') => 'file_id',
-            )
-        );
-    }
-
-    protected function importSubmissionKeyword($data)
+    protected function importSubmissionKeywords($data)
     {
         throw new \Exception(
             'Gotta implement the method importSubmissionKeywords '
                 . ' in the class SubmissionHandler.'
         );
     }
+
+    protected function importSubmissionHistory($data)
+    {
+        throw new \Exception(
+            'Gotta implement the method importSubmissionHistory '
+                . ' in the class SubmissionHandler.'
+        );
+    }
+
 
     protected function importAuthor($data)
     {
@@ -288,11 +273,6 @@ class SubmissionHandler extends EntityHandler
                 'users' => 'editor_id',
             )
         );
-    }
-
-    protected function importSubmissionHistory($data)
-    {
-
     }
 
     protected function importReviewAssignment($data)

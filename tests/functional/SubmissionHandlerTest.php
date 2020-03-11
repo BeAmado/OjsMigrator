@@ -57,6 +57,9 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'submission_supp_file_settings',
             'submission_galleys',
             'submission_galley_settings',
+            'submission_comments',
+            'authors',
+            'author_settings',
         ],
     ]) : void {
         parent::setUpBeforeClass($args);
@@ -65,7 +68,8 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                 'test_journal',
             ],
             'users' => [
-                'ironman'
+                'ironman',
+                'hulk',
             ],
             'sections' => [
                 'sports',
@@ -378,6 +382,99 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 
     public function testCanImportASubmissionComment()
     {
-        
+        $submission = $this->CreateRWC2015();
+        $comment = $submission->get('comments')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importSubmissionComment',
+            $comment
+        );
+
+        $commentId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName('comments'),
+            $comment->get('comment_id')->getValue()
+        );
+
+        $commentFromDb = $this->handler()->getDAO('comments')->read([
+            'comment_id' => $commentId,
+        ]);
+
+        $this->assertSame(
+            '1-1-1-1',
+            implode('-', [
+                (int) $imported,
+                $commentFromDb->length(),
+                (int) $this->areEqual(
+                    Registry::get('DataMapper')->getMapping(
+                        $this->handler()->formTableName(),
+                        $submission->getId()
+                    ),
+                    $commentFromDb->get(0)
+                                  ->getData($this->handler()->formIdField())
+                ),
+                (int) $this->handler()->areEqual(
+                    $commentFromDb->get(0),
+                    $comment,
+                    ['author_id', $this->handler()->formIdField()]
+                )
+            ])
+        );
+    }
+
+    public function testCanImportAnAuthor()
+    {
+        $submission = $this->createRWC2015();
+        $author = $submission->get('authors')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importAuthor',
+            $author
+        );
+
+        $authorId = Registry::get('DataMapper')->getMapping(
+            'authors',
+            $author->get('author_id')->getValue()
+        );
+
+        $authorsFromDb = Registry::get('AuthorsDAO')->read([
+            'author_id' => $authorId,
+        ]);
+
+        $author->get('settings')->forEachValue(function($setting) {
+            $this->handler()->setMappedData(
+                $setting,
+                ['authors' => 'author_id',]
+            );
+        });
+
+        $settingsFromDb = Registry::get('AuthorSettingsDAO')->read([
+            'author_id' => $authorId,
+        ]);
+
+        $this->assertSame(
+            '1-1-1-1-1-2-1',
+            implode('-', [
+                (int) $imported,
+                (int) is_numeric($authorId),
+                $authorsFromDb->length(),
+                (int) $this->handler()->areEqual(
+                    $authorsFromDb->get(0),
+                    $author,
+                    ['submission_id']
+                ),
+                (int) $this->areEqual(
+                    $authorsFromDb->get(0)->getData('submission_id'),
+                    Registry::get('DataMapper')->getMapping(
+                        $this->handler()->formTableName(),
+                        $submission->getId()
+                    )
+                ),
+                $settingsFromDb->length(),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $settingsFromDb->toArray(),
+                    $author->get('settings')->toArray()
+                ),
+            ])
+        );
     }
 }

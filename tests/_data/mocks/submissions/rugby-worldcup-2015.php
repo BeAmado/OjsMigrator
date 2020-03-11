@@ -229,14 +229,69 @@ return array(
         array(
             '__tableName_' => 'authors',
             'author_id' => 8877,
-            /*
-             * remaining author fields
-             */
-            'settings' => array(),
+            'submission_id' => 7384,
+            'primary_contact' => 1,
+            'seq' => 1,
+            'first_name' => 'Anthony',
+            'middle_name' => null,
+            'last_name' => 'Stark',
+            'country' => 'US',
+            'email' => 'tony@avengers.com',
+            'url' => null,
+            'user_group_id' => null,
+            'suffix' => null,
+            'settings' => array(
+                array(
+                    '__tableName_' => 'author_settings',
+                    'author_id' => 8877,
+                    'locale' => 'en',
+                    'setting_name' => 'affiliation',
+                    'setting_value' => 'Avengers',
+                    'setting_type' => 'string',
+                ),
+                array(
+                    '__tableName_' => 'author_settings',
+                    'author_id' => 8877,
+                    'locale' => 'en',
+                    'setting_name' => 'biography',
+                    'setting_value' => 'Genious, playboy, millionaire, philanthropist',
+                    'setting_type' => 'string',
+                ),
+            ),
         ),
-        /*
-         * other authors
-         */
+        array(
+            '__tableName_' => 'authors',
+            'author_id' => 25,
+            'submission_id' => 7384,
+            'primary_contact' => 0,
+            'seq' => 2,
+            'first_name' => 'Bruce',
+            'middle_name' => null,
+            'last_name' => 'Wayne',
+            'country' => 'US',
+            'email' => 'bruce@justiceleague.com',
+            'url' => null,
+            'user_group_id' => null,
+            'suffix' => null,
+            'settings' => array(
+                array(
+                    '__tableName_' => 'author_settings',
+                    'author_id' => 25,
+                    'locale' => 'en',
+                    'setting_name' => 'affiliation',
+                    'setting_value' => 'Justice League',
+                    'setting_type' => 'string',
+                ),
+                array(
+                    '__tableName_' => 'author_settings',
+                    'author_id' => 25,
+                    'locale' => 'en',
+                    'setting_name' => 'biography',
+                    'setting_value' => 'Orphaned very young, punches villains for a living',
+                    'setting_type' => 'string',
+                ),
+            ),
+        ),
     ),
     'edit_assignments' => array(
         array(
