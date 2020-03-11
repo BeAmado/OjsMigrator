@@ -47,11 +47,15 @@ class MyStatement extends MyObject
      */
     protected function createStmt()
     {
+        try{
         $this->set(
             'stmt',
             Registry::get('ConnectionManager')->getConnection()
                                               ->prepare($this->getQuery())
         );
+        } catch (\Exception $e) {
+            echo "\n\n\n" . $e->getMessage() . "\n\n\nThe query: " . $this->getQuery() . "\n\n\n";
+        }
     }
 
     /**

@@ -62,6 +62,8 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'author_settings',
             'edit_assignments',
             'edit_decisions',
+            'review_rounds',
+            'review_assignments',
         ],
     ]) : void {
         parent::setUpBeforeClass($args);
@@ -541,6 +543,86 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                     $fromDb->get(0),
                     $decision,
                     [$this->handler()->formIdField(), 'editor_id']
+                ),
+            ])
+        );
+    }
+
+    public function testCanImportAReviewRound()
+    {
+        $submission = $this->createRWC2015();
+        $round = $submission->get('review_rounds')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importReviewRound',
+            $round
+        );
+
+        $roundId = Registry::get('DataMapper')->getMapping(
+            'review_rounds',
+            $round->get('review_round_id')->getValue()
+        );
+
+        $fromDb = Registry::get('ReviewRoundsDAO')->read([
+            'review_round_id' => $roundId,
+        ]);
+
+        $this->assertSame(
+            '1-1-1-1-1',
+            implode('-', [
+                (int) $imported,
+                (int) is_numeric($roundId),
+                $fromDb->length(),
+                (int) $this->areEqual(
+                    Registry::get('DataMapper')->getMapping(
+                        $this->handler()->formTableName(),
+                        $submission->getId()
+                    ),
+                    $fromDb->get(0)->getData('submission_id')
+                ),
+                (int) $this->handler()->areEqual(
+                    $fromDb->get(0),
+                    $round,
+                    ['submission_id']
+                )
+            ])
+        );
+    }
+
+    public function testCanImportAReviewAssignment()
+    {
+        $submission = $this->createRWC2015();
+
+        $assign = $submission->get('review_assignments')->get(0);
+
+        $imported = $this->getStub()->callMethod(
+            'importReviewAssignment',
+            $assign
+        );
+
+        $reviewId = Registry::get('DataMapper')->getMapping(
+            'review_assignments',
+            $assign->get('review_id')->getValue()
+        );
+
+        $fromDb = Registry::get('ReviewAssignmentsDAO')->read([
+            'review_id' => $reviewId,
+        ]);
+
+        $this->assertSame(
+            '1-1-1-1-0',
+            implode('-', [
+                (int) $imported,
+                (int) is_numeric($reviewId),
+                $fromDb->length(),
+                (int) $this->handler()->areEqual(
+                    $fromDb->get(0),
+                    $assign,
+                    ['submission_id','reviewer_id','review_round_id']
+                ),
+                (int) $this->areEqual(
+                    $fromDb->get(0)->getData('review_round_id'),
+                    $assign->get('review_round_id')->getValue()
                 ),
             ])
         );

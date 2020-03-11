@@ -275,6 +275,15 @@ class SubmissionHandler extends EntityHandler
         );
     }
 
+    protected function importReviewRound($data)
+    {
+        return $this->importEntity(
+            $data,
+            'review_rounds',
+            array($this->formTableName() => 'submission_id')
+        );
+    }
+
     protected function importReviewAssignment($data)
     {
         return $this->importEntity(
@@ -285,16 +294,8 @@ class SubmissionHandler extends EntityHandler
                 'users' => 'reviewer_id',
                 $this->formTableName('files') => 'reviewer_file_id',
                 'review_forms' => 'review_form_id',
+                'review_rounds' => 'review_round_id',
             )
-        );
-    }
-
-    protected function importReviewRound($data)
-    {
-        return $this->importEntity(
-            $data,
-            'review_rounds',
-            array($this->formTableName() => 'submission_id')
         );
     }
 
@@ -347,10 +348,6 @@ class SubmissionHandler extends EntityHandler
                 $this->importSubmissionComment($comment);
             });
 
-        // import the keywords
-        if ($submission->hasAttribute('keywords'))
-            $this->importSubmissionKeywords($submission);
-
         // import the authors
         if ($submission->hasAttribute('authors'))
             $submission->get('authors')->forEachValue(function($author) {
@@ -369,20 +366,24 @@ class SubmissionHandler extends EntityHandler
                 $this->importEditDecision($ed);
             });
 
+        // import the keywords
+        if ($submission->hasAttribute('keywords'))
+            $this->importSubmissionKeywords($submission);
+
         // import the submission history
         if ($submission->hasAttribute('history'))
-            $this->importSubmissionHistory($submission->get('history'));
-
-        // import the review assignments
-        if ($submission->hasAttribute('review_assignments'))
-            $submission->get('review_assignments')->forEachValue(function($ra) {
-                $this->importReviewAssignment($ra);
-            });
+            $this->importSubmissionHistory($submission);
 
         // import the review_rounds
         if ($submission->hasAttribute('review_rounds'))
             $submission->get('review_rounds')->forEachValue(function($rr) {
                 $this->importReviewRound($rr);
+            });
+
+        // import the review assignments
+        if ($submission->hasAttribute('review_assignments'))
+            $submission->get('review_assignments')->forEachValue(function($ra) {
+                $this->importReviewAssignment($ra);
             });
 
         return true;

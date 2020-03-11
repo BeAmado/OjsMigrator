@@ -71,6 +71,9 @@ class Maestro
 
     protected static function getDao($name)
     {
+        if (\strpos(\strtolower($name), 'sqlite') !== false)
+            return (new \BeAmado\OjsMigrator\Db\Sqlite\SqliteDAO('sqlite'));
+
         /** @var $tablesNames array*/
         $tablesNames = Registry::get('SchemaHandler')->getTablesNames();
         

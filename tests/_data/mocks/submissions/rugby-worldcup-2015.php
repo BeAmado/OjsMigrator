@@ -378,16 +378,53 @@ return array(
              */
         ),
     ),
-    'review_assignments' => array(
-        array(),
-        /*
-         * other review assignments
-         */
-    ),
     'review_rounds' => array(
-        array(),
+        array(
+            '__tableName_' => 'review_rounds',
+            'review_round_id' => 9999,
+            'submission_id' => 7384,
+            'round' => 1,
+            'review_revision' => 1,
+            'status' => null,
+            'stage_id' => null,
+        ),
         /*
          * other review rounds
+         */
+    ),
+    'review_assignments' => array(
+        array(
+            '__tableName_' => 'review_assignments',
+            'review_id' => 222,
+            'submission_id' => 7384,
+            'reviewer_id' => '[hulk_user_id]',
+            'competing_interests' => 'Turning into a green monster',
+            'regret_message' => 'Regret not remembering',
+            'recommendation' => 1,
+            'date_assigned' => '2015-11-08 13:22:19',
+            'date_notified' => '2015-11-08 13:22:29',
+            'date_confirmed' => '2015-11-08 13:23:19',
+            'date_completed' => '2015-11-08 13:24:19',
+            'date_acknowledged' => '2015-11-08 15:22:19',
+            'date_due' => '2015-11-18 23:22:19',
+            'date_response_due' => '2015-11-18 14:22:19',
+            'last_modified' => '2015-11-08 15:32:19',
+            'reminder_was_automatic' => 0,
+            'declined' => 0,
+            'replaced' => 0,
+            'cancelled' => 0,
+            'reviewer_file_id' => null,
+            'date_rated' => '2015-11-10 10:10:10',
+            'date_reminded' => '2015-11-11 11:11:11',
+            'quality' => 0,
+            'review_method' => 1,
+            'round' => 1,
+            'step' => 1,
+            'review_form_id' => null,
+            'review_round_id' => 9999,
+        ),
+        /*
+         * other review assignments
          */
     ),
 );

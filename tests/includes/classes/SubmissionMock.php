@@ -111,10 +111,6 @@ class SubmissionMock extends EntityMock
             });
     }
 
-    protected function fillKeywords($keywords)
-    {
-    }
-
     protected function fillEditAssignments($submission)
     {
         if ($submission->hasAttribute('edit_assignments'))
@@ -133,11 +129,19 @@ class SubmissionMock extends EntityMock
             });
     }
 
-    protected function fillHistory($history)
+    protected function fillReviews($submission)
+    {
+        if ($submission->hasAttribute('review_assignments'))
+            $submission->get('review_assignments')->forEachValue(function($r) {
+                $this->fillUserId($r, 'reviewer_id');
+            });
+    }
+
+    protected function fillKeywords($keywords)
     {
     }
 
-    protected function fillReview($reviews)
+    protected function fillHistory($history)
     {
     }
 
@@ -158,6 +162,7 @@ class SubmissionMock extends EntityMock
         $this->fillComments($submission);
         $this->fillEditAssignments($submission);
         $this->fillEditDecisions($submission);
+        $this->fillReviews($submission);
 
         return $submission;
     }

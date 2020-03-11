@@ -128,6 +128,11 @@ class TableDefinition extends MyObject implements MyStringRepr
         }, $columnNames);
     }
 
+    public function getPrimaryKeyDefinitions()
+    {
+        return $this->getColumns($this->getPrimaryKeys());
+    }
+
     /**
      * Returns the string representation of the table definition.
      *

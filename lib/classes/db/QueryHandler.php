@@ -196,7 +196,7 @@ class QueryHandler
         );
     }
 
-    protected function hasToGetModifiedParametersForSqlite($td)
+    public function hasToGetModifiedParametersForSqlite($td)
     {
         return Registry::get('ConnectionManager')->getDbDriver() == 'sqlite' &&
             \array_reduce(

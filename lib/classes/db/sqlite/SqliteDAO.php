@@ -7,6 +7,61 @@ use \BeAmado\OjsMigrator\Entity\Entity;
 
 class SqliteDAO extends DAO
 {
+    /**
+     * @var string
+     */
+    private $idFieldToManualIncrement;
+
+    public function __construct($name)
+    {
+        parent::__construct($name);
+        if (\strpos(\strtolower($name), 'sqlite') !== false)
+            return;
+
+        if (Registry::get('QueryHandler')->hasToGetModifiedParametersForSqlite(
+            $this->getTableDefinition()
+        ))
+            $this->markTableToBeManuallyIncremented($name);
+        else
+            $this->markTableNotToBeManuallyIncremented($name);
+
+        if ($this->hasToManuallyIncrement())
+            $this->setIdFieldToManuallyIncrement();
+    }
+
+    protected function getTablesManualIncrement()
+    {
+        if (!Registry::hasKey('tablesManualIncrement'))
+            Registry::set(
+                'tablesManualIncrement',
+                Registry::get('MemoryManager')->create(array())
+            );
+
+        return Registry::get('tablesManualIncrement');
+    }
+
+    protected function isMarkedToBeManuallyIncremented($table)
+    {
+        return $this->getTablesManualIncrement()->get($table)->getValue();
+    }
+
+    protected function tableIsMarked($table)
+    {
+        return $this->getTablesManualIncrement()->hasAttribute($table);
+    }
+
+    protected function markTableToBeManuallyIncremented($table)
+    {
+        if (!$this->tableIsMarked($table))
+            $this->getTablesManualIncrement()->set($table, true);
+    }
+
+    protected function markTableNotToBeManuallyIncremented($table)
+    {
+        if (!$this->tableIsMarked($table))
+            $this->getTablesManualIncrement()->set($table, false);
+    }
+
     protected function hasToManuallyIncrement()
     {
         return \in_array(
@@ -14,22 +69,32 @@ class SqliteDAO extends DAO
             array(
                 'sqlite',
             )
-        ) && \in_array(
-            $this->getTableName(), 
-            array(
-                Registry::get('SubmissionHandler')->formTableName('files'),
-            )
+        ) && $this->isMarkedToBeManuallyIncremented($this->getTableName());
+    }
+
+    protected function getTableDefinition()
+    {
+        return Registry::get('SchemaHandler')->getTableDefinition(
+            $this->getTableName()
         );
     }
 
-    protected function formIdFieldToIncrement()
+    protected function setIdFieldToManuallyIncrement()
     {
-        switch($this->getTableName()) {
-            case Registry::get('SubmissionHandler')->formTableName('files'):
-                return 'file_id';
-        }
+        $this->idFieldToManuallyIncrement = \array_reduce(
+            $this->getTableDefinition()->getPrimaryKeyDefinitions(),
+            function($carry, $column) {
+                return $carry . (
+                    $column->isAutoIncrement() ? $column->getColumnName() : ''
+                );
+            },
+            ''
+        );
+    }
 
-        return '';
+    protected function getIdFieldToIncrement()
+    {   
+        return $this->idFieldToManuallyIncrement;
     }
 
     protected function lastIdStatementName()
@@ -45,9 +110,9 @@ class SqliteDAO extends DAO
         Registry::set(
             $this->lastIdStatementName(),
             Registry::get('StatementHandler')->create(
-                'SELECT ' . $this->formIdFieldToIncrement() . ' AS id'
+                'SELECT ' . $this->getIdFieldToIncrement() . ' AS id'
                     . ' FROM ' . $this->getTableName()
-                    . ' ORDER BY ' . $this->formIdFieldToIncrement()
+                    . ' ORDER BY ' . $this->getIdFieldToIncrement()
                     . ' DESC LIMIT 1'
             )
         );
@@ -80,19 +145,15 @@ class SqliteDAO extends DAO
 
     protected function manuallyIncrementId($entity)
     {
-//        echo "\n\n\nIncrementing the id: \n";
-//        echo "\nEntity Before: "; var_dump(Registry::get('entityToInsert'));
         if (\is_array($entity))
             $entity = Registry::get('MemoryManager')->create($entity);
 
         $entity->set(
-            $this->formIdFieldToIncrement(),
+            $this->getIdFieldToIncrement(),
             $this->formManualIncrementedId()
         );
 
         return $entity;
-
-//        echo "\n\nEntity After: ";var_dump(Registry::get('entityToInsert'));
     }
 
     /**
@@ -116,62 +177,5 @@ class SqliteDAO extends DAO
                 : $entity, 
             $options
         );
-        /*
-        Registry::remove('entityToInsert');
-        Registry::set(
-            'entityToInsert',
-            Registry::get('EntityHandler')->getValidData(
-                $this->getTableName(),
-                $entity
-            )
-        );
-
-        Registry::get('StatementHandler')->execute(
-            'insert' . Registry::get('CaseHandler')->transformCaseTo(
-                'PascalCase',
-                $this->getTableName()
-            ),
-            Registry::get('entityToInsert')->cloneInstance()
-        );
-
-        Registry::remove('insertedEntity');
-
-        Registry::get('StatementHandler')->execute(
-            'getlast10' . Registry::get('CaseHandler')->transformCaseTo(
-                'PascalCase',
-                $this->getTableName()
-            ),
-            null,
-            function($res) {
-                if (Registry::get('EntityHandler')->areEqual(
-                    Registry::get('entityToInsert'),
-                    $res
-                )) {
-                    Registry::set(
-                        'insertedEntity', 
-                        Registry::get('EntityHandler')->create(
-                            $this->getTableName(),
-                            $res
-                        )
-                    );
-                    return;
-                }
-
-                return true;
-            }
-        );
-
-        Registry::remove('entityToInsert');
-
-        if (!\is_a(
-            Registry::get('insertedEntity'), 
-            \BeAmado\OjsMigrator\MyObject::class)
-        ) {
-            Registry::remove('insertedEntity');
-            return;
-        }
-
-        return Registry::get('insertedEntity')->cloneInstance();
-        */
     }
 }
