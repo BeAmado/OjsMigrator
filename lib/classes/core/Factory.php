@@ -125,6 +125,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Entity\SubmissionHandler();
     }
 
+    protected function createSubmissionKeywordHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\SubmissionKeywordHandler();
+    }
+
     protected function createTableDefinitionHandler()
     {
         return new \BeAmado\OjsMigrator\Db\TableDefinitionHandler();
@@ -281,6 +286,8 @@ class Factory
                 return 'SubmissionFileHandler';
             case \strtolower('SubmissionHandler'):
                 return 'SubmissionHandler';
+            case \strtolower('SubmissionKeywordHandler'):
+                return 'SubmissionKeywordHandler';
             case \strtolower('UserHandler'):
                 return 'UserHandler';
             case \strtolower('TableDefinitionHandler'):

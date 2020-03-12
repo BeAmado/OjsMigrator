@@ -64,6 +64,9 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'edit_decisions',
             'review_rounds',
             'review_assignments',
+            'submission_search_objects',
+            'submission_search_object_keywords',
+            'submission_search_keyword_list',
         ],
     ]) : void {
         parent::setUpBeforeClass($args);
@@ -624,6 +627,32 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                     $fromDb->get(0)->getData('review_round_id'),
                     $assign->get('review_round_id')->getValue()
                 ),
+            ])
+        );
+    }
+
+    public function testCanImportTheSubmissionKeywords()
+    {
+        $submission = $this->createRWC2015();
+
+        $imported = $this->getStub()->callMethod(
+            'importSubmissionKeywords',
+            $submission
+        );
+
+        $searchObjects = $this->handler()->getDAO('search_objects')->read([
+            $this->handler()
+                 ->formIdField() => Registry::get('DataMapper')->getMapping(
+                $this->handler()->formTableName(),
+                $submission->getId()
+            ),
+        ]);
+
+        $this->assertSame(
+            '1-3',
+            implode('-', [
+                (int) $imported,
+                $searchObjects->length(),
             ])
         );
     }

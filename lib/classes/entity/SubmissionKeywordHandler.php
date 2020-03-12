@@ -10,7 +10,7 @@ class SubmissionKeywordHandler extends EntityHandler
         return Registry::get('SubmissionHandler');
     }
 
-    protected function tableName($name)
+    protected function tableName($name = null)
     {
         return $this->smHr()->formTableName($name);
     }
@@ -61,6 +61,22 @@ class SubmissionKeywordHandler extends EntityHandler
         });
     }
 
+    protected function objectFieldsToMap($data)
+    {
+        if (
+            $data->hasAttribute('assoc_id') && 
+            $data->get('assoc_id')->getValue() > 0
+        )
+            return array(
+                $this->tableName() => $this->smHr()->formIdField(),
+                $this->tableName('files') => 'assoc_id',
+            );
+
+        return array(
+            $this->tableName() => $this->smHr()->formIdField(),
+        );
+    }
+
     protected function importSubmissionSearchObject($data)
     {
         if (
@@ -78,9 +94,7 @@ class SubmissionKeywordHandler extends EntityHandler
         return $this->importEntity(
             $data,
             $this->tableName('search_objects'),
-            array(
-                $this->smHr()->formTableName() => $this->smHr()->formIdField(),
-            ),
+            $this->objectFieldsToMap($data),
             true
         ) && $this->importSearchObjectKeywords($data);
     }
@@ -95,10 +109,38 @@ class SubmissionKeywordHandler extends EntityHandler
         });
     }
 
+    protected function getSearchObjectKeywords($objectId)
+    {
+        $objKeywords = $this->smHr()->getDAO('search_object_keywords')
+                                    ->read(array(
+            'object_id' => $objectId,
+        ));
+
+        $objKeywords->forEachValue(function($o) {
+            $o->set(
+                'keyword_list',
+                $this->smHr()->getDAO('search_keyword_list')->read(array(
+                    'keyword_id' => $o->getData('keyword_id'),
+                ))
+            );
+        });
+
+        return $objKeywords;
+    }
+
     public function getSubmissionKeywords($submissionId)
     {
         $searchObjects = $this->smHr()->getDAO('search_objects')->read(array(
-            
+            $this->tableName('search_objects') => $submissionId,
         ));
+
+        $searchObjects->forEachValue(function($o) {
+            $o->set(
+                'search_object_keywords',
+                $this->getSearchObjectKeywords($o->getId())
+            );
+        });
+
+        return $searchObjects;
     }
 }

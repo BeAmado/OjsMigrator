@@ -203,7 +203,7 @@ return array(
             'object_id' => 182,
             '[submission_id]' => 7384,
             'type' => 16,
-            'assoc_id' => 7483,
+            'assoc_id' => 0,
             'search_object_keywords' => array(
                 array(
                     '__tableName_' => '[search_object_keywords_table]',
@@ -218,9 +218,46 @@ return array(
                 ),
             )
         ),
-        /*
-         * other keywords
-         */
+        array(
+            '__tableName_' => '[search_objects_table]',
+            'object_id' => 183,
+            '[submission_id]' => 7384,
+            'type' => 256,
+            'assoc_id' => 338,
+            'search_object_keywords' => array(
+                array(
+                    '__tableName_' => '[search_object_keywords_table]',
+                    'object_id' => 183,
+                    'pos' => 21,
+                    'keyword_id' => 81,
+                    'keyword_list' => array(
+                        '__tableName_' => '[search_keyword_list_table]',
+                        'keyword_id' => 81,
+                        'keyword_text' => 'young',
+                    )
+                ),
+            )
+        ),
+        array(
+            '__tableName_' => '[search_objects_table]',
+            'object_id' => 184,
+            '[submission_id]' => 7384,
+            'type' => 16,
+            'assoc_id' => 0,
+            'search_object_keywords' => array(
+                array(
+                    '__tableName_' => '[search_object_keywords_table]',
+                    'object_id' => 184,
+                    'pos' => 379,
+                    'keyword_id' => 892,
+                    'keyword_list' => array(
+                        '__tableName_' => '[search_keyword_list_table]',
+                        'keyword_id' => 892,
+                        'keyword_text' => 'winger',
+                    )
+                ),
+            )
+        ),
     ),
     'authors' => array(
         array(

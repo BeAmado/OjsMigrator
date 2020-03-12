@@ -213,12 +213,9 @@ class SubmissionHandler extends EntityHandler
         );
     }
 
-    protected function importSubmissionKeywords($data)
+    protected function importSubmissionKeywords($sm)
     {
-        throw new \Exception(
-            'Gotta implement the method importSubmissionKeywords '
-                . ' in the class SubmissionHandler.'
-        );
+        return Registry::get('SubmissionKeywordHandler')->importKeywords($sm);
     }
 
     protected function importSubmissionHistory($data)

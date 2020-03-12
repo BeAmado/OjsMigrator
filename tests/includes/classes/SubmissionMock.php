@@ -137,8 +137,21 @@ class SubmissionMock extends EntityMock
             });
     }
 
-    protected function fillKeywords($keywords)
+    protected function fillSearchObjectKeywords($k)
     {
+        $k->get('search_object_keywords')->forEachValue(function($sok) {
+            $this->basicFill($sok);
+            $this->basicFill($sok->get('keyword_list'));
+        });
+    }
+
+    protected function fillKeywords($submission)
+    {
+        if ($submission->hasAttribute('keywords'))
+            $submission->get('keywords')->forEachValue(function($k) {
+                $this->basicFill($k);
+                $this->fillSearchObjectKeywords($k);
+            });
     }
 
     protected function fillHistory($history)
@@ -163,12 +176,18 @@ class SubmissionMock extends EntityMock
         $this->fillEditAssignments($submission);
         $this->fillEditDecisions($submission);
         $this->fillReviews($submission);
+        $this->fillKeywords($submission);
 
         return $submission;
     }
 
     public function getSubmission($name)
     {
+        switch(\strtolower($name)) {
+            case 'rwc2015':
+                return $this->getRWC2015();
+        }
+
         return Registry::get('SubmissionHandler')->create(
             $this->fill($this->get($name))
         );
