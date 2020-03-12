@@ -299,5 +299,22 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
             ? \count($this->listValues()) 
             : 0;
     }
+
+    /*
+     * Sets the attribute in the object and returns the object itself.
+     *
+     * @param string $name
+     * @param mixed $value
+     * @return \BeAmado\OjsMigrator\MyObject
+     */
+    public function injectAttribute($name, $value)
+    {
+        $this->set(
+            $name,
+            $value
+        );
+
+        return $this;
+    }
 }
 
