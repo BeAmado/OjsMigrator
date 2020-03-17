@@ -330,6 +330,11 @@ class SubmissionFileHandler extends EntityHandler
         );
     }
 
-    public function copyFileFromJournalIntoEntitiesDir()
-    {}
+    public function copyFileFromJournalIntoEntitiesDir($filename, $journal)
+    {
+        return Registry::get('FileHandler')->copyFile(
+            $this->formPathByFileName($filename, $journal),
+            $this->formFilePathInEntitiesDir($filename)
+        );
+    }
 }

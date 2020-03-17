@@ -15,6 +15,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Util\ArrayHandler();
     }
 
+    protected function createAssocHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\AssocHandler();
+    }
+
     protected function createCaseHandler()
     {
         return new \BeAmado\OjsMigrator\Util\CaseHandler();
@@ -123,6 +128,11 @@ class Factory
     protected function createSubmissionHandler()
     {
         return new \BeAmado\OjsMigrator\Entity\SubmissionHandler();
+    }
+
+    protected function createSubmissionHistoryHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\SubmissionHistoryHandler();
     }
 
     protected function createSubmissionKeywordHandler()
@@ -242,6 +252,8 @@ class Factory
                 return 'AnnouncementHandler';
             case \strtolower('ArrayHandler'):
                 return 'ArrayHandler';
+            case \strtolower('AssocHandler'):
+                return 'AssocHandler';
             case \strtolower('CaseHandler'):
                 return 'CaseHandler';
             case \strtolower('ChoiceHandler'):
@@ -286,6 +298,8 @@ class Factory
                 return 'SubmissionFileHandler';
             case \strtolower('SubmissionHandler'):
                 return 'SubmissionHandler';
+            case \strtolower('SubmissionHistoryHandler'):
+                return 'SubmissionHistoryHandler';
             case \strtolower('SubmissionKeywordHandler'):
                 return 'SubmissionKeywordHandler';
             case \strtolower('UserHandler'):

@@ -72,6 +72,30 @@ class ArrayHandler
         return \array_search($elem, $arr) === (\count($arr) - 1);
     }
 
+    public function getItem($arr, $key)
+    {
+        if (\array_key_exists($key, $arr))
+            return $arr[$key];
+
+        if (
+            \is_numeric($key) && 
+            $key < 0 &&
+            \array_key_exists(
+                \count($arr) + $key,
+                $arr 
+            )
+        )
+            return $arr[\count($arr) + $key];
+    }
+
+    public function getLast($arr)
+    {
+        if (empty($arr))
+            return;
+
+        return $this->getItem($arr, -1);
+    }
+
     protected function equalsAssoc($arr1, $arr2)
     {
         foreach ($arr1 as $key => $value) {

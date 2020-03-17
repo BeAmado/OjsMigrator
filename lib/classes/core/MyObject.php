@@ -207,6 +207,16 @@ class MyObject extends AbstractObject implements MyIterable, MyCloneable
             \array_key_exists(\strtolower($name), $this->values);
     }
 
+    public function hasAttributes($attrList)
+    {
+        foreach ($attrList as $attr) {
+            if (!$this->hasAttribute($attr))
+                return false;
+        }
+
+        return true;
+    }
+
     protected function cloneArray($arr)
     {
         $newArr = $arr;

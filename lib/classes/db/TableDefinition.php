@@ -110,7 +110,13 @@ class TableDefinition extends MyObject implements MyStringRepr
      */
     public function getPrimaryKeys()
     {
-        return $this->get('primary_keys')->toArray();
+        if ($this->get('primary_keys')->length() > 0)
+            return \array_intersect(
+                $this->get('primary_keys')->toArray(),
+                $this->getColumnNames()
+            );
+
+        return array();
     }
 
     /**
@@ -131,6 +137,25 @@ class TableDefinition extends MyObject implements MyStringRepr
     public function getPrimaryKeyDefinitions()
     {
         return $this->getColumns($this->getPrimaryKeys());
+    }
+
+    protected function isColumn($col)
+    {
+        return \is_a($col, \BeAmado\OjsMigrator\Db\ColumnDefinition::class);
+    }
+
+    public function hasAutoIncrement()
+    {
+        return \array_reduce(
+            $this->getPrimaryKeyDefinitions(), 
+            function($carry, $column) {
+                if (!$this->isColumn($column))
+                    return $carry;
+
+                return $carry || $column->isAutoIncrement();
+            },
+            false
+        );
     }
 
     /**

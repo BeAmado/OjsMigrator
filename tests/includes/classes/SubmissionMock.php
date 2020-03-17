@@ -154,8 +154,23 @@ class SubmissionMock extends EntityMock
             });
     }
 
-    protected function fillHistory($history)
+    protected function fillHistory($submission)
     {
+        if (!$submission->hasAttribute('history'))
+            return;
+
+        if ($submission->get('history')->hasAttribute('event_logs'))
+            $submission->get('history')
+                       ->get('event_logs')->forEachValue(function($eventLog) {
+                $this->fillUserId($eventLog);
+            });
+
+        if ($submission->get('history')->hasAttribute('email_logs'))
+            $submission->get('history')
+                       ->get('email_logs')->forEachValue(function($emailLog) {
+                if ($emailLog->hasAttribute('email_log_user'))
+                    $this->fillUserId($emailLog->get('email_log_user'));
+            });
     }
 
     protected function fill($submission)
@@ -177,6 +192,7 @@ class SubmissionMock extends EntityMock
         $this->fillEditDecisions($submission);
         $this->fillReviews($submission);
         $this->fillKeywords($submission);
+        $this->fillHistory($submission);
 
         return $submission;
     }

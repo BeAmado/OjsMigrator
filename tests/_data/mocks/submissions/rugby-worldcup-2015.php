@@ -376,16 +376,28 @@ return array(
             array(
                 '__tableName_' => 'event_log',
                 'log_id' => 998,
-                /*
-                 * remaining event_log fields
-                 */
+                'assoc_type' => 257,
+                'assoc_id' => 7384,
+                'user_id' => '[hulk_user_id]',
+                'date_logged' => '2015-10-10 10:11:12',
+                'ip_address' => '10.10.10.10',
+                'event_type' => 2812,
+                'message' => 'Logging the event...',
+                'is_translated' => 0,
                 'settings' => array(
                     array(
                         '__tableName_' => 'event_log_settings',
                         'log_id' => 998,
-                        /*
-                         * remaining event_log_settings fields
-                         */
+                        'setting_name' => 'userName',
+                        'setting_value' => 'Bruce Banner',
+                        'setting_type' => 'string',
+                    ),
+                    array(
+                        '__tableName_' => 'event_log_settings',
+                        'log_id' => 998,
+                        'setting_name' => 'feeling',
+                        'setting_value' => 'Blue',
+                        'setting_type' => 'string',
                     )
                 ),
             ),
@@ -397,18 +409,23 @@ return array(
             array(
                 '__tableName_' => 'email_log',
                 'log_id' => 2390,
-                /*
-                 * remaining email_log fields
-                 */
-                'users' => array(
-                    array(
-                        'email_log_id' => 2390,
-                        'user_id' => '[thor_user_id]',
-                    ),
-                    /*
-                     * other email log users
-                     */
-                )
+                'assoc_type' => 257,
+                'assoc_id' => 7384,
+                'sender_id' => 23,
+                'date_sent' => '2015-10-10 23:22:21',
+                'id_address' => '24.23.22.21',
+                'event_type' => 222,
+                'from_address' => 'nobody@nowhere.com',
+                'recipients' => 'johndoe@imf.com',
+                'cc_recipients' => null,
+                'bcc_recipients' => null,
+                'subject' => 'what do do',
+                'body' => 'Just nothing',
+                'email_log_user' => array(
+                    '__tableName_' => 'email_log_users',
+                    'email_log_id' => 2390,
+                    'user_id' => '[thor_user_id]',
+                ),
             ),
             /*
              * other email logs

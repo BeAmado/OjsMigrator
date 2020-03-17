@@ -12,8 +12,11 @@ class GrammarHandler
      */
     protected function englishPlural($noun)
     {
-        if (substr($noun, -1) === 'y') {
-            return substr($noun, 0, -1) . 'ies';
+        switch (\strtolower(\substr($noun, -1))) {
+            case 's':
+                return $noun;
+            case 'y':
+                return substr($noun, 0, -1) . 'ies';
         }
 
         return $noun . 's';
@@ -30,7 +33,13 @@ class GrammarHandler
         if (\substr($noun, -3) === 'ies')
             return \substr($noun, 0, -3) . 'y';
 
-        if (\substr($noun, -1) === 's' && \substr($noun, -2, 1) !== 'u')
+        if (
+            \substr($noun, -1) === 's' && 
+            !\in_array(
+                \substr($noun, -2, 1),
+                array('u', 's')
+            )
+        )
             return \substr($noun, 0, -1);
 
         return $noun;

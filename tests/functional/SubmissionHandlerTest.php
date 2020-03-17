@@ -67,6 +67,10 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'submission_search_objects',
             'submission_search_object_keywords',
             'submission_search_keyword_list',
+            'event_log',
+            'event_log_settings',
+            'email_log',
+            'email_log_users',
         ],
     ]) : void {
         parent::setUpBeforeClass($args);
@@ -653,6 +657,48 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             implode('-', [
                 (int) $imported,
                 $searchObjects->length(),
+            ])
+        );
+    }
+
+    public function testCanImportTheSubmissionHistory()
+    {
+        $submission = $this->createRWC2015();
+
+        $imported = $this->getStub()->callMethod(
+            'importSubmissionHistory',
+            $submission
+        );
+
+        $submissionId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName(),
+            $submission->getId()
+        );
+
+        $eventLogs = Registry::get('EventLogDAO')->read([
+            'assoc_type' => 257,
+            'assoc_id' => $submissionId,
+        ]);
+        $eventLogSettings = Registry::get('EventLogSettingsDAO')->read([
+            'log_id' => $eventLogs->get(0)->getId(),
+        ]);
+
+        $emailLogs = Registry::get('EmailLogDAO')->read([
+            'assoc_type' => 257,
+            'assoc_id' => $submissionId,
+        ]);
+        $emailLogUsers = Registry::get('EmailLogUsersDAO')->read([
+            'email_log_id' => $emailLogs->get(0)->getId(),
+        ]);
+
+        $this->assertSame(
+            '1-1-1-2-1',
+            implode('-', [
+                (int) $imported,
+                $eventLogs->length(),
+                $emailLogs->length(),
+                $eventLogSettings->length(),
+                $emailLogUsers->length(),
             ])
         );
     }

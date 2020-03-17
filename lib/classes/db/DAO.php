@@ -11,7 +11,12 @@ class DAO
      *
      * The name of the table this DAO works upon
      */
-    protected $tableName;
+    private $tableName;
+
+    /**
+     * @var boolean
+     */
+    private $hasAutoIncrement;
 
     /**
      *
@@ -24,11 +29,19 @@ class DAO
             // TODO: treat better
         
         $this->tableName = $name;
+        $this->hasAutoIncrement = Registry::get(
+            'SchemaHandler'
+        )->getTableDefinition($this->getTableName())->hasAutoIncrement();
     }
 
     public function getTableName()
     {
         return $this->tableName;
+    }
+
+    public function hasAutoIncrement()
+    {
+        return $this->hasAutoIncrement;
     }
 
     protected function formStatementName($operation)
@@ -88,39 +101,17 @@ class DAO
     }
 
     /**
-     * Inserts the entity's data into the corresponding database table.
+     * Gets the entity that was just inserted in the database. This method is 
+     * to be used as a complement for the create method only.
      *
-     * @param \BeAmado\OjsMigrator\Entity\Entity | array $entity
-     * @param boolean $commitOnSucess
-     * @param boolean $rollbackOnError
-     * @return \BeAmado\OjsMigrator\Entity\Entity
+     * @return \BeAmado\OjsMigrator\MyObject
      */
-    public function create(
-        $entity, 
-        $options = array(
-            'commitOnSuccess' => false, 
-            'rollbackOnError' => false,
-        )
-    ) {
-        Registry::remove('entityToInsert');
-        Registry::set(
-            'entityToInsert',
-            Registry::get('EntityHandler')->getValidData(
-                $this->getTableName(),
-                $entity
-            )
-        );
-
-        Registry::get('StatementHandler')->execute(
-            'insert' . Registry::get('CaseHandler')->transformCaseTo(
-                'PascalCase',
-                $this->getTableName()
-            ),
-            Registry::get('entityToInsert')->cloneInstance()
-        );
+    protected function getInsertedEntity()
+    {
+        if (!Registry::hasKey('entityToInsert'))
+            return;
 
         Registry::remove('insertedEntity');
-
         Registry::get('StatementHandler')->execute(
             'getlast10' . Registry::get('CaseHandler')->transformCaseTo(
                 'PascalCase',
@@ -157,6 +148,45 @@ class DAO
         }
 
         return Registry::get('insertedEntity')->cloneInstance();
+    }
+
+    /**
+     * Inserts the entity's data into the corresponding database table.
+     *
+     * @param \BeAmado\OjsMigrator\Entity\Entity | array $entity
+     * @param boolean $commitOnSucess
+     * @param boolean $rollbackOnError
+     * @return \BeAmado\OjsMigrator\Entity\Entity
+     */
+    public function create(
+        $entity, 
+        $options = array(
+            'commitOnSuccess' => false, 
+            'rollbackOnError' => false,
+        )
+    ) {
+        Registry::remove('entityToInsert');
+        Registry::set(
+            'entityToInsert',
+            Registry::get('EntityHandler')->getValidData(
+                $this->getTableName(),
+                $entity
+            )
+        );
+
+        if (!Registry::get('StatementHandler')->execute(
+            'insert' . Registry::get('CaseHandler')->transformCaseTo(
+                'PascalCase',
+                $this->getTableName()
+            ),
+            Registry::get('entityToInsert')->cloneInstance()
+        ))
+            return;
+
+        if ($this->hasAutoIncrement())
+            return $this->getInsertedEntity();
+        else
+            return Registry::get('entityToInsert')->cloneInstance();
     }
 
     /**
