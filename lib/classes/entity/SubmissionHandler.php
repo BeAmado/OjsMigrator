@@ -2,8 +2,9 @@
 
 namespace BeAmado\OjsMigrator\Entity;
 use \BeAmado\OjsMigrator\Registry;
+use \BeAmado\OjsMigrator\ImportExport;
 
-class SubmissionHandler extends EntityHandler
+class SubmissionHandler extends EntityHandler implements ImportExport
 {
     /**
      * @var string
@@ -319,7 +320,7 @@ class SubmissionHandler extends EntityHandler
         // import the submission settings
         if ($submission->hasAttribute('settings'))
             $submission->get('settings')->forEachValue(function($setting) {
-                $this->importSubmissionSetting($setting);
+                return $this->importSubmissionSetting($setting);
             });
 
         // import the submission files
@@ -328,36 +329,39 @@ class SubmissionHandler extends EntityHandler
         
         // import the submission supplementary files
         if ($submission->hasAttribute('supplementary_files'))
-            $this->importSubmissionSuppFiles($submission);
+            $submission->get('supplementary_files')
+                       ->forEachValue(function($sf) {
+                return $this->importSubmissionSuppFile($sf);
+            });
         
         // import the submission galleys
         if ($submission->hasAttribute('galleys'))
             $submission->get('galleys')->forEachValue(function($galley) {
-                $this->importSubmissionGalley($galley);
+                return $this->importSubmissionGalley($galley);
             });
 
         // import the submission comments
         if ($submission->hasAttribute('comments'))
             $submission->get('comments')->forEachValue(function($comment) {
-                $this->importSubmissionComment($comment);
+                return $this->importSubmissionComment($comment);
             });
 
         // import the authors
         if ($submission->hasAttribute('authors'))
             $submission->get('authors')->forEachValue(function($author) {
-                $this->importAuthor($author);
+                return $this->importAuthor($author);
             });
 
         // import the edit assignments
         if ($submission->hasAttribute('edit_assignments'))
             $submission->get('edit_assignments')->forEachValue(function($ea) {
-                $this->importEditAssignment($ea);
+                return $this->importEditAssignment($ea);
             });
 
         // import the edit_decisions
         if ($submission->hasAttribute('edit_decisions'))
             $submission->get('edit_decisions')->forEachValue(function($ed) {
-                $this->importEditDecision($ed);
+                return $this->importEditDecision($ed);
             });
 
         // import the keywords
@@ -371,13 +375,13 @@ class SubmissionHandler extends EntityHandler
         // import the review_rounds
         if ($submission->hasAttribute('review_rounds'))
             $submission->get('review_rounds')->forEachValue(function($rr) {
-                $this->importReviewRound($rr);
+                return $this->importReviewRound($rr);
             });
 
         // import the review assignments
         if ($submission->hasAttribute('review_assignments'))
             $submission->get('review_assignments')->forEachValue(function($ra) {
-                $this->importReviewAssignment($ra);
+                return $this->importReviewAssignment($ra);
             });
 
         return true;
@@ -523,5 +527,15 @@ class SubmissionHandler extends EntityHandler
 
             // fetch the review rounds
         }
+    }
+
+    public function import($submission)
+    {
+        return $this->importSubmission($submission);
+    }
+
+    public function export($journal)
+    {
+        return $this->exportSubmissionsFromJournal($journal);
     }
 }

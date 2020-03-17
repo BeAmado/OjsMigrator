@@ -35,6 +35,8 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
     {
         foreach ([
             'rugby-worldcup-2015',
+            'rugby-worldcup-2011',
+            'the-rugby-championship-2015',
         ] as $name) {
             $sm = (new SubmissionMock())->getSubmission($name);
             if ($sm->hasAttribute('files'))
@@ -140,6 +142,16 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
     protected function createRWC2015()
     {
         return (new SubmissionMock())->getRWC2015();
+    }
+
+    protected function createTRC2015()
+    {
+        return (new SubmissionMock())->getTRC2015();
+    }
+
+    protected function createRWC2011()
+    {
+        return (new SubmissionMock())->getRWC2011();
     }
 
     public function testCanCreateTheRwc2015Submission()
@@ -254,11 +266,21 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         $file1 = $submission->get('files')->get(0);
         $file2 = $submission->get('files')->get(1);
 
+        $submissionId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName(),
+            $submission->getId()
+        );
+
+        $smFiles = $this->handler()->getDAO('files')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
         $this->assertSame(
             implode(';', [
                 1,
                 self::formContent($file1),
                 self::formContent($file2),
+                4,
             ]),
             implode(';', [
                 (int) $imported,
@@ -274,6 +296,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                         $journalId
                     )
                 ),
+                $smFiles->length(),
             ])
         );
     }
@@ -699,6 +722,167 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                 $emailLogs->length(),
                 $eventLogSettings->length(),
                 $emailLogUsers->length(),
+            ])
+        );
+    }
+
+    protected function getKeywords($submissionId)
+    {
+        $keywords = $this->handler()->getDAO('search_objects')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $keywords->forEachValue(function($so) {
+            $so->set(
+                'search_object_keywords',
+                $this->handler()->getDAO('search_object_keywords')->read([
+                    'object_id' => $so->getId(),
+                ])
+            );
+
+            $so->get('search_object_keywords')->forEachValue(function($k) {
+                $k->set(
+                    'keyword_list',
+                    $this->handler()->getDAO('search_keyword_list')->read([
+                        'keyword_id' => $k->getData('keyword_id')
+                    ])->get(0)
+                );
+            });
+        });
+
+        return $keywords;
+    }
+
+    protected function getHistory($submissionId)
+    {
+        $history = Registry::get('MemoryManager')->create();
+        $history->set(
+            'event_logs', 
+            Registry::get('EventLogDAO')->read([
+                'assoc_type' => 257,
+                'assoc_id' => $submissionId,
+            ])
+        );
+        $history->set(
+            'email_logs', 
+            Registry::get('EmailLogDAO')->read([
+                'assoc_type' => 257,
+                'assoc_id' => $submissionId,
+            ])
+        );
+
+        $history->get('event_logs')->forEachValue(function($log) {
+            $log->set(
+                'settings',
+                Registry::get('EventLogSettingsDAO')->read([
+                    'log_id' => $log->getId(),
+                ])
+            );
+        });
+        $history->get('email_logs')->forEachValue(function($log) {
+            $log->set(
+                'email_log_users',
+                Registry::get('EmailLogUsersDAO')->read([
+                    'email_log_id' => $log->getId(),
+                ])
+            );
+        });
+
+        return $history;
+    }
+
+    public function testCanImportTheRugbyChampionship2015Submission()
+    {
+        $submission = $this->createTRC2015();
+        $imported = Registry::get('SubmissionHandler')->import($submission);
+
+        $submissionId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName(),
+            $submission->getId()
+        );
+
+        $sm = $this->handler()->getDAO()->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $settings = $this->handler()->getDAO('settings')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $smFiles = $this->handler()->getDAO('files')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $suppFiles = $this->handler()->getDAO('supplementary_files')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $suppFileSettings = $this->handler()
+                                 ->getDAO('supp_file_settings')->read([
+            'supp_id' => $suppFiles->get(0)->getId(),
+        ]);
+
+        $publishedSm = $this->handler()->getDAO('published')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $comments = $this->handler()->getDAO('comments')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $galleys = $this->handler()->getDAO('galleys')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $galleySettings = $this->handler()->getDAO('galley_settings')->read([
+            'galley_id' => $galleys->get(0)->getId(),
+        ]);
+
+        $keywords = $this->getKeywords($submissionId);
+
+        $authors = Registry::get('AuthorsDAO')->read([
+            'submission_id' => $submissionId,
+        ]);
+
+        $editAssigns = Registry::get('EditAssignmentsDAO')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $editDecisions = Registry::get('EditDecisionsDAO')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $reviewRounds = Registry::get('ReviewRoundsDAO')->read([
+            'submission_id' => $submissionId,
+        ]);
+
+        $reviewAssigns = Registry::get('ReviewAssignmentsDAO')->read([
+            'submission_id' => $submissionId,
+        ]);
+
+        $history = $this->getHistory($submissionId);
+
+        $this->assertSame(
+            '1-1-2-4-1-2-1-1-1-3-2-2-2-1-1-1-2-1',
+            implode('-', [
+                (int) $imported,
+                $sm->length(),
+                $settings->length(),
+                $smFiles->length(),
+                $suppFiles->length(),
+                $suppFileSettings->length(),
+                $publishedSm->length(),
+                $comments->length(),
+                $galleys->length(),
+                $keywords->length(),
+                $authors->length(),
+                $editAssigns->length(),
+                $editDecisions->length(),
+                $reviewRounds->length(),
+                $reviewAssigns->length(),
+                $history->get('event_logs')->length(),
+                $history->get('event_logs')->get(0)->get('settings')->length(),
+                $history->get('email_logs')->length(),
             ])
         );
     }

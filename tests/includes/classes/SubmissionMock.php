@@ -202,6 +202,10 @@ class SubmissionMock extends EntityMock
         switch(\strtolower($name)) {
             case 'rwc2015':
                 return $this->getRWC2015();
+            case 'rwc2011':
+                return $this->getRWC2011();
+            case 'trc2015':
+                return $this->getTRC2015();
         }
 
         return Registry::get('SubmissionHandler')->create(
@@ -212,5 +216,15 @@ class SubmissionMock extends EntityMock
     public function getRWC2015()
     {
         return $this->getSubmission('rugby-worldcup-2015');
+    }
+
+    public function getTRC2015()
+    {
+        return $this->getSubmission('the-rugby-championship-2015');
+    }
+
+    public function getRWC2011()
+    {
+        return $this->getSubmission('rugby-worldcup-2011');
     }
 }

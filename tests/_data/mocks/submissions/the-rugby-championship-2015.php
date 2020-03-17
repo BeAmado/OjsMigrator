@@ -2,7 +2,7 @@
 
 return array(
     '__tableName_' => '[submissions_table]',
-    '[submission_id]' => 7384,
+    '[submission_id]' => 39,
     'locale' => 'en_NZ',
     'user_id' => '[ironman_user_id]',
     'journal_id' => '[test_journal_id]',
@@ -10,14 +10,14 @@ return array(
     'language' => 'en',
     'comments_to_ed' => null,
     'citations' => null,
-    'date_submitted' => '2015-12-09 13:15:26',
-    'last_modified' => '2015-12-20 23:14:57',
-    'date_status_modified' => '2015-12-09 19:09:34',
+    'date_submitted' => '2015-09-09 13:15:26',
+    'last_modified' => '2015-09-20 23:14:57',
+    'date_status_modified' => '2015-09-09 19:09:34',
     'status' => 3,
     'submission_progress' => 0,
     'current_round' => 1,
-    'submission_file_id' => 336,
-    'revised_file_id' => 337,
+    'submission_file_id' => 33699,
+    'revised_file_id' => 33799,
     'review_file_id' => null,
     'editor_file_id' => null,
     'pages' => '27-40',
@@ -28,8 +28,8 @@ return array(
     // associated entities
     'published' => array(
         '__tableName_' => '[published_submissions_table]',
-        '[published_submission_id]' => 77,
-        '[submission_id]' => 7384,
+        '[published_submission_id]' => 58976,
+        '[submission_id]' => 39,
         'issue_id' => '[rwc2015_issue_id]',
         'date_published' => '2015-12-30 12:00:23',
         'seq' => 1,
@@ -38,26 +38,31 @@ return array(
     'settings' => array(
         array(
             '__tableName_' => '[submission_settings_table]',
-            '[submission_id]' => 7384,
+            '[submission_id]' => 39,
             'locale' => 'en_NZ',
             'setting_name' => 'title',
-            'setting_value' => 'The Rugby World Cup 2015',
+            'setting_value' => 'The Rugby Championship 2015',
             'setting_type' => 'string',
         ),
-        /*
-         * other settings
-         */
+        array(
+            '__tableName_' => '[submission_settings_table]',
+            '[submission_id]' => 39,
+            'locale' => 'en_NZ',
+            'setting_name' => 'extra',
+            'setting_value' => 'Some extra setting',
+            'setting_type' => 'string',
+        ),
     ),
     'files' => array(
         // submission_file
         array(
             '__tableName_' => '[submission_files_table]',
-            'file_id' => 336,
+            'file_id' => 33699,
             'revision' => 1,
             'source_file_id' => null,
             'source_revision' => null,
-            '[submission_id]' => 7384,
-            'file_name' => '7384-336-1-SM.doc',
+            '[submission_id]' => 39,
+            'file_name' => '39-33699-1-SM.doc',
             'file_type' => 'application/msword',
             'file_size' => 123412,
             'original_file_name' => 'rwc2015-pre',
@@ -71,12 +76,12 @@ return array(
         // revised_file
         array(
             '__tableName_' => '[submission_files_table]',
-            'file_id' => 337,
+            'file_id' => 33799,
             'revision' => 1,
-            'source_file_id' => 336,
+            'source_file_id' => 33699,
             'source_revision' => 1,
-            '[submission_id]' => 7384,
-            'file_name' => '7384-337-1-RV.docx',
+            '[submission_id]' => 39,
+            'file_name' => '39-33799-1-RV.docx',
             'file_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'file_size' => 123980,
             'original_file_name' => 'rwc2015-rev',
@@ -89,12 +94,12 @@ return array(
         ),
         array(
             '__tableName_' => '[submission_files_table]',
-            'file_id' => 338,
+            'file_id' => 33899,
             'revision' => 1,
-            'source_file_id' => 337,
+            'source_file_id' => 33799,
             'source_revision' => 1,
-            '[submission_id]' => 7384,
-            'file_name' => '7384-338-1-PB.pdf',
+            '[submission_id]' => 39,
+            'file_name' => '39-33899-1-PB.pdf',
             'file_type' => 'application/pdf',
             'file_size' => 123139,
             'original_file_name' => 'rwc2015-final',
@@ -107,12 +112,12 @@ return array(
         ),
         array(
             '__tableName_' => '[submission_files_table]',
-            'file_id' => 339,
+            'file_id' => 339997,
             'revision' => 1,
-            'source_file_id' => 338,
+            'source_file_id' => 33899,
             'source_revision' => 1,
-            '[submission_id]' => 7384,
-            'file_name' => '7384-339-1-SP.pdf',
+            '[submission_id]' => 39,
+            'file_name' => '39-339997-1-SP.pdf',
             'file_type' => 'application/pdf',
             'file_size' => 123980,
             'original_file_name' => 'rwc2015-supp',
@@ -127,9 +132,9 @@ return array(
     'supplementary_files' => array(
         array(
             '__tableName_' => '[supplementary_files_table]',
-            'supp_id' => 2187,
-            'file_id' => 339,
-            '[submission_id]' => 7384,
+            'supp_id' => 218767,
+            'file_id' => 339997,
+            '[submission_id]' => 39,
             'type' => null,
             'language' => null,
             'date_created' => '2015-12-22',
@@ -140,7 +145,7 @@ return array(
             'settings' => array(
                 array(
                     '__tableName_' => '[supp_file_settings_table]',
-                    'supp_id' => 2187,
+                    'supp_id' => 218767,
                     'locale' => 'en_NZ',
                     'setting_name' => 'subject',
                     'setting_value' => 'Rugby',
@@ -148,10 +153,10 @@ return array(
                 ),
                 array(
                     '__tableName_' => '[supp_file_settings_table]',
-                    'supp_id' => 2187,
+                    'supp_id' => 218767,
                     'locale' => 'en_NZ',
                     'setting_name' => 'title',
-                    'setting_value' => 'New comers',
+                    'setting_value' => 'Breaking the drought',
                     'setting_type' => 'string',
                 ),
             ),
@@ -160,10 +165,10 @@ return array(
     'galleys' => array(
         array(
             '__tableName_' => '[galleys_table]',
-            'galley_id' => 22,
+            'galley_id' => 2882,
             'locale' => 'en_NZ',
-            '[submission_id]' => 7384,
-            'file_id' => 338,
+            '[submission_id]' => 39,
+            'file_id' => 339997,
             'label' => 'PDF',
             'html_galley' => 0,
             'style_file_id' => null,
@@ -172,7 +177,7 @@ return array(
             'settings' => array(
                 array(
                     '__tableName_' => '[galley_settings_table]',
-                    'galley_id' => 22,
+                    'galley_id' => 2882,
                     'locale' => 'en_NZ',
                     'setting_name' => 'excludeDoi',
                     'setting_value' => 0,
@@ -184,15 +189,15 @@ return array(
     'comments' => array(
         array(
             '__tableName_' => '[comments_table]',
-            'comment_id' => 33,
+            'comment_id' => 33778,
             'comment_type' => 2,
             'role_id' => 256,
-            '[submission_id]' => 7384,
-            'assoc_id' => 7384,
+            '[submission_id]' => 39,
+            'assoc_id' => 39,
             'author_id' => '[hulk_user_id]',
             'comment_title' => 'Simple comment',
             'comments' => 'Just commenting',
-            'date_posted' => '2015-12-20 12:09:09',
+            'date_posted' => '2015-11-30 12:09:09',
             'date_modified' => null,
             'viewable' => 1,
         ),
@@ -200,35 +205,35 @@ return array(
     'keywords' => array(
         array(
             '__tableName_' => '[search_objects_table]',
-            'object_id' => 182,
-            '[submission_id]' => 7384,
+            'object_id' => 17782,
+            '[submission_id]' => 39,
             'type' => 16,
             'assoc_id' => 0,
             'search_object_keywords' => array(
                 array(
                     '__tableName_' => '[search_object_keywords_table]',
-                    'object_id' => 182,
+                    'object_id' => 17782,
                     'pos' => 231,
                     'keyword_id' => 89231,
                     'keyword_list' => array(
                         '__tableName_' => '[search_keyword_list_table]',
                         'keyword_id' => 89231,
-                        'keyword_text' => 'best',
+                        'keyword_text' => 'west',
                     )
                 ),
             )
         ),
         array(
             '__tableName_' => '[search_objects_table]',
-            'object_id' => 183,
-            '[submission_id]' => 7384,
+            'object_id' => 18783,
+            '[submission_id]' => 39,
             'type' => 256,
             'assoc_id' => 338,
             'search_object_keywords' => array(
                 array(
                     '__tableName_' => '[search_object_keywords_table]',
-                    'object_id' => 183,
-                    'pos' => 21,
+                    'object_id' => 18783,
+                    'pos' => 218,
                     'keyword_id' => 81,
                     'keyword_list' => array(
                         '__tableName_' => '[search_keyword_list_table]',
@@ -240,14 +245,14 @@ return array(
         ),
         array(
             '__tableName_' => '[search_objects_table]',
-            'object_id' => 184,
-            '[submission_id]' => 7384,
+            'object_id' => 1999984,
+            '[submission_id]' => 39,
             'type' => 16,
             'assoc_id' => 0,
             'search_object_keywords' => array(
                 array(
                     '__tableName_' => '[search_object_keywords_table]',
-                    'object_id' => 184,
+                    'object_id' => 1999984,
                     'pos' => 379,
                     'keyword_id' => 892,
                     'keyword_list' => array(
@@ -262,8 +267,8 @@ return array(
     'authors' => array(
         array(
             '__tableName_' => 'authors',
-            'author_id' => 8877,
-            'submission_id' => 7384,
+            'author_id' => 8876667,
+            'submission_id' => 39,
             'primary_contact' => 1,
             'seq' => 1,
             'first_name' => 'Anthony',
@@ -277,7 +282,7 @@ return array(
             'settings' => array(
                 array(
                     '__tableName_' => 'author_settings',
-                    'author_id' => 8877,
+                    'author_id' => 8876667,
                     'locale' => 'en',
                     'setting_name' => 'affiliation',
                     'setting_value' => 'Avengers',
@@ -285,7 +290,7 @@ return array(
                 ),
                 array(
                     '__tableName_' => 'author_settings',
-                    'author_id' => 8877,
+                    'author_id' => 8876667,
                     'locale' => 'en',
                     'setting_name' => 'biography',
                     'setting_value' => 'Genious, playboy, millionaire, philanthropist',
@@ -295,8 +300,8 @@ return array(
         ),
         array(
             '__tableName_' => 'authors',
-            'author_id' => 25,
-            'submission_id' => 7384,
+            'author_id' => 25998,
+            'submission_id' => 39,
             'primary_contact' => 0,
             'seq' => 2,
             'first_name' => 'Bruce',
@@ -310,7 +315,7 @@ return array(
             'settings' => array(
                 array(
                     '__tableName_' => 'author_settings',
-                    'author_id' => 25,
+                    'author_id' => 25998,
                     'locale' => 'en',
                     'setting_name' => 'affiliation',
                     'setting_value' => 'Justice League',
@@ -318,7 +323,7 @@ return array(
                 ),
                 array(
                     '__tableName_' => 'author_settings',
-                    'author_id' => 25,
+                    'author_id' => 25998,
                     'locale' => 'en',
                     'setting_name' => 'biography',
                     'setting_value' => 'Orphaned very young, punches villains for a living',
@@ -330,8 +335,8 @@ return array(
     'edit_assignments' => array(
         array(
             '__tableName_' => 'edit_assignments',
-            'edit_id' => 1000,
-            '[submission_id]' => 7384,
+            'edit_id' => 100000,
+            '[submission_id]' => 39,
             'editor_id' => '[greenlantern_user_id]',
             'can_edit' => 1,
             'can_review' => 1,
@@ -341,8 +346,8 @@ return array(
         ),
         array(
             '__tableName_' => 'edit_assignments',
-            'edit_id' => 1000,
-            '[submission_id]' => 7384,
+            'edit_id' => 10009990,
+            '[submission_id]' => 39,
             'editor_id' => '[thor_user_id]',
             'can_edit' => 1,
             'can_review' => 1,
@@ -354,8 +359,8 @@ return array(
     'edit_decisions' => array(
         array(
             '__tableName_' => 'edit_decisions',
-            'edit_decision_id' => 900,
-            '[submission_id]' => 7384,
+            'edit_decision_id' => 8700,
+            '[submission_id]' => 39,
             'round' => 1,
             'editor_id' => '[greenlantern_user_id]',
             'decision' => 0,
@@ -363,8 +368,8 @@ return array(
         ),
         array(
             '__tableName_' => 'edit_decisions',
-            'edit_decision_id' => 2000,
-            '[submission_id]' => 7384,
+            'edit_decision_id' => 290088,
+            '[submission_id]' => 39,
             'round' => 2,
             'editor_id' => '[thor_user_id]',
             'decision' => 1,
@@ -375,9 +380,9 @@ return array(
         'event_logs' => array(
             array(
                 '__tableName_' => 'event_log',
-                'log_id' => 998,
+                'log_id' => 85990,
                 'assoc_type' => 257,
-                'assoc_id' => 7384,
+                'assoc_id' => 39,
                 'user_id' => '[hulk_user_id]',
                 'date_logged' => '2015-10-10 10:11:12',
                 'ip_address' => '10.10.10.10',
@@ -387,14 +392,14 @@ return array(
                 'settings' => array(
                     array(
                         '__tableName_' => 'event_log_settings',
-                        'log_id' => 998,
+                        'log_id' => 85990,
                         'setting_name' => 'userName',
                         'setting_value' => 'Bruce Banner',
                         'setting_type' => 'string',
                     ),
                     array(
                         '__tableName_' => 'event_log_settings',
-                        'log_id' => 998,
+                        'log_id' => 85990,
                         'setting_name' => 'feeling',
                         'setting_value' => 'Blue',
                         'setting_type' => 'string',
@@ -408,9 +413,9 @@ return array(
         'email_logs' => array(
             array(
                 '__tableName_' => 'email_log',
-                'log_id' => 2390,
+                'log_id' => 113,
                 'assoc_type' => 257,
-                'assoc_id' => 7384,
+                'assoc_id' => 39,
                 'sender_id' => 23,
                 'date_sent' => '2015-10-10 23:22:21',
                 'id_address' => '24.23.22.21',
@@ -423,7 +428,7 @@ return array(
                 'body' => 'Just nothing',
                 'email_log_user' => array(
                     '__tableName_' => 'email_log_users',
-                    'email_log_id' => 2390,
+                    'email_log_id' => 113,
                     'user_id' => '[thor_user_id]',
                 ),
             ),
@@ -435,8 +440,8 @@ return array(
     'review_rounds' => array(
         array(
             '__tableName_' => 'review_rounds',
-            'review_round_id' => 9999,
-            'submission_id' => 7384,
+            'review_round_id' => 77,
+            'submission_id' => 39,
             'round' => 1,
             'review_revision' => 1,
             'status' => null,
@@ -449,33 +454,33 @@ return array(
     'review_assignments' => array(
         array(
             '__tableName_' => 'review_assignments',
-            'review_id' => 222,
-            'submission_id' => 7384,
+            'review_id' => 28729,
+            'submission_id' => 39,
             'reviewer_id' => '[hulk_user_id]',
             'competing_interests' => 'Turning into a green monster',
             'regret_message' => 'Regret not remembering',
             'recommendation' => 1,
-            'date_assigned' => '2015-11-08 13:22:19',
-            'date_notified' => '2015-11-08 13:22:29',
-            'date_confirmed' => '2015-11-08 13:23:19',
-            'date_completed' => '2015-11-08 13:24:19',
-            'date_acknowledged' => '2015-11-08 15:22:19',
-            'date_due' => '2015-11-18 23:22:19',
-            'date_response_due' => '2015-11-18 14:22:19',
-            'last_modified' => '2015-11-08 15:32:19',
+            'date_assigned' => '2015-10-08 13:22:19',
+            'date_notified' => '2015-10-08 13:22:29',
+            'date_confirmed' => '2015-10-08 13:23:19',
+            'date_completed' => '2015-10-08 13:24:19',
+            'date_acknowledged' => '2015-10-08 15:22:19',
+            'date_due' => '2015-10-18 23:22:19',
+            'date_response_due' => '2015-10-18 14:22:19',
+            'last_modified' => '2015-10-08 15:32:19',
             'reminder_was_automatic' => 0,
             'declined' => 0,
             'replaced' => 0,
             'cancelled' => 0,
             'reviewer_file_id' => null,
-            'date_rated' => '2015-11-10 10:10:10',
-            'date_reminded' => '2015-11-11 11:11:11',
+            'date_rated' => '2015-10-10 10:10:10',
+            'date_reminded' => '2015-10-11 11:11:11',
             'quality' => 0,
             'review_method' => 1,
             'round' => 1,
             'step' => 1,
             'review_form_id' => null,
-            'review_round_id' => 9999,
+            'review_round_id' => 77,
         ),
         /*
          * other review assignments
