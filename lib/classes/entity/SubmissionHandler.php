@@ -394,11 +394,11 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
         if (
             !\is_a($submission, \BeAmado\OjsMigrator\MyObject::class) ||
-            $submission->hasAttribute($this->getIdField())
+            !$submission->hasAttribute($this->formIdField())
         )
             return;
 
-        return $submission->get($this->getIdField())->getValue();
+        return $submission->get($this->formIdField())->getValue();
     }
 
     protected function getSubmissionSettings($submission)
@@ -408,6 +408,21 @@ class SubmissionHandler extends EntityHandler implements ImportExport
                 $this->formIdField() => $this->getSubmissionId($submission)
             )
         );
+    }
+
+    protected function getPublishedSubmission($submission)
+    {
+        $data = $this->getEntityDAO($this->formTableName('published'))->read(
+            array(
+                $this->formIdField() => $this->getSubmissionId($submission)
+            )
+        );
+
+        if (
+            \is_a($data, \BeAmado\OjsMigrator\MyObject::class) &&
+            $data->length() == 1
+        )
+            return $data->get(0);
     }
 
     protected function getSubmissionFiles($submission)
@@ -469,6 +484,22 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         return $galleys;
     }
 
+    protected function getSubmissionComments($submission)
+    {
+        return $this->getEntityDAO(
+            $this->formTableName('comments')
+        )->read(array(
+            $this->formIdField() => $this->getSubmissionId($submission)
+        ));
+    }
+
+    protected function getSubmissionKeywords($submission)
+    {
+        return Registry::get(
+            'SubmissionKeywordHandler'
+        )->getSubmissionKeywords($this->getSubmissionId($submission));
+    }
+
     protected function getJournalId($journal)
     {
         if (\is_numeric($journal))
@@ -481,6 +512,25 @@ class SubmissionHandler extends EntityHandler implements ImportExport
             return;
 
         return $journal->get('journal_id')->getValue();
+    }
+
+    protected function copyFilesToEntitiesDir($submission)
+    {
+        if (!$submission->hasAttribute('files'))
+            return;
+
+        Registry::set(
+            '__journalId__',
+            $submission->get('journal_id')->getValue()
+        );
+
+        return $submission->get('files')->forEachValue(function($smFile) {
+            return Registry::get('SubmissionFileHandler')
+                           ->copyFileFromJournalIntoEntitiesDir(
+                $smFile->get('file_name')->getValue(),
+                Registry::get('__journalId__')
+            );
+        });
     }
 
     public function exportSubmissionsFromJournal($journal)
@@ -501,21 +551,34 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         foreach(Registry::get('FileSystemManager')->listdir(
             $this->getEntityDataDir($this->formTableName())
         ) as $filename) {
-            $sbm = Registry::get('JsonHandler')->createFromFile($filename);
+            $sm = Registry::get('JsonHandler')->createFromFile($filename);
+
+            // fetch the published submission data
+            $sm->set('published', $this->getPublishedSubmission($sm));
 
             // fetch the submission settings
+            $sm->set('settings', $this->getSubmissionSettings($sm));
 
             // fetch the submission files
+            $sm->set('files', $this->getSubmissionFiles($sm));
 
             // fetch the submission supplementary files
+            $sm->set(
+                'supplementary_files',
+                $this->getSubmissionSupplementaryFiles($sm)
+            );
 
             // fetch the submission galleys
+            $sm->set('galleys', $this->getSubmissionGalleys($sm));
 
             // fetch the submission comments
+            $sm->set('comments', $this->getSubmissionComments($sm));
 
             // fetch the submission keywords
+            $sm->set('keywords', $this->getSubmissionKeywords($sm));
 
             // fetch the authors
+            $sm->set('authors', $this->getSubmissionAuthors($sm));
 
             // fetch the edit assignments
 
@@ -526,6 +589,9 @@ class SubmissionHandler extends EntityHandler implements ImportExport
             // fetch the review assignments
 
             // fetch the review rounds
+
+            if ($sm->hasAttribute('files'))
+                $this->copyFilesToEntitiesDir($sm);
         }
     }
 

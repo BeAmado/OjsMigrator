@@ -111,4 +111,23 @@ class SubmissionHistoryHandler extends EntityHandler
         return $this->importEventLogs($submission->get('history')) &&
             $this->importEmailLogs($submission->get('history'));
     }
+
+    protected function smHr()
+    {
+        return Registry::get('SubmissionHandler');
+    }
+
+    protected function getEventLogs($submissionId)
+    {
+        if (!\is_numeric($submissionId))
+            return;
+        
+        $eventLogs = $this->smHr()->getDAO('search_objects')->read(array(
+            'assoc_id' => $submissionId,
+            'assoc_type' => Registry::get('AssocHandler')
+                                    ->getAssocType('submission'),
+        ));
+
+
+    }
 }

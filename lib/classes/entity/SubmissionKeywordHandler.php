@@ -111,8 +111,8 @@ class SubmissionKeywordHandler extends EntityHandler
 
     protected function getSearchObjectKeywords($objectId)
     {
-        $objKeywords = $this->smHr()->getDAO('search_object_keywords')
-                                    ->read(array(
+        $objKeywords = $this->smHr()
+                            ->getDAO('search_object_keywords')->read(array(
             'object_id' => $objectId,
         ));
 
@@ -131,7 +131,7 @@ class SubmissionKeywordHandler extends EntityHandler
     public function getSubmissionKeywords($submissionId)
     {
         $searchObjects = $this->smHr()->getDAO('search_objects')->read(array(
-            $this->tableName('search_objects') => $submissionId,
+            $this->smHr()->formIdField() => $submissionId,
         ));
 
         $searchObjects->forEachValue(function($o) {

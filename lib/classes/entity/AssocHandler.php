@@ -62,6 +62,13 @@ class AssocHandler
         return $this->assocTypes;
     }
 
+    public function getAssocType($name)
+    {
+        if (\array_key_exists($name, $this->getAssocTypes()))
+            return $this->getAssocTypes()[$name];
+
+    }
+
     public function getAssocTableName($assocType)
     {
         foreach ($this->getAssocTypes() as $name => $type) {

@@ -886,4 +886,282 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             ])
         );
     }
+
+    protected function tableName($entity)
+    {
+        if (
+            !is_a($entity, \BeAmado\OjsMigrator\MyObject::class) ||
+            !$entity->hasAttribute('__tableName_')
+        )
+            return;
+
+        return $entity->get('__tableName_')->getValue();
+    }
+
+    protected function getMappedSmTRC2015($fields = [], $assocEntities = [])
+    {
+        $map = [];
+        $map[$this->handler()->formTableName()] = $this->handler()
+                                                       ->formIdField();
+
+        if (\array_key_exists('user_id', $fields))
+            $map['users'] = 'user_id';
+        if (\array_key_exists('section_id', $fields))
+            $map['sections'] = 'section_id';
+        if (\array_key_exists('journal_id', $fields))
+            $map['journals'] = 'journal_id';
+
+        $sm = $this->createTRC2015();
+        $this->handler()->setMappedData($sm, $map);
+
+        foreach ($assocEntities as $table) {
+            if (!in_array($table, [
+                'settings',
+                'published',
+                'files',
+                'supplementary_files',
+                'galleys',
+                'comments',
+                'edit_assignments',
+                'edit_decisions',
+                'authors',
+                'review_rounds',
+                'review_assignments',
+            ]))
+                continue;
+
+            if ($table == 'published')
+                $this->handler()->setMappedData($sm->get('published'), [
+                    'issues' => 'issue_id',
+                    $this->handler()->formTableName(
+                        'published'
+                    ) => $this->handler()->formIdField('published'),
+                    $this->handler()
+                         ->formTableName() => $this->handler()->formIdField()
+                ]);
+
+            $sm->get($table)->forEachValue(function($entity) {
+                $this->handler()->setMappedData($entity, [
+                    $this->handler()->formTableName() => in_array(
+                        $this->tableName($entity),
+                        [
+                            'authors',
+                            'review_rounds',
+                            'review_assignments',
+                        ]
+                    ) ? 'submission_id' : $this->handler()->formIdField()
+                ]);
+            });
+        }
+
+        return $sm;
+    }
+
+    /*
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSubmissionSettings()
+    {
+        $submission = $this->getMappedSmTRC2015([], ['settings']);
+        $settings = $this->getStub()->callMethod(
+            'getSubmissionSettings',
+            $submission
+        );
+
+        $this->assertSame(
+            '2-1',
+            implode('-', [
+                $settings->length(),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $settings->toArray(),
+                    $submission->get('settings')->toArray()
+                )
+            ])
+        );
+    }
+
+    /*
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetThePublishedSubmission()
+    {
+        $submission = $this->getMappedSmTRC2015([], ['published']);
+        $pubSm = $this->getStub()->callMethod(
+            'getPublishedSubmission',
+            $submission
+        );
+
+        $this->assertTrue($this->handler()->areEqual(
+            $pubSm,
+            $submission->get('published')
+        ));
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSubmissionFiles()
+    {
+        $submission = $this->getMappedSmTRC2015();
+        $smFiles = $this->getStub()->callMethod(
+            'getSubmissionFiles',
+            $submission
+        );
+
+        $this->assertSame(
+            '4',
+            implode('-', [
+                $smFiles->length(),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSupplementaryFiles()
+    {
+        $submission = $this->getMappedSmTRC2015();
+        $suppFiles = $this->getStub()->callMethod(
+            'getSubmissionSupplementaryFiles',
+            $submission
+        );
+
+        $submission->get('supplementary_files')->forEachValue(function($sf) {
+            $this->handler()->setMappedData($sf, [
+                $this->handler()
+                     ->formTableName() => $this->handler()->formIdField(),
+                $this->handler()
+                     ->formTableName('files') => 'file_id',
+                $this->handler()
+                     ->formTableName('supplementary_files') => 'supp_id',
+            ]);
+
+            $sf->get('settings')->forEachValue(function($setting) {
+                $this->handler()->setMappedData($setting, [
+                    $this->handler()
+                         ->formTableName('supplementary_files') => 'supp_id',
+                ]);
+            });
+        });
+
+        $this->assertSame(
+            '1-1-1',
+            implode('-', [
+                $suppFiles->length(),
+                (int) $this->handler()->areEqual(
+                    $suppFiles->get(0),
+                    $submission->get('supplementary_files')->get(0)
+                ),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $suppFiles->get(0)->get('settings')->toArray(),
+                    $submission->get('supplementary_files')->get(0)
+                               ->get('settings')->toArray()
+                ),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSubmissionGalleys()
+    {
+        $submission = $this->getMappedSmTRC2015();
+        $galleys = $this->getStub()->callMethod(
+            'getSubmissionGalleys',
+            $submission
+        );
+
+        $this->handler()->setMappedData($submission->get('galleys')->get(0), [
+            $this->handler()->formTableName('galleys') => 'galley_id',
+            $this->handler()->formTableName('files') => 'file_id',
+            $this->handler()->formTableName() => $this->handler()
+                                                      ->formIdField(),
+        ]);
+
+        $this->handler()->setMappedData(
+            $submission->get('galleys')->get(0)->get('settings')->get(0),
+            [$this->handler()->formTableName('galleys') => 'galley_id']
+        );
+
+        $this->assertSame(
+            '1-1-1-1',
+            implode('-', [
+                $galleys->length(),
+                $galleys->get(0)->get('settings')->length(),
+                (int) $this->handler()->areEqual(
+                    $galleys->get(0),
+                    $submission->get('galleys')->get(0)
+                ),
+                (int) $this->handler()->areEqual(
+                    $galleys->get(0)->get('settings')->get(0),
+                    $submission->get('galleys')->get(0)
+                               ->get('settings')->get(0)
+                ),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSubmissionComments()
+    {
+        $submission = $this->getMappedSmTRC2015();
+
+        $comments = $this->getStub()->callMethod(
+            'getSubmissionComments',
+            $submission
+        );
+
+        $this->handler()->setMappedData($submission->get('comments')->get(0), [
+            $this->handler()->formTableName('comments') => 'comment_id',
+            'users' => 'author_id',
+            $this->handler()->formTableName() => $this->handler()
+                                                      ->formIdField(),
+        ]);
+
+        $this->assertSame(
+            '1-1',
+            implode('-', [
+                $comments->length(),
+                (int) $this->handler()->areEqual(
+                    $comments->get(0),
+                    $submission->get('comments')->get(0)
+                ),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSubmissionKeywords()
+    {
+        $submission = $this->getMappedSmTRC2015();
+
+        $keywords = $this->getStub()->callMethod(
+            'getSubmissionKeywords',
+            $submission
+        );
+
+        $keywordsArr = [];
+        foreach ($keywords->toArray() as $searchObject) {
+            foreach ($searchObject['search_object_keywords'] as $objKey) {
+                $keywordsArr[] = $objKey['keyword_list']['keyword_text'];
+            }
+        }
+
+        $this->assertSame(
+            '3-1',
+            implode('-', [
+                $keywords->length(),
+                Registry::get('ArrayHandler')->equals(
+                    ['winger', 'west', 'young'],
+                    $keywordsArr
+                ),
+            ])
+        );
+    }
 }
