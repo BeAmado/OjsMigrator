@@ -542,6 +542,20 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         );
     }
 
+    protected function getSubmissionReviewRounds($submission)
+    {
+        return Registry::get('ReviewRoundsDAO')->read(array(
+            'submission_id' => $this->getSubmissionId($submission),
+        ));
+    }
+
+    protected function getSubmissionReviewAssignments($submission)
+    {
+        return Registry::get('ReviewAssignmentsDAO')->read(array(
+            'submission_id' => $this->getSubmissionId($submission),
+        ));
+    }
+
     protected function getJournalId($journal)
     {
         if (\is_numeric($journal))

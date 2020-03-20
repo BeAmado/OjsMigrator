@@ -1354,4 +1354,68 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             ])
         );
     }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSubmissionReviewRounds()
+    {
+        $submission = $this->getMappedSmTRC2015();
+
+        $submission->get('review_rounds')->forEachValue(function($rr) {
+            $this->handler()->setMappedData($rr, [
+                'review_rounds' => 'review_round_id',
+                $this->handler()->formTableName() => 'submission_id',
+            ]);
+        });
+
+        $rounds = $this->getStub()->callMethod(
+            'getSubmissionReviewRounds',
+            $submission
+        );
+
+        $this->assertSame(
+            '1-1',
+            implode('-', [
+                $rounds->length(),
+                (int) $this->handler()->areEqual(
+                    $rounds->get(0),
+                    $submission->get('review_rounds')->get(0)
+                ),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSubmissionReviewAssignments()
+    {
+        $submission = $this->getMappedSmTRC2015();
+
+        $submission->get('review_assignments')->forEachValue(function($ra) {
+            $this->handler()->setMappedData($ra, [
+                'review_assignments' => 'review_id',
+                $this->handler()->formTableName() => 'submission_id',
+                'users' => 'reviewer_id',
+                'review_rounds' => 'review_round_id',
+            ]);
+        });
+
+        $assigns = $this->getStub()->callMethod(
+            'getSubmissionReviewAssignments',
+            $submission
+        );
+
+        $this->assertSame(
+            '1-1',
+            implode('-', [
+                $assigns->length(),
+                (int) $this->handler()->areEqual(
+                    $assigns->get(0),
+                    $submission->get('review_assignments')->get(0)
+                ),
+            ])
+        );
+    }
 }

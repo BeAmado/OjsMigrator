@@ -476,11 +476,13 @@ return array(
             'date_rated' => '2015-10-10 10:10:10',
             'date_reminded' => '2015-10-11 11:11:11',
             'quality' => 0,
+            'stage_id' => 1,
             'review_method' => 1,
             'round' => 1,
             'step' => 1,
             'review_form_id' => null,
             'review_round_id' => 77,
+            'unconsidered' => null,
         ),
         /*
          * other review assignments
