@@ -1157,9 +1157,199 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             '3-1',
             implode('-', [
                 $keywords->length(),
-                Registry::get('ArrayHandler')->equals(
+                (int) Registry::get('ArrayHandler')->equals(
                     ['winger', 'west', 'young'],
                     $keywordsArr
+                ),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSubmissionAuthors()
+    {
+        $submission = $this->getMappedSmTRC2015();
+
+        $submission->get('authors')->forEachValue(function($author) {
+            $this->handler()->setMappedData($author, [
+                'authors' => 'author_id',
+                $this->handler()->formTableName() => 'submission_id',
+            ]);
+
+            $author->get('settings')->forEachValue(function($setting) {
+                $this->handler()->setMappedData($setting, [
+                    'authors' => 'author_id',
+                ]);
+            });
+        });
+
+        $authorSettings = [];
+        foreach ($submission->get('authors')->toArray() as $author) {
+            foreach ($author['settings'] as $setting)
+                $authorSettings[] = $setting;
+        }
+
+        $authors = $this->getStub()->callMethod(
+            'getSubmissionAuthors',
+            $submission
+        );
+
+        $settingsArr = [];
+        foreach ($authors->toArray() as $author) {
+            foreach ($author['settings'] as $setting)
+                $settingsArr[] = $setting;
+        }
+
+        $this->assertSame(
+            '2-2-2-1',
+            implode('-', [
+                $authors->length(),
+                $authors->get(0)->get('settings')->length(),
+                $authors->get(1)->get('settings')->length(),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $settingsArr,
+                    $authorSettings
+                ),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetEditAssignmentsForTheSubmission()
+    {
+        $submission = $this->getMappedSmTRC2015();
+
+        $assigns = $this->getStub()->callMethod(
+            'getEditAssignments',
+            $submission
+        );
+
+        $submission->get('edit_assignments')->forEachValue(function($ea) {
+            $this->handler()->setMappedData($ea, [
+                'edit_assignments' => 'edit_id',
+                'users' => 'editor_id',
+                $this->handler()->formTableName() => $this->handler()
+                                                          ->formIdField(),
+            ]);
+        });
+
+        $this->assertSame(
+            '2-1',
+            implode('-', [
+                $assigns->length(),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $assigns->toArray(),
+                    $submission->get('edit_assignments')->toArray()
+                ),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetEditDecisionsForTheSubmission()
+    {
+        $submission = $this->getMappedSmTRC2015();
+
+        $decisions = $this->getStub()->callMethod(
+            'getEditDecisions',
+            $submission
+        );
+
+        $submission->get('edit_decisions')->forEachValue(function($ea) {
+            $this->handler()->setMappedData($ea, [
+                'edit_decisions' => 'edit_decision_id',
+                'users' => 'editor_id',
+                $this->handler()->formTableName() => $this->handler()
+                                                          ->formIdField(),
+            ]);
+        });
+
+        $this->assertSame(
+            '2-1',
+            implode('-', [
+                $decisions->length(),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $decisions->toArray(),
+                    $submission->get('edit_decisions')->toArray()
+                ),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     */
+    public function testCanGetTheSubmissionHistory()
+    {
+        $submission = $this->getMappedSmTRC2015();
+
+        $submission->get('history')
+                   ->get('event_logs')->forEachValue(function($log) {
+            $this->handler()->setMappedData($log, [
+                'event_log' => 'log_id',
+                $this->handler()->formTableName() => 'assoc_id',
+                'users' => 'user_id',
+            ]);
+
+            $log->get('settings')->forEachValue(function($setting) {
+                $this->handler()->setMappedData($setting, [
+                    'event_log' => 'log_id',
+                ]);
+            });
+        });
+
+        $submission->get('history')
+                   ->get('email_logs')->forEachValue(function($log) {
+            $this->handler()->setMappedData($log, [
+                'email_log' => 'log_id',
+                $this->handler()->formTableName() => 'assoc_id',
+            ]);
+
+            $this->handler()->setMappedData($log->get('email_log_user'), [
+                'users' => 'user_id',
+                'email_log' => 'email_log_id',
+            ]);
+        });
+
+        $history = $this->getStub()->callMethod(
+            'getSubmissionHistory',
+            $submission
+        );
+
+        $this->assertSame(
+            '1-1-1-1-1-1-1',
+            implode('-', [
+                $history->get('event_logs')->length(),
+                $history->get('email_logs')->length(),
+                (int) $this->handler()->areEqual(
+                    $history->get('event_logs')->get(0),
+                    $submission->get('history')->get('event_logs')->get(0)
+                ),
+                (int) $this->handler()->areEqual(
+                    $history->get('email_logs')->get(0),
+                    $submission->get('history')->get('email_logs')->get(0),
+                    ['sender_id']
+                ),
+                (int) $this->areEqual(
+                    0,
+                    $history->get('email_logs')->get(0)->getData('sender_id')
+                ),
+                (int) $this->handler()->areEqual(
+                    $history->get('email_logs')->get(0)->get('email_log_user'),
+                    $submission->get('history')->get('email_logs')->get(0)
+                                               ->get('email_log_user')
+                ),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $history->get('event_logs')->get(0)
+                            ->get('settings')->toArray(),
+                    $submission->get('history')->get('event_logs')->get(0)
+                                               ->get('settings')->toArray()
                 ),
             ])
         );

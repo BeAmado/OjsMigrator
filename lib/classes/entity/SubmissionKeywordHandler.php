@@ -121,7 +121,7 @@ class SubmissionKeywordHandler extends EntityHandler
                 'keyword_list',
                 $this->smHr()->getDAO('search_keyword_list')->read(array(
                     'keyword_id' => $o->getData('keyword_id'),
-                ))
+                ))->get(0)
             );
         });
 

@@ -214,10 +214,10 @@ return array(
                     '__tableName_' => '[search_object_keywords_table]',
                     'object_id' => 17782,
                     'pos' => 231,
-                    'keyword_id' => 89231,
+                    'keyword_id' => 89444,
                     'keyword_list' => array(
                         '__tableName_' => '[search_keyword_list_table]',
-                        'keyword_id' => 89231,
+                        'keyword_id' => 89444,
                         'keyword_text' => 'west',
                     )
                 ),
@@ -422,8 +422,8 @@ return array(
                 'event_type' => 222,
                 'from_address' => 'nobody@nowhere.com',
                 'recipients' => 'johndoe@imf.com',
-                'cc_recipients' => null,
-                'bcc_recipients' => null,
+                'cc_recipients' => 'none',
+                'bcc_recipients' => 'none',
                 'subject' => 'what do do',
                 'body' => 'Just nothing',
                 'email_log_user' => array(

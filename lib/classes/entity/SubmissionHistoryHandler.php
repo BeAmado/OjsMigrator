@@ -112,22 +112,63 @@ class SubmissionHistoryHandler extends EntityHandler
             $this->importEmailLogs($submission->get('history'));
     }
 
-    protected function smHr()
-    {
-        return Registry::get('SubmissionHandler');
-    }
-
     protected function getEventLogs($submissionId)
     {
         if (!\is_numeric($submissionId))
             return;
         
-        $eventLogs = $this->smHr()->getDAO('search_objects')->read(array(
+        $eventLogs = Registry::get('EventLogDAO')->read(array(
             'assoc_id' => $submissionId,
             'assoc_type' => Registry::get('AssocHandler')
-                                    ->getAssocType('submission'),
+                                    ->getAssocTypeSubmission(),
         ));
 
+        if (!\is_a($eventLogs, \BeAmado\OjsMigrator\MyObject::class))
+            return;
 
+        $eventLogs->forEachValue(function($log) {
+            $log->set(
+                'settings',
+                Registry::get('EventLogSettingsDAO')->read(array(
+                    'log_id' => $log->getId(),
+                ))
+            );
+        });
+
+        return $eventLogs;
+    }
+
+    protected function getEmailLogs($submissionId)
+    {
+        if (!\is_numeric($submissionId))
+            return;
+
+        $emailLogs = Registry::get('EmailLogDAO')->read(array(
+            'assoc_id' => $submissionId,
+            'assoc_type' => Registry::get('AssocHandler')
+                                    ->getAssocTypeSubmission(),
+        ));
+
+        if (!\is_a($emailLogs, \BeAmado\OjsMigrator\MyObject::class))
+            return;
+
+        $emailLogs->forEachValue(function($log) {
+            $log->set(
+                'email_log_user',
+                Registry::get('EmailLogUsersDAO')->read(array(
+                    'email_log_id' => $log->getId(),
+                ))->get(0)
+            );
+        });
+
+        return $emailLogs;
+    }
+
+    public function getSubmissionHistory($submissionId)
+    {
+        return Registry::get('MemoryManager')->create(array(
+            'event_logs' => $this->getEventLogs($submissionId),
+            'email_logs' => $this->getEmailLogs($submissionId),
+        ));
     }
 }

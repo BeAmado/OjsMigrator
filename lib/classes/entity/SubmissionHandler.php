@@ -500,6 +500,48 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         )->getSubmissionKeywords($this->getSubmissionId($submission));
     }
 
+    protected function getSubmissionAuthors($submission)
+    {
+        $authors = Registry::get('AuthorsDAO')->read(array(
+            'submission_id' => $this->getSubmissionId($submission),
+        ));
+
+        if (!\is_a($authors, \BeAmado\OjsMigrator\MyObject::class))
+            return;
+
+        $authors->forEachValue(function($author) {
+            $author->set(
+                'settings',
+                Registry::get('AuthorSettingsDAO')->read(array(
+                    'author_id' => $author->getData('author_id'),
+                ))
+            );
+        });
+
+        return $authors;
+    }
+
+    protected function getEditAssignments($submission)
+    {
+        return Registry::get('EditAssignmentsDAO')->read(array(
+            $this->formIdField() => $this->getSubmissionId($submission),
+        ));
+    }
+
+    protected function getEditDecisions($submission)
+    {
+        return Registry::get('EditDecisionsDAO')->read(array(
+            $this->formIdField() => $this->getSubmissionId($submission),
+        ));
+    }
+
+    protected function getSubmissionHistory($submission)
+    {
+        return Registry::get('SubmissionHistoryHandler')->getSubmissionHistory(
+            $this->getSubmissionId($submission)
+        );
+    }
+
     protected function getJournalId($journal)
     {
         if (\is_numeric($journal))

@@ -69,6 +69,11 @@ class AssocHandler
 
     }
 
+    public function getAssocTypeSubmission()
+    {
+        return $this->getAssocType('submission');
+    }
+
     public function getAssocTableName($assocType)
     {
         foreach ($this->getAssocTypes() as $name => $type) {
