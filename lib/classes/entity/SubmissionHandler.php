@@ -542,14 +542,14 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         );
     }
 
-    protected function getSubmissionReviewRounds($submission)
+    protected function getReviewRounds($submission)
     {
         return Registry::get('ReviewRoundsDAO')->read(array(
             'submission_id' => $this->getSubmissionId($submission),
         ));
     }
 
-    protected function getSubmissionReviewAssignments($submission)
+    protected function getReviewAssignments($submission)
     {
         return Registry::get('ReviewAssignmentsDAO')->read(array(
             'submission_id' => $this->getSubmissionId($submission),
@@ -609,42 +609,22 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         ) as $filename) {
             $sm = Registry::get('JsonHandler')->createFromFile($filename);
 
-            // fetch the published submission data
             $sm->set('published', $this->getPublishedSubmission($sm));
-
-            // fetch the submission settings
             $sm->set('settings', $this->getSubmissionSettings($sm));
-
-            // fetch the submission files
             $sm->set('files', $this->getSubmissionFiles($sm));
-
-            // fetch the submission supplementary files
             $sm->set(
                 'supplementary_files',
                 $this->getSubmissionSupplementaryFiles($sm)
             );
-
-            // fetch the submission galleys
             $sm->set('galleys', $this->getSubmissionGalleys($sm));
-
-            // fetch the submission comments
             $sm->set('comments', $this->getSubmissionComments($sm));
-
-            // fetch the submission keywords
             $sm->set('keywords', $this->getSubmissionKeywords($sm));
-
-            // fetch the authors
             $sm->set('authors', $this->getSubmissionAuthors($sm));
-
-            // fetch the edit assignments
-
-            // fetch the edit decisions
-
-            // fetch the submission history
-
-            // fetch the review assignments
-
-            // fetch the review rounds
+            $sm->set('edit_assignments', $this->getEditAssignments($sm));
+            $sm->set('edit_decisions', $this->getEditDecisions($sm));
+            $sm->set('history', $this->getSubmissionHistory($sm));
+            $sm->set('review_rounds', $this->getReviewRounds($sm));
+            $sm->set('review_assignments', $this->getReviewAssignments($sm));
 
             if ($sm->hasAttribute('files'))
                 $this->copyFilesToEntitiesDir($sm);

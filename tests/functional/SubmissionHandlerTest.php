@@ -1387,7 +1387,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         });
 
         $rounds = $this->getStub()->callMethod(
-            'getSubmissionReviewRounds',
+            'getReviewRounds',
             $submission
         );
 
@@ -1420,7 +1420,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         });
 
         $assigns = $this->getStub()->callMethod(
-            'getSubmissionReviewAssignments',
+            'getReviewAssignments',
             $submission
         );
 
