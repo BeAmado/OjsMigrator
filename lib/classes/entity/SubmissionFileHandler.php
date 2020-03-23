@@ -281,7 +281,7 @@ class SubmissionFileHandler extends EntityHandler
                 'file_name' => $filename,
             ),
             'where' => array(
-                'file_id' => \explode('-', $filename)[0],
+                'file_id' => \explode('-', $filename)[1],
                 'revision' => \explode('-', $filename)[2],
             ),
         ));

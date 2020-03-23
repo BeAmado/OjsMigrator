@@ -263,9 +263,6 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             $submission->getData('journal_id')
         );
 
-        $file1 = $submission->get('files')->get(0);
-        $file2 = $submission->get('files')->get(1);
-
         $submissionId = Registry::get('DataMapper')->getMapping(
             $this->handler()->formTableName(),
             $submission->getId()
@@ -275,26 +272,46 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             $this->handler()->formIdField() => $submissionId,
         ]);
 
+        $filesContents = [];
+        for ($i = 0; $i < $submission->get('files')->length(); $i++) {
+            $filesContents[] = self::formContent(
+                $submission->get('files')->get($i)
+            );
+        }
+
+        $smFilesContents = [];
+        for ($i = 0; $i < $smFiles->length(); $i++) {
+            $smFilesContents[] = Registry::get('FileHandler')->read(
+                Registry::get('SubmissionFileHandler')->formPathByFileName(
+                    $smFiles->get($i),
+                    $journalId
+                )
+            );
+        }
+
+        $mappedFileNames = [];
+        for ($i = 0; $i < $submission->get('files')->length(); $i++) {
+            $mappedFileNames[] = $this->mapFileName(
+                $submission->get('files')->get($i)
+            );
+        }
+
+        $mappedSmFileNames = [];
+        for ($i = 0; $i < $smFiles->length(); $i++) {
+            $mappedSmFileNames[] = $smFiles->get($i)->getData('file_name');
+        }
+
         $this->assertSame(
-            implode(';', [
-                1,
-                self::formContent($file1),
-                self::formContent($file2),
-                4,
-            ]),
+            '1;1;1;4',
             implode(';', [
                 (int) $imported,
-                Registry::get('FileHandler')->read(
-                    Registry::get('SubmissionFileHandler')->formPathByFileName(
-                        $this->mapFileName($file1),
-                        $journalId
-                    )
+                (int) Registry::get('ArrayHandler')->equals(
+                    $filesContents,
+                    $smFilesContents
                 ),
-                Registry::get('FileHandler')->read(
-                    Registry::get('SubmissionFileHandler')->formPathByFileName(
-                        $this->mapFileName($file2),
-                        $journalId
-                    )
+                (int) Registry::get('ArrayHandler')->equals(
+                    $mappedFileNames,
+                    $mappedSmFileNames
                 ),
                 $smFiles->length(),
             ])
