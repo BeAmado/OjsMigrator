@@ -589,6 +589,18 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         });
     }
 
+    protected function saveSubmissionJsonData($submission)
+    {
+        return Registry::get('JsonHandler')->dumpToFile(
+            Registry::get('FileSystemManager')->formPath(array(
+                $this->getEntityDataDir($this->formTableName()),
+                $submission->get($this->formIdField())->getValue(),
+                $submission->get($this->formIdField())->getValue() . '.json',
+            )),
+            $submission
+        );
+    }
+
     public function exportSubmissionsFromJournal($journal)
     {
         if (
@@ -628,6 +640,9 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
             if ($sm->hasAttribute('files'))
                 $this->copyFilesToEntitiesDir($sm);
+
+            $this->saveSubmissionJsonData($sm);
+            Registry::get('FileSystemManager')->removeFile($filename);
         }
     }
 

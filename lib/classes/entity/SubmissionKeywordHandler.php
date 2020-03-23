@@ -89,7 +89,8 @@ class SubmissionKeywordHandler extends EntityHandler
             $this->tableName('search_objects'),
             $data->get('object_id')->getValue()
         ))
-            return $this->importSearchObjectKeywords($data);
+            return true;
+//            return $this->importSearchObjectKeywords($data);
 
         return $this->importEntity(
             $data,

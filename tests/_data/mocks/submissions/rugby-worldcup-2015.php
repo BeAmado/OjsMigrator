@@ -341,7 +341,7 @@ return array(
         ),
         array(
             '__tableName_' => 'edit_assignments',
-            'edit_id' => 1000,
+            'edit_id' => 1001,
             '[submission_id]' => 7384,
             'editor_id' => '[thor_user_id]',
             'can_edit' => 1,

@@ -27,9 +27,16 @@ class SubmissionHistoryHandler extends EntityHandler
         if (!$data->hasAttributes(array(
             'assoc_id', 
             'assoc_type',
+            'log_id',
         )))
             return false;
         
+        if (Registry::get('DataMapper')->isMapped(
+            'event_log',
+            $data->get('log_id')->getValue()
+        ))
+            return true;
+
         return $this->importEntity(
             $data,
             'event_log',
@@ -49,8 +56,15 @@ class SubmissionHistoryHandler extends EntityHandler
             'email_log_user',
             'assoc_id',
             'assoc_type',
+            'log_id',
         )))
             return false;
+
+        if (Registry::get('DataMapper')->isMapped(
+            'email_log',
+            $data->get('log_id')->getValue()
+        ))
+            return true;
 
         $data->set(
             'sender_id',

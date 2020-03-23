@@ -104,7 +104,8 @@ class QueryHandler
         return 'SELECT '
           . \implode(', ', $tableDefinition->getColumnNames())
           . ' FROM ' . $tableDefinition->getTableName()
-          . ' ORDER BY ' . \implode(', ', $tableDefinition->getPrimaryKeys())
+//          . ' ORDER BY ' . \implode(', ', $tableDefinition->getPrimaryKeys())
+          . ' ORDER BY ' . $tableDefinition->getAutoIncrementablePk()
           . ' DESC LIMIT ' . $amount;
     }
 

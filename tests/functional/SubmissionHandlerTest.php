@@ -14,6 +14,7 @@ use BeAmado\OjsMigrator\Test\TestStub;
 
 // mocks
 use BeAmado\OjsMigrator\Test\SubmissionMock;
+use BeAmado\OjsMigrator\Test\JournalMock;
 
 class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 {
@@ -1432,6 +1433,96 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                     $assigns->get(0),
                     $submission->get('review_assignments')->get(0)
                 ),
+            ])
+        );
+    }
+
+    protected function listSubmissionEntitiesDir()
+    {
+        return Registry::get('FileSystemManager')->listdir(
+            $this->handler()
+                 ->getEntityDataDir($this->handler()->formTableName())
+        );
+    }
+
+    protected function clearTheSubmissionEntitiesDir()
+    {
+        foreach ($this->listSubmissionEntitiesDir() as $dir) {
+            Registry::get('FileSystemManager')->removeWholeDir($dir);
+        }
+    }
+
+    protected function getMappedTestJournal()
+    {
+        $journal = (new JournalMock())->getTestJournal();
+        $this->handler()->setMappedData($journal, [
+            'journals' => 'journal_id',
+        ]);
+
+        return $journal;
+    }
+
+    protected function copyData($name = 'copied_data')
+    {
+        $fsm = Registry::get('FileSystemManager');
+        $fsm->copyDir(
+            $fsm->formPathFromBaseDir(array(
+                'tests', '_data',
+            )),
+            $fsm->formPathFromBaseDir(array(
+                $name
+            ))
+        );
+    }
+
+    public function testCanImportRugbyWorldCup2015Submission()
+    {
+        $imported = Registry::get('SubmissionHandler')->import(
+            $this->createRWC2015()
+        );
+
+        $this->assertSame(
+            '1',
+            implode('-', [
+                (int) $imported,
+            ])
+        );
+    }
+
+    public function testCanImportRugbyWorldCup2011Submission()
+    {
+        $imported = Registry::get('SubmissionHandler')->import(
+            $this->createRWC2011()
+        );
+
+        $this->assertSame(
+            '1',
+            implode('-', [
+                (int) $imported,
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     * @depends testCanImportRugbyWorldCup2015Submission
+     * @depends testCanImportRugbyWorldCup2011Submission
+     */
+    public function testCanExportTheSubmissionsFromTheTestJournal()
+    {
+        $smEntitiesBefore = $this->listSubmissionEntitiesDir();
+        $this->clearTheSubmissionEntitiesDir();
+        $smEntitiesAfter = $this->listSubmissionEntitiesDir();
+
+        $testJournal = $this->getMappedTestJournal();
+        Registry::get('SubmissionHandler')->export($testJournal);
+
+        $this->assertSame(
+            '3-0-3',
+            implode('-', [
+                count($smEntitiesBefore),
+                count($smEntitiesAfter),
+                count($this->listSubmissionEntitiesDir()),
             ])
         );
     }

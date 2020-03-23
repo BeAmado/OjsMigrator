@@ -80,8 +80,8 @@ return array(
             'revision' => 1,
             'source_file_id' => 31,
             'source_revision' => 1,
-            '[submission_id]' => 7384,
-            'file_name' => '7-31-1-RV.docx',
+            '[submission_id]' => 7,
+            'file_name' => '7-32-1-RV.docx',
             'file_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'file_size' => 123980,
             'original_file_name' => 'rwc2011-rev',
@@ -114,10 +114,10 @@ return array(
     'galleys' => array(
         array(
             '__tableName_' => '[galleys_table]',
-            'galley_id' => 22,
+            'galley_id' => 2882,
             'locale' => 'en_NZ',
-            '[submission_id]' => 7384,
-            'file_id' => 338,
+            '[submission_id]' => 7,
+            'file_id' => 33,
             'label' => 'PDF',
             'html_galley' => 0,
             'style_file_id' => null,
@@ -126,7 +126,7 @@ return array(
             'settings' => array(
                 array(
                     '__tableName_' => '[galley_settings_table]',
-                    'galley_id' => 22,
+                    'galley_id' => 2882,
                     'locale' => 'en_NZ',
                     'setting_name' => 'excludeDoi',
                     'setting_value' => 0,
@@ -138,15 +138,15 @@ return array(
     'comments' => array(
         array(
             '__tableName_' => '[comments_table]',
-            'comment_id' => 33,
+            'comment_id' => 450,
             'comment_type' => 2,
             'role_id' => 256,
-            '[submission_id]' => 7384,
-            'assoc_id' => 7384,
+            '[submission_id]' => 7,
+            'assoc_id' => 7,
             'author_id' => '[hulk_user_id]',
             'comment_title' => 'Simple comment',
             'comments' => 'Just commenting',
-            'date_posted' => '2015-12-20 12:09:09',
+            'date_posted' => '2011-12-20 12:09:09',
             'date_modified' => null,
             'viewable' => 1,
         ),
@@ -157,7 +157,7 @@ return array(
             'object_id' => 1890,
             '[submission_id]' => 7,
             'type' => 256,
-            'assoc_id' => 338,
+            'assoc_id' => 456,
             'search_object_keywords' => array(
                 array(
                     '__tableName_' => '[search_object_keywords_table]',
@@ -196,8 +196,8 @@ return array(
     'authors' => array(
         array(
             '__tableName_' => 'authors',
-            'author_id' => 8877,
-            'submission_id' => 7384,
+            'author_id' => 123,
+            'submission_id' => 7,
             'primary_contact' => 1,
             'seq' => 1,
             'first_name' => 'Anthony',
@@ -211,7 +211,7 @@ return array(
             'settings' => array(
                 array(
                     '__tableName_' => 'author_settings',
-                    'author_id' => 8877,
+                    'author_id' => 123,
                     'locale' => 'en',
                     'setting_name' => 'affiliation',
                     'setting_value' => 'Avengers',
@@ -219,7 +219,7 @@ return array(
                 ),
                 array(
                     '__tableName_' => 'author_settings',
-                    'author_id' => 8877,
+                    'author_id' => 123,
                     'locale' => 'en',
                     'setting_name' => 'biography',
                     'setting_value' => 'Genious, playboy, millionaire, philanthropist',
@@ -229,7 +229,7 @@ return array(
         ),
         array(
             '__tableName_' => 'authors',
-            'author_id' => 2500,
+            'author_id' => 2534,
             'submission_id' => 7,
             'primary_contact' => 0,
             'seq' => 2,
@@ -244,7 +244,7 @@ return array(
             'settings' => array(
                 array(
                     '__tableName_' => 'author_settings',
-                    'author_id' => 2500,
+                    'author_id' => 2534,
                     'locale' => 'en',
                     'setting_name' => 'affiliation',
                     'setting_value' => 'Justice League',
@@ -252,7 +252,7 @@ return array(
                 ),
                 array(
                     '__tableName_' => 'author_settings',
-                    'author_id' => 2500,
+                    'author_id' => 2534,
                     'locale' => 'en',
                     'setting_name' => 'biography',
                     'setting_value' => 'Orphaned very young, punches villains for a living',

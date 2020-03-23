@@ -332,7 +332,7 @@ class SubmissionFileHandler extends EntityHandler
 
     public function copyFileFromJournalIntoEntitiesDir($filename, $journal)
     {
-        return Registry::get('FileHandler')->copyFile(
+        return Registry::get('FileSystemManager')->copyFile(
             $this->formPathByFileName($filename, $journal),
             $this->formFilePathInEntitiesDir($filename)
         );

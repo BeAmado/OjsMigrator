@@ -158,6 +158,24 @@ class TableDefinition extends MyObject implements MyStringRepr
         );
     }
 
+    public function getAutoIncrementablePk()
+    {
+        return implode(
+            ', ', 
+            \array_map(
+                function($colDef) {
+                    return $colDef->getColumnName();
+                }, 
+                \array_filter(
+                    $this->getPrimaryKeyDefinitions(),
+                    function($pk) {
+                        return $pk->isAutoIncrement();
+                    }
+                )
+            )
+        );
+    }
+
     /**
      * Returns the string representation of the table definition.
      *
