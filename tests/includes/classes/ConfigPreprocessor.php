@@ -10,7 +10,7 @@ class ConfigPreprocessor
      */
     private $vars;
 
-    protected function parseDbDriver($args)
+    protected function parseDbDriver($args = array())
     {
         if (
             !\array_key_exists('dbDriver', $args) ||

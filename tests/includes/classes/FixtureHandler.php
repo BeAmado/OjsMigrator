@@ -25,25 +25,20 @@ class FixtureHandler
         $this->scenario = new OjsScenarioHandler();
     }
 
-    public function createTablesForUsers()
+    public function createTablesForAnnouncements()
     {
         $this->scenario->createTables([
-            'users',
-            'user_settings',
-            'roles',
-            'user_interests',
-            'controlled_vocabs',
-            'controlled_vocab_entries',
-            'controlled_vocab_entry_settings',
+            'announcements',
+            'announcement_settings',
         ]);
     }
 
-    public function createTablesForSections()
+    public function createTablesForGroups()
     {
         $this->scenario->createTables([
-            'sections',
-            'section_settings',
-            'section_editors',
+            'groups',
+            'group_settings',
+            'group_memberships',
         ]);
     }
 
@@ -69,30 +64,108 @@ class FixtureHandler
         ]);
     }
 
+    public function createTablesForReviewForms()
+    {
+        $this->scenario->createTables([
+            'review_forms',
+            'review_form_settings',
+            'review_form_elements',
+            'review_form_element_settings',
+        ]);
+    }
+
+    public function createTablesForSections()
+    {
+        $this->scenario->createTables([
+            'sections',
+            'section_settings',
+            'section_editors',
+        ]);
+    }
+
     public function createTablesForSubmissions()
     {
         $this->scenario->createTables([
             Registry::get('SubmissionHandler')->formTableName(),
+            Registry::get('SubmissionHandler')->formTableName('published'),
             Registry::get('SubmissionHandler')->formTableName('settings'),
             Registry::get('SubmissionHandler')->formTableName('files'),
+            Registry::get('SubmissionHandler')->formTableName(
+                'supplementary_files'
+            ),
+            Registry::get('SubmissionHandler')->formTableName(
+                'supp_file_settings'
+            ),
+            Registry::get('SubmissionHandler')->formTableName('galleys'),
+            Registry::get('SubmissionHandler')->formTableName(
+                'galley_settings'
+            ),
+            Registry::get('SubmissionHandler')->formTableName('comments'),
+            Registry::get('SubmissionHandler')->formTableName(
+                'search_objects'
+            ),
+            Registry::get('SubmissionHandler')->formTableName(
+                'search_object_keywords'
+            ),
+            Registry::get('SubmissionHandler')->formTableName(
+                'search_keyword_list'
+            ),
+            'authors',
+            'author_settings',
+            'edit_decisions',
+            'edit_assignments',
+            'email_log',
+            'email_log_users',
+            'event_log',
+            'event_log_settings',
+            'review_rounds',
+            'review_assignments',
+            'review_form_responses',
         ]);
     }
 
-    protected function createTablesForEntities($entities = [])
+    public function createTablesForUsers()
+    {
+        $this->scenario->createTables([
+            'users',
+            'user_settings',
+            'roles',
+            'user_interests',
+            'controlled_vocabs',
+            'controlled_vocab_entries',
+            'controlled_vocab_entry_settings',
+        ]);
+    }
+
+    protected function getCreateTablesMethod($entityName)
+    {
+        return 'createTablesFor' . Registry::get('GrammarHandler')->getPlural(
+            Registry::get('CaseHandler')->transformCaseTo(
+                'PascalCase',
+                $entityName
+            )
+        );
+    }
+
+    public function createTablesForEntities($entities = [])
     {
         foreach ($entities as $entity) {
-            if (!\is_string($entity))
-                ;// do nothing
-            else if (\strpos(\strtolower($entity), 'issue') !== false)
-                $this->createTablesForIssues();
-            else if (\strpos(\strtolower($entity), 'journal') !== false)
-                $this->createTablesForJournals();
-            else if (\strpos(\strtolower($entity), 'section') !== false)
-                $this->createTablesForSections();
-            else if (\strpos(\strtolower($entity), 'submission') !== false)
-                $this->createTablesForSubmissions();
-            else if (\strpos(\strtolower($entity), 'user') !== false)
-                $this->createTablesForUsers();
+            if (
+                !\is_string($entity) ||
+                !\in_array(\strtolower($entity), [
+                    'announcements', 'announcement',
+                    'groups', 'group',
+                    'issues', 'issue',
+                    'journals', 'journal',
+                    'review_forms', 'review_form',
+                    'sections', 'section',
+                    'submissions', 'submission',
+                    'users', 'user',
+                ])
+            )
+                continue;
+
+            $this->{$this->getCreateTablesMethod($entity)}();
         }
     }
 
@@ -179,25 +252,5 @@ class FixtureHandler
                 $this->createSingle($entityName, $entity, false, false);
             }
         }
-    }
-        
-    public function createUser(
-        $user, 
-        $importWholeUser = false, 
-        $createTables = true
-    ) {
-        return $this->createSingle(
-            'user', 
-            $user, 
-            $importWholeUser, 
-            $createTables
-        );
-    }
-
-    public function createUsers($users = [])
-    {
-        $this->createSeveral([
-            'user' => $users,
-        ]);
     }
 }

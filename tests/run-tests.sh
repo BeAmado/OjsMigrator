@@ -6,12 +6,17 @@ phpunit-begin()
     echo
 }
 
-phpunit-end()
+clear-test-stage()
 {
     rm -rf "$(dirname $0)/_data/ojs2"
     rm -rf "$(dirname $0)/_data/db_sandbox"
     rm -rf "$(dirname $0)/_data/sandbox"
     rm -f "$(dirname $0)/dbdriver"
+}
+
+phpunit-end()
+{
+    clear-test-stage
     echo
     echo 
     echo "========= End of $1 tests ========="
@@ -89,6 +94,12 @@ functional-tests()
     fi
 }
 
+smoke-test()
+{
+    $(dirname $0)/smoke/run-application.php
+    clear-test-stage
+}
+
 set-test-db-driver()
 {
     echo $1 > "$(dirname $0)/dbdriver"
@@ -130,6 +141,11 @@ run-tests()
     if [[ $@ =~ '--all' ]]
     then
         all-tests
+    fi
+
+    if [[ $@ =~ '--smoke' ]]
+    then
+        smoke-test
     fi
 }
 

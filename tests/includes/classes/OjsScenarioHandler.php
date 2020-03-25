@@ -108,8 +108,11 @@ class OjsScenarioHandler
         }
     }
 
-    protected function createConfigPreprocessor($args)
+    protected function createConfigPreprocessor($args = array())
     {
+        if ($args === null)
+            $args = array();
+
         $dbDriverFilename = Registry::get('FileSystemManager')
                                     ->formPathFromBaseDir(array(
             'tests',

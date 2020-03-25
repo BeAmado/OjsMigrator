@@ -50,6 +50,30 @@ class Application
         Registry::get('MigrationManager')->chooseEntitiesToMigrate();
     }
 
+    protected function getHandler($table)
+    {
+        if (!\in_array($table, array(
+            'announcements',
+            'groups',
+            'issues',
+            'journals',
+            'review_forms',
+            'sections',
+            'submissions',
+            'users',
+        )))
+            return;
+
+        return Registry::get(\implode('', array(
+            Registry::get('CaseHandler')->transformCaseTo(
+                'Pascal', 
+                Registry::get('GrammarHandler')->getSingle($table)
+            ),
+            'Handler'
+        )));
+    }
+
+
     protected function beginFlow()
     {
         $this->showWelcomeMessage();
