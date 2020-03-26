@@ -87,6 +87,91 @@ class Application
         exit($signal);
     }
 
+    protected function entitiesOrder()
+    {
+        return array(
+            1 => 'journals',
+            2 => 'users',
+            3 => 'announcements',
+            4 => 'groups',
+            5 => 'review_forms',
+            6 => 'sections',
+            7 => 'issues',
+            8 => 'submissions',
+        );
+    }
+
+    protected function exportEntities($entities, $journal)
+    {
+        foreach($this->entitiesOrder() as $tableName) {
+            if (\in_array($tableName, $entities))
+                $this->getHandler($tableName)->export($journal);
+        }
+    }
+
+    protected function listEntityDataDir($tableName)
+    {
+        return Registry::get('FileSystemManager')->listdir(
+            Registry::get('EntityHandler')->getEntityDataDir($tableName)
+        );
+    }
+
+    protected function getEntityFilesToImport($tableName)
+    {
+        if (in_array($tableName, array(
+            'issues',
+            'submissions',
+        )))
+            return \array_map(function($dir) {
+                return Registry::get('FileSystemManager')->formPath(array(
+                    $dir,
+                    \basename($dir) . '.json',
+                ));
+            }, $this->listEntityDataDir($tableName));
+
+        return $this->listEntityDataDir($tableName);
+    }
+
+    protected function importEntity($tableName)
+    {
+        foreach ($this->getEntityFilesToImport($tableName) as $filename)
+        {
+            $this->getHandler($tableName)->import(
+                Registry::get('JsonHandler')->createFromFile($filename)
+            );
+        }
+    }
+
+    protected function importEntities($entities)
+    {
+        foreach ($this->entitiesOrder() as $tableName) {
+            if (\in_array($tableName, $entities))
+                $this->importEntity($tableName);
+        }
+    }
+
+    protected function runImport()
+    {
+        // decompress the entities tar.gz file
+
+        // choose the journal to import the entities
+        $journal = Registry::get('MigrationManager')->chooseJournal();
+
+        // map the journal
+
+        // import the entities
+    }
+
+    protected function runExport()
+    {
+        // choose the journal to export
+        $journal = Registry::get('MigrationManager')->chooseJournal();
+
+        // export the entities
+
+        // compress the entities dir into a tar.gz file
+    }
+
     public function run($ojsDir = null)
     {
         try {
@@ -96,11 +181,15 @@ class Application
 
             $this->beginFlow();
 
-            echo "\n\nThe params:\n";
-            var_dump(Registry::get('MigrationManager')->getMigrationOptionsAsArray());
-            echo "\n\n";
-        } catch (Exception $e) {
+            if (Registry::get('MigrationManager')->choseExport())
+                $this->runExport();
+            else if (Registry::get('MigrationManager')->choseImport())
+                $this->runImport();
+        } catch (\Exception $e) {
             echo "\n\nCaught the exception:\n'" . $e->getMessage() . "\n\n";
+        } catch (\Error $e) {
+            echo "\n\nCaught the error: \n'" . $e->getMessage() 
+                . "\n" . $e->getTraceAsString() . "\n\n";
         } finally {
             $lastError = \error_get_last();
             if ($lastError)

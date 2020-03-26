@@ -172,4 +172,38 @@ class MigrationManager
                 $this->getMigrationOption('entitiesToMigrate')->push($entity);
         }
     }
+
+    public function chooseJournal()
+    {
+        $journals = Registry::get('JournalsDAO')->read();
+        
+        $jArr = array();
+        for ($i = 0; $i < $journals->length(); $i++) {
+            $jArr[$journals->get($i)->getId()] = $journals->get($i)
+                                                          ->getData('path');
+        }
+
+        $path = Registry::get('MenuHandler')->getOption(
+            $jArr,
+            'Choose the journal you wish to ' 
+                . ($this->choseImport() ? 'import' : 'export'),
+            null,
+            'Journal Selection'
+        );
+
+        for ($i = 0; $i < $journals->length(); $i++) {
+            if ($journals->get($i)->getData('path') === $path)
+                return $journals->get($i);
+        }
+    }
+
+    public function choseImport()
+    {
+        return \strtolower($this->getMigrationOption('action')) === 'import';
+    }
+
+    public function choseExport()
+    {
+        return \strtolower($this->getMigrationOption('action')) === 'export';
+    }
 }
