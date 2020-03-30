@@ -24,6 +24,17 @@ class MenuHandler
         }
     }
 
+    public function confirm($choice, $default = false)
+    {
+        return \in_array(
+            \strtolower(Registry::get('IoManager')->getUserInput(
+                'You chose "' . $choice . '". Are you sure? '
+                    . ($default ? '(Y/n)' : '(y/N)') . ' : '
+            )),
+            ($default ? array('no', 'n') : array('yes', 'y'))
+        );
+    }
+
     public function getOption(
         $options,
         $header = 'Choose on of the following options:',

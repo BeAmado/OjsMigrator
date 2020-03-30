@@ -183,6 +183,13 @@ class SchemaHandler implements FiletypeHandler
                 )
             ))
         );
+        
+        if (!Registry::get('FileSystemManager')->fileExists(
+            $vars->get('schemaLocationsFile')->getValue()
+        ))
+            throw new \Exception('The xml file listing the schema locations "'
+                . $vars->get('schemaLocationsFile')->getValue()
+                . '" does not exist');
 
         // xmlContent will be the data in the file dbscripts/xml/install.xml
         $vars->set(

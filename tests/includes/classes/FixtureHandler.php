@@ -169,8 +169,11 @@ class FixtureHandler
         }
     }
 
-    protected function getHandler($entityName)
+    protected function getHandler($entityName = null)
     {
+        if ($entityName == null)
+            return Registry::get('EntityHandler');
+
         return Registry::get(
             Registry::get('GrammarHandler')->getSingle($entityName)
             . 'handler'
@@ -251,6 +254,34 @@ class FixtureHandler
             foreach($entities as $entity) {
                 $this->createSingle($entityName, $entity, false, false);
             }
+        }
+    }
+
+    protected function createFiles($submission)
+    {
+        if (
+            !\is_string($submission) && 
+            !$this->getHandler()->isEntity($submission)
+        )
+            return;
+
+        if (\is_string($submission))
+            return $this->createFiles(
+                (new SubmissionMock())->getSubmission($submission)
+            );
+
+        
+    }
+
+    public function createSubmissionFiles($submissions)
+    {
+        foreach ($submissions as $sm) {
+            if (\is_string($sm) || $this->getHandler()->isEntity($sm))
+                $this->createFiles(
+                    \is_string($sm) 
+                        ? (new SubmissionMock())->getSubmission($sm) 
+                        : $sm
+                );
         }
     }
 }

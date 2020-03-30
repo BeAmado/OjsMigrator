@@ -150,6 +150,7 @@ class OjsScenarioHandler
         if (\array_key_exists('createTables', $args))
             $this->createTables($args['createTables']);
         
+        (new DataMappingHandler())->setUpDataMappingStage();
     }
 
     public function removeSandbox()
@@ -176,6 +177,7 @@ class OjsScenarioHandler
         $this->dropCreatedTables();
         $this->removeSandbox();
         Registry::get('SchemaHandler')->removeSchemaDir();
+        (new DataMappingHandler())->tearDownDataMappingStage();
     }
     
     public function getOjs2XmlSchemaFilename()

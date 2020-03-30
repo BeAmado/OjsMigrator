@@ -67,21 +67,20 @@ class ConfigHandler
      */
     public function setConfigFile($filename)
     {
-        if (!Registry::get('FileSystemManager')->fileExists($filename)) {
-            return false;
-            // TODO raise an Exception
-        }
+        if (!Registry::get('FileSystemManager')->fileExists($filename))
+            throw new \Exception('The configuration file "' . $filename 
+                . '" does not exist');
 
         $this->configFile = $filename;
         $this->setContent();
 
-        if ($this->validateContent()) {
-            $this->setFilesDir();
-            $this->setConnectionSettings();
-            return true;
-        }
+        if (!$this->validateContent())
+            return false;
 
-        return false;
+        $this->setFilesDir();
+        $this->setConnectionSettings();
+        return true;
+
     }
 
     /**

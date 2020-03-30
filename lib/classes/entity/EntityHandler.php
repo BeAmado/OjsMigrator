@@ -317,20 +317,6 @@ class EntityHandler
      */
     public function getEntityDataDir($entity)
     {
-        /*if (
-            !\is_a(
-                Registry::get('entitiesDataDir'),
-                \BeAmado\OjsMigrator\MyObject::class
-            ) ||
-            !Registry::get('entitiesDataDir')->hasAttribute(
-                $this->entityTableName($entity)
-            )
-        )
-            $this->setEntityDataDir($entity);
-
-        return Registry::get('entitiesDataDir')->get(
-            $this->entityTableName($entity)
-        )->getValue();*/
         return Registry::get('entitiesDir') 
             . \BeAmado\OjsMigrator\DIR_SEPARATOR 
             . $this->entityTableName($entity);

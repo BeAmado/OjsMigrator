@@ -92,6 +92,9 @@ class ArchiveManager
                 //treat the exception
             }
 
+            //rethrow
+            throw $e;
+
             return false;
         }
 

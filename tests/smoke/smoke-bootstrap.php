@@ -24,8 +24,15 @@ $dbDriver = $fsm->fileExists($dbDriverFile)
     ? (new \BeAmado\OjsMigrator\Util\FileHandler())->read($dbDriverFile)
     : 'sqlite';
 
-(new \BeAmado\OjsMigrator\Test\OjsScenarioHandler())->setUpStage(
-    in_array($dbDriver, array('mysql', 'sqlite')) 
-        ? array('dbDriver' => $dbDriver)
-        : null
+(new \BeAmado\OjsMigrator\Test\OjsScenarioHandler())->setUpStage(array(
+    'dbDriver' => in_array($dbDriver, array('mysql', 'sqlite')) 
+        ? $dbDriver
+        : 'sqlite',
+    'createTables' => array(
+        'journals',
+    ),
+));
+
+(new \BeAmado\OjsMigrator\Entity\EntityHandler())->createOrUpdateInDatabase(
+    (new \BeAmado\OjsMigrator\Test\JournalMock())->getTestJournal()
 );

@@ -176,21 +176,6 @@ class IoManager
         if ($options['maxtime'] < $maxtime)
             $maxtime = (int) $options['maxtime'];
 
-        /*$this->writeToStdout($message, true);
-        $content = '';
-        do {
-            $c = $this->readFromStdin();
-            $content .= $c;
-        } while ($c != PHP_EOL );
-
-        $this->closeStream('stdin');
-
-        if (substr($content, -1) == PHP_EOL) {
-            return substr($content, 0, -1);
-        }
-
-        return $content;*/
-        //return \readline($message);
         $this->writeToStdout($message);
         $content = '';
         $this->openStdin();

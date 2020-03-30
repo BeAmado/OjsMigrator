@@ -52,6 +52,9 @@ class MigrationManager
                 'entitiesToMigrate' => array(
                     'type' => 'MyObject',
                 ),
+                'chosenJournal' => array(
+                    'type' => 'MyObject',
+                ),
             )
         );
     }
@@ -173,28 +176,59 @@ class MigrationManager
         }
     }
 
+    public function getEntitiesToMigrate()
+    {
+        return $this->getMigrationOption('entitiesToMigrate');
+    }
+
     public function chooseJournal()
     {
         $journals = Registry::get('JournalsDAO')->read();
-        
         $jArr = array();
         for ($i = 0; $i < $journals->length(); $i++) {
             $jArr[$journals->get($i)->getId()] = $journals->get($i)
                                                           ->getData('path');
         }
 
-        $path = Registry::get('MenuHandler')->getOption(
-            $jArr,
-            'Choose the journal you wish to ' 
-                . ($this->choseImport() ? 'import' : 'export'),
-            null,
-            'Journal Selection'
-        );
+        $path = '';
+        for ($i = 0; $i < 10; $i++) {
+            $path = Registry::get('MenuHandler')->getOption(
+                $jArr,
+                'Choose the journal you wish to ' 
+                    . ($this->choseImport() ? 'import' : 'export'),
+                'Enter the number of your choice: ',
+                'Journal Selection'
+            );
+
+            if (Registry::get('MenuHandler')->confirm($path))
+                break;
+        }
 
         for ($i = 0; $i < $journals->length(); $i++) {
-            if ($journals->get($i)->getData('path') === $path)
-                return $journals->get($i);
+            if ($journals->get($i)->getData('path') !== $path)
+                continue;
+                
+            $this->setMigrationOption(
+                'chosenJournal',
+                $journals->get($i)->cloneInstance()
+            );
+            break;
         }
+
+        Registry::get('MemoryManager')->destroy(array(
+            $path,
+            $jArr,
+            $journals,
+        ));
+
+        unset($path);
+        unset($jArr);
+        unset($journals);
+    }
+
+    public function getChosenJournal()
+    {
+        return $this->getMigrationOption('chosenJournal');
     }
 
     public function choseImport()

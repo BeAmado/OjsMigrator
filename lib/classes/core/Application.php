@@ -4,8 +4,34 @@ namespace BeAmado\OjsMigrator;
 
 class Application
 {
+    /**
+     * @var string
+     */
+    private $status;
+
+    public function __construct()
+    {
+        $this->status = 'idle';
+    }
+
+    public function isRunning()
+    {
+        return \strtolower($this->status) === 'running';
+    }
+
+    protected function start()
+    {
+        $this->status = 'running';
+    }
+
+    protected function stop()
+    {
+        $this->status = 'stopped';
+    }
+
     protected function preload($args)
     {
+        $this->start();
         Maestro::setOjsDir($args['OjsDir']);
         Maestro::setSchemaDir();
         Registry::get('SchemaHandler')->loadAllSchema();
@@ -15,6 +41,7 @@ class Application
     {
         Registry::get('SchemaHandler')->removeSchemaDir();
         Registry::clear();
+        $this->stop();
     }
 
     protected function showWelcomeMessage()
@@ -46,6 +73,8 @@ class Application
         ) === 'exit') {
             $this->endFlow(100);
         }
+
+        Registry::get('MigrationManager')->chooseJournal();
 
         Registry::get('MigrationManager')->chooseEntitiesToMigrate();
     }
@@ -84,7 +113,7 @@ class Application
     {
         $this->finish();
         $this->showEndMessage();
-        exit($signal);
+//        exit($signal);
     }
 
     protected function entitiesOrder()
@@ -152,10 +181,12 @@ class Application
 
     protected function runImport()
     {
+        echo "\n\n\nChose to IMPORT the following entities: ";
+        var_dump(Registry::get('MigrationManager')->getEntitiesToMigrate());
+        echo "\nAnd the chosen journal: ";
+        var_dump(Registry::get('MigrationManager')->getChosenJournal());
+        echo "\n\n\n";
         // decompress the entities tar.gz file
-
-        // choose the journal to import the entities
-        $journal = Registry::get('MigrationManager')->chooseJournal();
 
         // map the journal
 
@@ -164,12 +195,28 @@ class Application
 
     protected function runExport()
     {
-        // choose the journal to export
-        $journal = Registry::get('MigrationManager')->chooseJournal();
-
+//        echo "\n\n\nChose to EXPORT the following entities: ";
+//        var_dump(Registry::get('MigrationManager')->getEntitiesToMigrate());
+//        echo "\nAnd the chosen journal: ";
+//        var_dump(Registry::get('MigrationManager')->getChosenJournal());
+//        echo "\n\n\n";
         // export the entities
 
+        foreach (Registry::get(
+            'MigrationManager'
+        )->getEntitiesToMigrate()->toArray() as $table) {
+            echo "\n\nExporting the '$table':\n\n";
+            $this->getHandler($table)->export(
+                Registry::get('MigrationManager')->getChosenJournal()
+            );
+        }
+
         // compress the entities dir into a tar.gz file
+        Registry::get('ArchiveHandler')->tar(
+            'cz',
+            Registry::get('FileSystemManager')->formPathFromBaseDir('data'),
+            Registry::get('entitiesDir')
+        );
     }
 
     public function run($ojsDir = null)
@@ -190,12 +237,14 @@ class Application
         } catch (\Error $e) {
             echo "\n\nCaught the error: \n'" . $e->getMessage() 
                 . "\n" . $e->getTraceAsString() . "\n\n";
+                var_dump($e);
         } finally {
             $lastError = \error_get_last();
             if ($lastError)
                 var_dump($lastError);
 
-            $this->endFlow();
+            if ($this->isRunning())
+                $this->endFlow();
         }
     }
 

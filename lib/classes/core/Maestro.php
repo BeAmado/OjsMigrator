@@ -150,20 +150,18 @@ class Maestro
      *
      * @param string $dir
      * @return void
+     * @throws \Exception
      */
     public static function setOjsDir($dir = null)
     {
-        if (
-            $dir !== null && 
-            !Registry::get('FileSystemManager')->dirExists($dir)
-        ) {
-            return;
-        }
+        if ($dir === null)
+            return self::setOjsDir(self::getDefaultDir('OjsDir'));
+        
+        if (!Registry::get('FileSystemManager')->dirExists($dir))
+            throw new \Exception('The OJS directory "' . $dir 
+                . '" does not exist.');
 
-        Registry::set(
-            'OjsDir',
-            $dir ?: self::getDefaultDir('OjsDir')
-        );
+        Registry::set('OjsDir', $dir);
     }
 
     /**
@@ -174,16 +172,9 @@ class Maestro
      */
     public static function setSchemaDir($dir = null)
     {
-        if (
-            $dir !== null && 
-            !Registry::get('FileSystemManager')->dirExists($dir)
-        ) {
-            return;
-        }
-
-        Registry::set(
-            'SchemaDir',
-            $dir ?: self::getDefaultDir('SchemaDir')
-        );
+        if ($dir === null)
+            return self::setSchemaDir(self::getDefaultDir('SchemaDir'));
+        
+        Registry::set('SchemaDir', $dir);
     }
 }
