@@ -152,9 +152,21 @@ class JournalHandler extends EntityHandler implements ImportExport
         return $this->importJournal($journal);
     }
 
+    protected function getJournalId($journal)
+    {
+        if (\is_numeric($journal))
+            return $journal;
+
+        if (
+            \is_a($journal, \BeAmado\OjsMigrator\MyObject::class) &&
+            $journal->hasAttribute('journal_id')
+        )
+            return $journal->get('journal_id')->getValue();
+    }
+
     public function export($journal)
     {
-        return $this->exportJournal($journal);
+        return $this->exportJournal($this->getJournalId($journal));
     }
 
     protected function journalFilesDir($journal)

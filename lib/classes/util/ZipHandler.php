@@ -21,7 +21,7 @@ class ZipHandler
         
         \gzwrite(
             $gz,
-            Registry::get('FileHandler')->read($filename)
+            Registry::get('FileHandler')->read($filename, false)
         );
 
         return \gzclose($gz);

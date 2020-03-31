@@ -39,15 +39,18 @@ $dbDriver = $fsm->fileExists($dbDriverFile)
     ),
     'users' => array(
         'ironman',
-//        'hulk',
-//        'batman',
-//        'thor',
-//        'greenlantern',
+        'hulk',
+        'batman',
+        'thor',
+        'greenlantern',
     ),
-    'review_forms' => array(),
+    'review_forms' => array(
+        'first',
+        'second',
+    ),
     'sections' => array(
-//        'sports',
-//        'sciences',
+        'sports',
+        'sciences',
     ),
     'issues' => array(
         '2011',

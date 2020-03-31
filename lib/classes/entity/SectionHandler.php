@@ -142,6 +142,6 @@ class SectionHandler extends EntityHandler implements ImportExport
 
     public function export($journal)
     {
-        return $this->exportSectionFromJournal($journal);
+        return $this->exportSectionsFromJournal($journal);
     }
 }

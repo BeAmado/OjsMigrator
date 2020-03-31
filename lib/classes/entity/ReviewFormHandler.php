@@ -2,8 +2,9 @@
 
 namespace BeAmado\OjsMigrator\Entity;
 use \BeAmado\OjsMigrator\Registry;
+use \BeAmado\OjsMigrator\ImportExport;
 
-class ReviewFormHandler extends EntityHandler
+class ReviewFormHandler extends EntityHandler implements ImportExport
 {
     public function create($data, $extra = null)
     {
@@ -169,5 +170,15 @@ class ReviewFormHandler extends EntityHandler
                 $rev
             );
         }
+    }
+
+    public function import($reviewForm)
+    {
+        return $this->importReviewForm($reviewForm);
+    }
+
+    public function export($journal)
+    {
+        return $this->exportReviewFormsFromJournal($journal);
     }
 }

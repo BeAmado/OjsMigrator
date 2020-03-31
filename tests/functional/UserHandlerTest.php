@@ -4,6 +4,7 @@ use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Entity\UserHandler;
 use BeAmado\OjsMigrator\Test\UserMock;
+use BeAmado\OjsMigrator\Test\FixtureHandler;
 
 // interfaces 
 use BeAmado\OjsMigrator\Test\StubInterface;
@@ -33,12 +34,7 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
         ),
     )) : void {
         parent::setUpBeforeClass($args);
-
-        $eh = Registry::get('EntityHandler');
-        $eh->createOrUpdateInDatabase($eh->create('journals', array(
-            'journal_id' => 178,
-            'path' => 'test_journal',
-        )));
+        (new FixtureHandler())->createSingle('journals', 'test_journal');
     }
 
     public function getStub()
@@ -267,7 +263,7 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
     public function testCanImportIronManUserRole()
     {
         $ironman = $this->createIronMan();
-        $role = $ironman->getData('roles')[0];
+        $role = $ironman->get('roles')->get(0);
 
         $imported = $this->getStub()->callMethod(
             'importUserRole',

@@ -124,6 +124,8 @@ class ArchiveManager
             );
         }
 
+        Registry::get('FileSystemManager')->removeFile($filename);
+
         if ($vars->get('success')->getValue()) {
             Registry::get('MemoryManager')->destroy($vars);
             unset($vars);

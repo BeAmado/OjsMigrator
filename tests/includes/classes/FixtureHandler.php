@@ -267,6 +267,21 @@ class FixtureHandler
         );
     }
 
+    protected function listEntitiesDir()
+    {
+        return Registry::get('FileSystemManager')->listdir(
+            Registry::get('entitiesDir')
+        );
+    }
+
+    protected function clearEntitiesDir()
+    {
+        foreach ($this->listEntitiesDir() as $dir) {
+            Registry::get('FileSystemManager')->removeWholeDir($dir);
+        }
+    }
+    
+
     public function createSeveral(
         $data, 
         $importWholeEntity = false
@@ -282,6 +297,8 @@ class FixtureHandler
                 );
             }
         }
+
+        $this->clearEntitiesDir();
     }
 
     protected function getTableName($entity)
