@@ -11,6 +11,16 @@ class JournalHandler extends EntityHandler implements ImportExport
         return new Entity($data, 'journals');
     }
 
+    protected function registerJournal($data)
+    {
+        return $this->importEntity(
+            $data,
+            'journals',
+            array(),
+            true
+        );
+    }
+
     protected function importJournalSetting($data)
     {
         $setting = $this->getValidData('journal_settings', $data);
@@ -46,10 +56,13 @@ class JournalHandler extends EntityHandler implements ImportExport
     public function importJournal($journal)
     {
         try {
-            if (!Registry::get('DataMapper')->isMapped(
-                'journals',
-                $journal->get('journal_id')->getValue()
-            ))
+            if (
+                !Registry::get('DataMapper')->isMapped(
+                    'journals',
+                    $journal->get('journal_id')->getValue()
+                ) &&
+                !$this->registerJournal($journal)
+            )
                 return false;
 
             if ($journal->hasAttribute('settings'))

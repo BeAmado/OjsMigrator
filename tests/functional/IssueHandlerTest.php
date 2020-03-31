@@ -22,18 +22,9 @@ class IssueHandlerTest extends FunctionalTest implements StubInterface
     {
         $issue->get('files')->forEachValue(function($issueFile) {
             Registry::get('FileHandler')->write(
-                Registry::get('FileSystemManager')->formPath(array(
-                    Registry::get('IssueHandler')->getEntityDataDir('issues'),
-                    $issueFile->get('issue_id')->getValue(),
-                    $issueFile->get('file_name')->getValue(),
-                )),
-                /*Registry::get('IssueHandler')->formIssueFilenameFullpath(
-                    $issueFile,
-                    Registry::get('DataMapper')->getMapping(
-                        'journals',
-                        (new JournalMock())->getTestJournal()->getId()
-                    )
-                ),*/
+                Registry::get('IssueFileHandler')->formFilePathInEntitiesDir(
+                    $issueFile->get('file_name')->getValue()
+                ),
                 'This is the issue with original file name '
                     . $issueFile->get('file_name')->getValue()
             );

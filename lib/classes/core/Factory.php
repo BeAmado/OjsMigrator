@@ -70,6 +70,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Db\IndexDefinitionHandler();
     }
 
+    protected function createIssueFileHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\IssueFileHandler();
+    }
+
     protected function createIssueHandler()
     {
         return new \BeAmado\OjsMigrator\Entity\IssueHandler();
@@ -274,6 +279,8 @@ class Factory
                 return 'GroupHandler';
             case \strtolower('IndexDefinitionHandler'):
                 return 'IndexDefinitionHandler';
+            case \strtolower('IssueFileHandler'):
+                return 'IssueFileHandler';
             case \strtolower('IssueHandler'):
                 return 'IssueHandler';
             case \strtolower('JournalHandler'):

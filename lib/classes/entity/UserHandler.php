@@ -240,37 +240,6 @@ class UserHandler extends EntityHandler implements ImportExport
 
     protected function importUserRole($data)
     {
-        /*$role = $this->getValidData('roles', $data);
-
-        if (
-            !Registry::get('DataMapper')->isMapped(
-                'journals', 
-                $role->getData('journal_id')
-            ) ||
-            !Registry::get('DataMapper')->isMapped(
-                'users',
-                $role->getData('user_id')
-            )
-        )
-            return false;
-
-        $role->set(
-            'user_id',
-            Registry::get('DataMapper')->getMapping(
-                'users',
-                $role->getData('user_id')
-            )
-        );
-
-        $role->set(
-            'journal_id',
-            Registry::get('DataMapper')->getMapping(
-                'journals',
-                $role->getData('journal_id')
-            )
-        );
-
-        return $this->createOrUpdateInDatabase($role);*/
         return $this->importEntity(
             $data,
             'roles',

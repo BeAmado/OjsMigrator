@@ -129,13 +129,16 @@ class IssueHandler extends EntityHandler implements ImportExport
      */
     protected function copyIssueFile($issueFile)
     {
-        $oldFilename = $issueFile->get('file_name')->getValue();
+//        $oldFilename = $issueFile->get('file_name')->getValue();
+//
+//        $fileFullpath = Registry::get('FileSystemManager')->formPath(array(
+//            $this->getEntityDataDir('issues'),
+//            \explode('-', $oldFilename)[0], // issue_id
+//            $oldFilename,
+//        ));
 
-        $fileFullpath = Registry::get('FileSystemManager')->formPath(array(
-            $this->getEntityDataDir('issues'),
-            \explode('-', $oldFilename)[0], // issue_id
-            $oldFilename,
-        ));
+        $fileFullpath = Registry::get('IssueFileHandler')
+        ->formFilePathInEntitiesDir($issueFile->get('file_name')->getValue());
 
         if (!Registry::get('FileSystemManager')->fileExists($fileFullpath))
             return false;
@@ -402,11 +405,9 @@ class IssueHandler extends EntityHandler implements ImportExport
                     $issueFile,
                     Registry::get('__copyIssueFiles_journalId__')
                 ),
-                Registry::get('FileSystemManager')->formPath(array(
-                    $this->getEntityDataDir('issues'),
-                    $issueFile->get('issue_id')->getValue(),
-                    $issueFile->get('file_name')->getValue(),
-                ))
+                Registry::get('IssueFileHandler')->formFilePathInEntitiesDir(
+                    $issueFile->get('file_name')->getValue()
+                )
             );
         });
 

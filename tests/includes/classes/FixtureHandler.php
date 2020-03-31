@@ -175,8 +175,13 @@ class FixtureHandler
             return Registry::get('EntityHandler');
 
         return Registry::get(
-            Registry::get('GrammarHandler')->getSingle($entityName)
-            . 'handler'
+            Registry::get('CaseHandler')->transformCaseTo(
+                'Pascal',
+                \implode('_', array(
+                    Registry::get('GrammarHandler')->getSingle($entityName),
+                    'handler'
+                ))
+            )
         );
     }
 
@@ -230,6 +235,21 @@ class FixtureHandler
         )
             return false;
 
+        if (\is_string($entity))
+            Registry::get('IoManager')->writeToStdout(implode('', array(
+                'Creating (i.e importing) the ',
+                Registry::get('GrammarHandler')->getSingle($entityName),
+                ' "' . $entity . '"...',
+                PHP_EOL,
+                PHP_EOL,
+            )));
+
+        if ($importWholeEntity && \in_array($entityName, array(
+            'submissions', 'submission',
+            'issues', 'issue',
+        )))
+            $this->createFiles($entityName, $entity);
+
         if ($createTables)
             $this->createTablesForEntities([$entityName]);
 
@@ -247,41 +267,84 @@ class FixtureHandler
         );
     }
 
-    public function createSeveral($data)
-    {
+    public function createSeveral(
+        $data, 
+        $importWholeEntity = false
+    ) {
         foreach ($data as $entityName => $entities) {
             $this->createTablesForEntities([$entityName]);
             foreach($entities as $entity) {
-                $this->createSingle($entityName, $entity, false, false);
+                $this->createSingle(
+                    $entityName,
+                    $entity,
+                    $importWholeEntity,
+                    false
+                );
             }
         }
     }
 
-    protected function createFiles($submission)
+    protected function getTableName($entity)
     {
         if (
-            !\is_string($submission) && 
-            !$this->getHandler()->isEntity($submission)
+            !\is_a($entity, \BeAmado\OjsMigrator\MyObject::class) ||
+            !$entity->hasAttribute('__tableName_')
+        )
+            return;
+        
+        return $entity->get('__tableName_')->getValue();
+    }
+
+    protected function getFileName($file)
+    {
+        if (
+            !\is_a($file, \BeAmado\OjsMigrator\MyObject::class) ||
+            !$file->hasAttribute('file_name')
+        )
+            return;
+        
+        return $file->get('file_name')->getValue();
+    }
+
+    protected function formContent($file)
+    {
+        if (\is_a($file, \BeAmado\OjsMigrator\MyObject::class))
+            return $this->formContent($this->getFileName($file));
+        else if (!\is_string($file))
+            return;
+
+        return 'This is the file with name "' . $file . '"';
+    }
+
+    protected function formPathInEntitiesDir($file)
+    {
+        return $this->getHandler($this->getTableName($file))
+                    ->formFilePathInEntitiesDir($this->getFileName($file));
+    }
+
+    public function createFiles($entityName, $entity)
+    {
+        if (
+            !\is_string($entity) && 
+            !$this->getHandler()->isEntity($entity)
         )
             return;
 
-        if (\is_string($submission))
+        if (\is_string($entity))
             return $this->createFiles(
-                (new SubmissionMock())->getSubmission($submission)
+                $entityName,
+                $this->getMock($entityName, $entity)
             );
 
-        
+        if (!$entity->hasAttribute('files'))
+            return;
+
+        return $entity->get('files')->forEachValue(function($file) {
+            return Registry::get('FileHandler')->write(
+                $this->formPathInEntitiesDir($file),
+                $this->formContent($file)
+            );
+        });
     }
 
-    public function createSubmissionFiles($submissions)
-    {
-        foreach ($submissions as $sm) {
-            if (\is_string($sm) || $this->getHandler()->isEntity($sm))
-                $this->createFiles(
-                    \is_string($sm) 
-                        ? (new SubmissionMock())->getSubmission($sm) 
-                        : $sm
-                );
-        }
-    }
 }

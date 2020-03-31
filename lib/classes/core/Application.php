@@ -72,6 +72,7 @@ class Application
             Registry::get('MigrationManager')->getMigrationOption('action')
         ) === 'exit') {
             $this->endFlow(100);
+            return;
         }
 
         Registry::get('MigrationManager')->chooseJournal();
@@ -212,7 +213,7 @@ class Application
         }
 
         // compress the entities dir into a tar.gz file
-        Registry::get('ArchiveHandler')->tar(
+        Registry::get('ArchiveManager')->tar(
             'cz',
             Registry::get('FileSystemManager')->formPathFromBaseDir('data'),
             Registry::get('entitiesDir')

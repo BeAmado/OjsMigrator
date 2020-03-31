@@ -33,6 +33,27 @@ $dbDriver = $fsm->fileExists($dbDriverFile)
     ),
 ));
 
-(new \BeAmado\OjsMigrator\Entity\EntityHandler())->createOrUpdateInDatabase(
-    (new \BeAmado\OjsMigrator\Test\JournalMock())->getTestJournal()
-);
+(new \BeAmado\OjsMigrator\Test\FixtureHandler())->createSeveral(array(
+    'journals' => array(
+        'test_journal',
+    ),
+    'users' => array(
+        'ironman',
+//        'hulk',
+//        'batman',
+//        'thor',
+//        'greenlantern',
+    ),
+    'review_forms' => array(),
+    'sections' => array(
+//        'sports',
+//        'sciences',
+    ),
+    'issues' => array(
+        '2011',
+        '2015',
+    ),
+    'groups' => array(),
+    'announcements' => array(),
+    'submissions' => array(),
+), true);

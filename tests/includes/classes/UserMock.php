@@ -5,6 +5,8 @@ use \BeAmado\OjsMigrator\Registry;
 
 class UserMock extends EntityMock
 {
+    use JournalFiller;
+
     /**
      * @Override
      */
@@ -27,7 +29,16 @@ class UserMock extends EntityMock
             )
         ));
 
-        if (Registry::get('FileSystemManager')->fileExists($filename))
-            return Registry::get('UserHandler')->create(include($filename));
+        if (!Registry::get('FileSystemManager')->fileExists($filename))
+            return;
+
+        $user = Registry::get('UserHandler')->create(include($filename));
+
+        if ($user->hasAttribute('roles'))
+            $user->get('roles')->forEachValue(function($role) {
+                $this->fillJournalId($role);
+            });
+        
+        return $user;
     }
 }

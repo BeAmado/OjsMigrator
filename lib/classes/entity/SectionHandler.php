@@ -136,6 +136,7 @@ class SectionHandler extends EntityHandler implements ImportExport
 
     public function import($section)
     {
+//        echo "\n\n\nTrying to import the section " . $section->getId() . "\n\n\n";
         return $this->importSection($section);
     }
 

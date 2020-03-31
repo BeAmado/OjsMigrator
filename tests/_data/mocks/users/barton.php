@@ -12,13 +12,13 @@ return array(
         array(
             '__tableName_' => 'roles',
             'role_id' => 65536,
-            'journal_id' => 178,
+            'journal_id' => '[test_journal_id]',
             'user_id' => 9285,
         ),
         array(
             '__tableName_' => 'roles',
             'role_id' => 4096,
-            'journal_id' => 178,
+            'journal_id' => '[test_journal_id]',
             'user_id' => 9285,
         ),
     ),
