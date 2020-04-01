@@ -445,7 +445,7 @@ return array(
             'round' => 1,
             'review_revision' => 1,
             'status' => null,
-            'stage_id' => null,
+            'stage_id' => 1,
         ),
         /*
          * other review rounds

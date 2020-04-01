@@ -64,5 +64,9 @@ $dbDriver = $fsm->fileExists($dbDriverFile)
         'welcome',
         'inscriptions',
     ),
-    'submissions' => array(),
+    'submissions' => array(
+        'rwc2011',
+        'rwc2015',
+        'trc2015',
+    ),
 ), true);
