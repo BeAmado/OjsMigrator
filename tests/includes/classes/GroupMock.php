@@ -1,6 +1,7 @@
 <?php
 
 namespace BeAmado\OjsMigrator\Test;
+use \BeAmado\OjsMigrator\Registry;
 
 class GroupMock extends EntityMock
 {
@@ -21,13 +22,22 @@ class GroupMock extends EntityMock
         return $this->fillJournalId($group, 'assoc_id');
     }
 
+    public function getGroup($name)
+    {
+        return Registry::get('GroupHandler')->create(
+            $this->fill($this->get($name))
+        );
+    }
+
     public function getGroupForwards()
     {
-        return $this->fill($this->get('forwards'));
+//        return $this->fill($this->get('forwards'));
+        return $this->getGroup('forwards');
     }
 
     public function getGroupBacks()
     {
-        return $this->fill($this->get('backs'));
+//        return $this->fill($this->get('backs'));
+        return $this->getGroup('backs');
     }
 }

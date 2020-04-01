@@ -3,6 +3,8 @@
 use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Entity\AnnouncementHandler;
 use BeAmado\OjsMigrator\Registry;
+use BeAmado\OjsMigrator\Test\AnnouncementMock;
+use BeAmado\OjsMigrator\Test\FixtureHandler;
 
 // interfaces
 use BeAmado\OjsMigrator\Test\StubInterface;
@@ -18,77 +20,20 @@ class AnnouncementHandlerTest extends FunctionalTest
             'announcement_settings',
             'announcement_types',
             'announcement_type_settings',
-            'journals',
         ),
     )) : void {
         parent::setUpBeforeClass($args);
-
-        Registry::get('EntityHandler')->createOrUpdateInDatabase(
-            Registry::get('EntityHandler')->create('journals', array(
-                'journal_id' => 289,
-                'path' => 'test_journal',
-            ))
-        );
+        (new FixtureHandler())->createSingle('journals', 'test_journal');
     }
 
-    protected function createAnnouncements()
+    protected function createWelcomeAnnouncement()
     {
-        return array(
-            array(
-                '__tableName_' => 'announcements',
-                'announcement_id' => '1827',
-                'assoc_type' => 0,
-                'assoc_id' => 289,
-                'type_id' => null,
-                'date_expire' => '2018-09-18 08:09:10',
-                'date_posted' => '2018-07-14 04:01:57',
-                'settings' => array(
-                    array(
-                        '__tableName_' => 'announcement_settings',
-                        'announcement_id' => '1827',
-                        'locale' => 'fr_CA',
-                        'setting_name' => 'title',
-                        'setting_value' => 'Soyez les bienvenues',
-                        'setting_type' => 'string',
-                    ),
-                    array(
-                        '__tableName_' => 'announcement_settings',
-                        'announcement_id' => '1827',
-                        'locale' => 'fr_CA',
-                        'setting_name' => 'description',
-                        'setting_value' => '<p>Nous vous souhaitons une très bonne année</p>',
-                        'setting_type' => 'string',
-                    ),
-                ),
-            ),
-            array(
-                '__tableName_' => 'announcements',
-                'announcement_id' => '179',
-                'assoc_type' => 0,
-                'assoc_id' => 289,
-                'type_id' => null,
-                'date_expire' => '2018-05-18 07:09:10',
-                'date_posted' => '2018-01-24 02:03:59',
-                'settings' => array(
-                    array(
-                        '__tableName_' => 'announcement_settings',
-                        'announcement_id' => '179',
-                        'locale' => 'fr_CA',
-                        'setting_name' => 'title',
-                        'setting_value' => 'Ouverture des inscriptions',
-                        'setting_type' => 'string',
-                    ),
-                    array(
-                        '__tableName_' => 'announcement_settings',
-                        'announcement_id' => '179',
-                        'locale' => 'fr_CA',
-                        'setting_name' => 'description',
-                        'setting_value' => '<p>Les inscriptions pour le course de vétérinaire sont ouvertes jusqu\'au 18 mai.</p>', 
-                        'setting_type' => 'string',
-                    ),
-                ),
-            ),
-        );
+        return (new AnnouncementMock())->getWelcomeAnnouncement();
+    }
+
+    protected function createInscriptionAnnouncement()
+    {
+        return (new AnnouncementMock())->getInscriptionAnnouncement();
     }
 
     public function getStub()
@@ -100,10 +45,7 @@ class AnnouncementHandlerTest extends FunctionalTest
 
     public function testCanRegisterAnnouncement()
     {
-        $ann = Registry::get('AnnouncementHandler')->create(
-            $this->createAnnouncements()[0]
-        );
-
+        $ann = $this->createWelcomeAnnouncement();
         $registered = $this->getStub()->callMethod(
             'registerAnnouncement',
             $ann
@@ -136,7 +78,8 @@ class AnnouncementHandlerTest extends FunctionalTest
      */
     public function testCanImportAnnouncementSetting()
     {
-        $annSetting = $this->createAnnouncements()[0]['settings'][0];
+        $annSetting = $this->createWelcomeAnnouncement()
+                           ->get('settings')->get(0)->toArray();
         
         $imported = $this->getStub()->callMethod(
             'importAnnouncementSetting',
@@ -173,9 +116,7 @@ class AnnouncementHandlerTest extends FunctionalTest
      */
     public function testCanImportAnnouncement()
     {
-        $announcement = Registry::get('MemoryManager')->create(
-            $this->createAnnouncements()[0]
-        );
+        $announcement = $this->createWelcomeAnnouncement();
 
         $imported = Registry::get('AnnouncementHandler')->importAnnouncement(
             $announcement
@@ -227,9 +168,7 @@ class AnnouncementHandlerTest extends FunctionalTest
      */
     public function testCanImportAnotherAnnouncement()
     {
-        $announcement = Registry::get('MemoryManager')->create(
-            $this->createAnnouncements()[1]
-        );
+        $announcement = $this->createInscriptionAnnouncement();
 
         $imported = Registry::get('AnnouncementHandler')->importAnnouncement(
             $announcement
@@ -290,7 +229,7 @@ class AnnouncementHandlerTest extends FunctionalTest
     public function testCanGetTheAnnouncementSettings()
     {
         $announcement = Registry::get('MemoryManager')->create(
-            $this->createAnnouncements()[0]
+            $this->createWelcomeAnnouncement()
         );
 
         $announcement->set(
@@ -341,7 +280,10 @@ class AnnouncementHandlerTest extends FunctionalTest
             $anns[] = Registry::get('JsonHandler')->createFromFile($filename);
         }
 
-        $mocked = $this->createAnnouncements();
+        $mocked = array(
+            $this->createWelcomeAnnouncement()->toArray(),
+            $this->createInscriptionAnnouncement()->toArray(),
+        );
         $mockedSettings = array();
         $mockedAnnouncements = array();
         foreach ($mocked as $m) {

@@ -178,7 +178,9 @@ class FixtureHandler
             Registry::get('CaseHandler')->transformCaseTo(
                 'Pascal',
                 \implode('_', array(
-                    Registry::get('GrammarHandler')->getSingle($entityName),
+                    Registry::get('GrammarHandler')->getSingle(
+                        \str_replace('article', 'submission', $entityName)
+                    ),
                     'handler'
                 ))
             )
@@ -276,7 +278,7 @@ class FixtureHandler
 
     protected function clearEntitiesDir()
     {
-        foreach ($this->listEntitiesDir() as $dir) {
+        foreach (($this->listEntitiesDir() ?: array()) as $dir) {
             Registry::get('FileSystemManager')->removeWholeDir($dir);
         }
     }

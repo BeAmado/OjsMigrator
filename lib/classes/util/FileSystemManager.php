@@ -78,6 +78,9 @@ class FileSystemManager
 
         $dir = $this->removeTrailingSlashes($dir);
 
+        if (!$this->dirExists($dir))
+            return;
+
         $list = \scandir($dir);
 
         $list = $this->removeDots($list);

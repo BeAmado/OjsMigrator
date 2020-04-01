@@ -18,38 +18,6 @@ use BeAmado\OjsMigrator\Test\JournalMock;
 
 class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 {
-    public static function formContent($file)
-    {
-        return 'This is the file with name "' 
-            . $file->get('file_name')->getValue() . '"';
-    }
-
-    protected static function formPathInEntitiesDir($file)
-    {
-        return Registry::get('SubmissionFileHandler')
-                       ->formFilePathInEntitiesDir(
-            $file->get('file_name')->getValue()
-        );
-    }
-
-    protected static function createTheSubmissionFiles()
-    {
-        foreach ([
-            'rugby-worldcup-2015',
-            'rugby-worldcup-2011',
-            'the-rugby-championship-2015',
-        ] as $name) {
-            $sm = (new SubmissionMock())->getSubmission($name);
-            if ($sm->hasAttribute('files'))
-                $sm->get('files')->forEachValue(function($file){
-                    Registry::get('FileHandler')->write(
-                        self::formPathInEntitiesDir($file),
-                        self::formContent($file)
-                    );
-                });
-        }
-    }
-
     public static function setUpBeforeClass($args = [
         'createTables' => [
             'submissions',
@@ -97,7 +65,13 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             ],
         ]);
 
-        self::createTheSubmissionFiles();
+        foreach ([
+            'rugby-worldcup-2015',
+            'rugby-worldcup-2011',
+            'the-rugby-championship-2015',
+        ] as $name) {
+            (new FixtureHandler())->createFiles('submission', $name);
+        }
     }
 
     public function getStub()
@@ -210,7 +184,6 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 
     public function testCanImportASubmissionSetting()
     {
-//        $submission = $this->createRWC2015();
         $setting = $this->createRWC2015()->get('settings')->get(0);
 
         $imported = $this->getStub()->callMethod(
@@ -275,7 +248,10 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 
         $filesContents = [];
         for ($i = 0; $i < $submission->get('files')->length(); $i++) {
-            $filesContents[] = self::formContent(
+            $filesContents[] = (new class extends FixtureHandler {
+                use TestStub;
+            })->callMethod(
+                'formContent',
                 $submission->get('files')->get($i)
             );
         }
