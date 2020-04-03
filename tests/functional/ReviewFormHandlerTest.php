@@ -3,6 +3,7 @@
 use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Registry;
 use BeAmado\OjsMigrator\Entity\ReviewFormHandler;
+use BeAmado\OjsMigrator\Test\FixtureHandler;
 
 // interfaces
 use BeAmado\OjsMigrator\Test\StubInterface;
@@ -18,7 +19,6 @@ class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
 {
     public static function setUpBeforeClass($args = array(
         'createTables' => array(
-            'journals',
             'review_forms',
             'review_form_settings',
             'review_form_elements',
@@ -26,7 +26,7 @@ class ReviewFormHandlerTest extends FunctionalTest implements StubInterface
         ),
     )) : void {
         parent::setUpBeforeClass($args);
-        self::setUpTestJournal();
+        (new FixtureHandler())->createSingle('journals', 'test_journal');
     }
 
     public function getStub()

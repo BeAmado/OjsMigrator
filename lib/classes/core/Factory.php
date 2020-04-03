@@ -178,6 +178,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Db\ConnectionManager();
     }
 
+    protected function createDataMappingManager()
+    {
+        return new \BeAmado\OjsMigrator\DataMappingManager();
+    }
+
     protected function createFileSystemManager()
     {
         return new \BeAmado\OjsMigrator\Util\FileSystemManager();
@@ -323,6 +328,8 @@ class Factory
                 return 'ArchiveManager';
             case \strtolower('ConnectionManager'):
                 return 'ConnectionManager';
+            case \strtolower('DataMappingManager'):
+                return 'DataMappingManager';
             case \strtolower('FileSystemManager'):
                 return 'FileSystemManager';
             case \strtolower('IoManager'):

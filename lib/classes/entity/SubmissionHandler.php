@@ -589,8 +589,15 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         });
     }
 
-    protected function saveSubmissionJsonData($submission)
+    public function saveJsonData($submission)
     {
+        if (
+            !\is_a($submission, \BeAmado\OjsMigrator\MyObject::class) ||
+            !$submission->hasAttribute('__tableName_') ||
+            $this->entityTableName($submission) !== $this->formTableName()
+        )
+            return false;
+
         return Registry::get('JsonHandler')->dumpToFile(
             Registry::get('FileSystemManager')->formPath(array(
                 $this->getEntityDataDir($this->formTableName()),
@@ -641,7 +648,7 @@ class SubmissionHandler extends EntityHandler implements ImportExport
             if ($sm->hasAttribute('files'))
                 $this->copyFilesToEntitiesDir($sm);
 
-            $this->saveSubmissionJsonData($sm);
+            $this->saveJsonData($sm);
             Registry::get('FileSystemManager')->removeFile($filename);
         }
     }

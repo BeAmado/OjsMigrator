@@ -414,6 +414,25 @@ class IssueHandler extends EntityHandler implements ImportExport
         Registry::remove('__copyIssueFiles_journalId__');
     }
 
+    public function saveJsonData($issue)
+    {
+        if (
+            !\is_a($issue, \BeAmado\OjsMigrator\MyObject::class) ||
+            !$issue->hasAttribute('__tableName_') ||
+            $this->entityTableName($issue) !== 'issues' 
+        )
+            return false;
+
+        return Registry::get('JsonHandler')->dumpToFile(
+            Registry::get('FileSystemManager')->formPath(array(
+                $this->getEntityDataDir('issues'),
+                $issue->get('issue_id')->getValue(),
+                $issue->get('issue_id')->getValue() . '.json',
+            )),
+            $issue
+        );
+    }
+
     protected function getIssueData($filename)
     {
         $issue = Registry::get('JsonHandler')->createFromFile($filename);
@@ -446,14 +465,15 @@ class IssueHandler extends EntityHandler implements ImportExport
         if ($issue->get('files')->length() > 0)
             $this->copyIssueFiles($issue, 'export');
 
-        return Registry::get('JsonHandler')->dumpToFile(
-            Registry::get('FileSystemManager')->formPath(array(
-                \dirname($filename),
-                $issue->get('issue_id')->getValue(),
-                $issue->get('issue_id')->getValue() . '.json',
-            )),
-            $issue
-        ) && Registry::get('FileSystemManager')->removeFile($filename);
+//        return Registry::get('JsonHandler')->dumpToFile(
+//            Registry::get('FileSystemManager')->formPath(array(
+//                \dirname($filename),
+//                $issue->get('issue_id')->getValue(),
+//                $issue->get('issue_id')->getValue() . '.json',
+//            )),
+//            $issue
+        return $this->saveJsonData($issue) 
+            && Registry::get('FileSystemManager')->removeFile($filename);
     }
 
     public function exportIssuesFromJournal($journal)

@@ -96,7 +96,15 @@ functional-tests()
 
 smoke-test()
 {
-    $(dirname $0)/smoke/run-application.php
+    extra_arg=''
+    if [[ $@ =~ '--export' ]]
+    then 
+        extra_arg='export'
+    elif [[ $@ =~ '--import' ]]
+    then 
+        extra_arg='import'
+    fi
+    $(dirname $0)/smoke/run-application.php $extra_arg
     clear-test-stage
 }
 
@@ -145,7 +153,7 @@ run-tests()
 
     if [[ $@ =~ '--smoke' ]]
     then
-        smoke-test
+        smoke-test $@
     fi
 }
 

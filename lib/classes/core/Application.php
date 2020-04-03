@@ -164,6 +164,7 @@ class Application
 
     protected function importEntity($tableName)
     {
+        echo "\n\n\nImporting the '$tableName'...\n\n\n";
         foreach ($this->getEntityFilesToImport($tableName) as $filename)
         {
             $this->getHandler($tableName)->import(
@@ -174,6 +175,9 @@ class Application
 
     protected function importEntities($entities)
     {
+        if (!\in_array('journals', $entities))
+            $entities[] = 'journals';
+
         foreach ($this->entitiesOrder() as $tableName) {
             if (\in_array($tableName, $entities))
                 $this->importEntity($tableName);
@@ -187,11 +191,17 @@ class Application
         echo "\nAnd the chosen journal: ";
         var_dump(Registry::get('MigrationManager')->getChosenJournal());
         echo "\n\n\n";
-        // decompress the entities tar.gz file
 
-        // map the journal
+        Registry::get('DataMappingManager')->setDataMappingDir(
+            Registry::get('MigrationManager')->getChosenJournal()
+        );
 
+        var_dump(Registry::get('DataMappingManager')->getDataMappingDir());
         // import the entities
+//        $this->importEntities(
+//            Registry::get('MigrationManager')->getEntitiesToMigrate()
+//                                             ->toArray()
+//        );
     }
 
     protected function runExport()
@@ -206,7 +216,7 @@ class Application
         foreach (Registry::get(
             'MigrationManager'
         )->getEntitiesToMigrate()->toArray() as $table) {
-            echo "\n\nExporting the '$table':\n\n";
+            echo "\n\nExporting the '$table'...\n\n";
             $this->getHandler($table)->export(
                 Registry::get('MigrationManager')->getChosenJournal()
             );

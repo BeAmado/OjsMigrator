@@ -366,4 +366,63 @@ class FixtureHandler
         });
     }
 
+    protected function formEntityJsonFileNameInEntitiesDir($entity)
+    {
+        if (\in_array($entity->getTableName(), array(
+            'articles', 'article', 'submissions', 'submission',
+            'issues', 'issue',
+        )))
+            return Registry::get('FileSystemManager')->formPath(array(
+                $this->handler()->getEntityDataDir($entity),
+                $entity->getId(),
+                $entity->getId() . '.json',
+            ));
+
+        return Registry::get('FileSystemManager')->formPath(array(
+            $this->handler()->getEntityDataDir($entity),
+            $entity->getId() . '.json',
+        ));
+    }
+
+    public function createEntity($entityName, $entity)
+    {
+        if (
+            !\is_string($entity) && 
+            !$this->getHandler()->isEntity($entity)
+        )
+            return;
+
+        if (\is_string($entity)) {
+            Registry::get('IoManager')->writeToStdout(implode('', array(
+                'Creating the ',
+                Registry::get('GrammarHandler')->getSingle($entityName),
+                ' "' . $entity . ' in the entities directory"...',
+                PHP_EOL,
+                PHP_EOL,
+            )));
+
+            return $this->createEntity(
+                $entityName,
+                $this->getMock($entityName, $entity)
+            );
+        }
+        
+        if (\in_array($entityName, array(
+            'articles', 'article', 'submissions', 'submission',
+            'issues', 'issue',
+        )))
+            return $this->getHandler($entityName)->saveJsonData($entity) &&
+                $this->createFiles($entityName, $entity);
+        
+        return $this->getHandler()->dumpEntity($entity);
+    }
+
+    public function createEntities($data)
+    {
+        foreach ($data as $entityName => $entities) {
+            foreach ($entities as $entity) {
+                $this->createEntity($entityName, $entity);
+            }
+        }
+    }
 }

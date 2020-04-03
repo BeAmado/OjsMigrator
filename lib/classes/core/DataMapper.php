@@ -13,7 +13,7 @@ class DataMapper
      */
     public function getEntityMappingDir($entity)
     {
-        return Registry::get('DataMappingDir')
+        return Registry::get('DataMappingManager')->getDataMappingDir()
             . \BeAmado\OjsMigrator\DIR_SEPARATOR 
             . (\is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class)
                 ? $entity->getTableName()
