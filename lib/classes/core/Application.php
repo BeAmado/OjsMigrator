@@ -148,9 +148,12 @@ class Application
 
     protected function getEntityFilesToImport($tableName)
     {
+        if ($tableName === 'submissions')
+            $tableName = Registry::get('SubmissionHandler')->formTableName();
+
         if (in_array($tableName, array(
             'issues',
-            'submissions',
+            'submissions', 'articles',
         )))
             return \array_map(function($dir) {
                 return Registry::get('FileSystemManager')->formPath(array(
@@ -184,35 +187,52 @@ class Application
         }
     }
 
+    protected function mapJournal()
+    {
+        $list = Registry::get('FileSystemManager')->listdir(
+            Registry::get('EntityHandler')->getEntityDataDir('journals')
+        );
+
+        $journalId = \explode(
+            '.', 
+            \array_reverse(\explode(
+                \BeAmado\OjsMigrator\DIR_SEPARATOR,
+                $list[0]
+            ))[0]
+        )[0];
+
+        if (!Registry::get('DataMapper')->isMapped(
+            'journals',
+            $journalId
+        ))
+            Registry::get('DataMapper')->mapData(
+                'journals',
+                array(
+                    'old' => $journalId,
+                    'new' => Registry::get('MigrationManager')
+                                     ->getChosenJournal()->getId(),
+                )
+            );
+    }
+
     protected function runImport()
     {
-        echo "\n\n\nChose to IMPORT the following entities: ";
-        var_dump(Registry::get('MigrationManager')->getEntitiesToMigrate());
-        echo "\nAnd the chosen journal: ";
-        var_dump(Registry::get('MigrationManager')->getChosenJournal());
-        echo "\n\n\n";
-
         Registry::get('DataMappingManager')->setDataMappingDir(
             Registry::get('MigrationManager')->getChosenJournal()
         );
 
-        var_dump(Registry::get('DataMappingManager')->getDataMappingDir());
+        $this->mapJournal();
+
         // import the entities
-//        $this->importEntities(
-//            Registry::get('MigrationManager')->getEntitiesToMigrate()
-//                                             ->toArray()
-//        );
+        $this->importEntities(
+            Registry::get('MigrationManager')->getEntitiesToMigrate()
+                                             ->toArray()
+        );
     }
 
     protected function runExport()
     {
-//        echo "\n\n\nChose to EXPORT the following entities: ";
-//        var_dump(Registry::get('MigrationManager')->getEntitiesToMigrate());
-//        echo "\nAnd the chosen journal: ";
-//        var_dump(Registry::get('MigrationManager')->getChosenJournal());
-//        echo "\n\n\n";
         // export the entities
-
         foreach (Registry::get(
             'MigrationManager'
         )->getEntitiesToMigrate()->toArray() as $table) {
@@ -223,11 +243,11 @@ class Application
         }
 
         // compress the entities dir into a tar.gz file
-        Registry::get('ArchiveManager')->tar(
-            'cz',
-            Registry::get('FileSystemManager')->formPathFromBaseDir('data'),
-            Registry::get('entitiesDir')
-        );
+//        Registry::get('ArchiveManager')->tar(
+//            'cz',
+//            Registry::get('FileSystemManager')->formPathFromBaseDir('data'),
+//            Registry::get('entitiesDir')
+//        );
     }
 
     public function run($ojsDir = null)

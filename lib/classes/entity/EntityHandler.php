@@ -473,7 +473,6 @@ class EntityHandler
      */
     public function dumpEntity($entity)
     {
-//        if (!\is_a($entity, \BeAmado\OjsMigrator\Entity\Entity::class))
         if (!$this->isEntity($entity))
             return false;
 

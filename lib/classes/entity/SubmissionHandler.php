@@ -142,7 +142,7 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
         if (!$this->mappedJournalIdIsSetInRegistry())
             $this->setMapJournalIdInRegistry(
-                $submission->getData('journal_id')
+                $submission->get('journal_id')->getValue()
             );
 
         return $submission->get('files')->forEachValue(function($file) {
@@ -299,7 +299,7 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         if (
             !Registry::get('DataMapper')->isMapped(
                 $this->formTableName(),
-                $submission->getId()
+                $submission->get($this->formIdField())->getValue()
             ) &&
             !$this->registerSubmission($submission)
         )

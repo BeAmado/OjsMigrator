@@ -85,6 +85,9 @@ class ReviewFormHandler extends EntityHandler implements ImportExport
      */
     public function importReviewForm($reviewForm)
     {
+        if (!$this->isEntity($reviewForm))
+            return $this->importReviewForm($this->create($reviewForm));
+
         if (
             !Registry::get('DataMapper')->isMapped(
                 'review_forms',

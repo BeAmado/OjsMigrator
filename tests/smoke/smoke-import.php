@@ -33,7 +33,7 @@ $entities = array(
     ),
     'announcements' => array(
         'welcome',
-        'subscriptions',
+        'inscriptions',
     ),
     'groups' => array(
         'backs',
