@@ -241,13 +241,6 @@ class Application
                 Registry::get('MigrationManager')->getChosenJournal()
             );
         }
-
-        // compress the entities dir into a tar.gz file
-//        Registry::get('ArchiveManager')->tar(
-//            'cz',
-//            Registry::get('FileSystemManager')->formPathFromBaseDir('data'),
-//            Registry::get('entitiesDir')
-//        );
     }
 
     public function run($ojsDir = null)

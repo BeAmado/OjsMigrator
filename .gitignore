@@ -1,3 +1,4 @@
 vendor/
 *.swp
 .data_mapping/
+*.tar.gz
