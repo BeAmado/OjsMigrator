@@ -155,6 +155,26 @@ class ConfigHandler
         unset($line);
     }
 
+    protected function filesDirIsRelative()
+    {
+        return \substr(
+            $this->getFilesDir(),
+            0,
+            1
+        ) !== \BeAmado\OjsMigrator\DIR_SEPARATOR;
+    }
+
+    protected function setFilesDirWithAbsolutePath()
+    {
+        if (!$this->filesDirIsRelative())
+            return;
+
+        $this->filesDir = Registry::get('FileSystemManager')->formPath(array(
+            \BeAmado\OjsMigrator\Maestro::getOjsDir(),
+            $this->filesDir,
+        ));
+    }
+
     protected function setFilesDir()
     {
         if(!$this->validateContent()) {
@@ -175,6 +195,9 @@ class ConfigHandler
         }
 
         $this->filesDir = \trim($this->filesDir);
+
+        if ($this->filesDirIsRelative())
+            $this->setFilesDirWithAbsolutePath();
     }
 
     public function getConnectionSettings()

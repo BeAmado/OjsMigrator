@@ -167,12 +167,15 @@ class SubmissionHistoryHandler extends EntityHandler
             return;
 
         $emailLogs->forEachValue(function($log) {
-            $log->set(
-                'email_log_user',
-                Registry::get('EmailLogUsersDAO')->read(array(
-                    'email_log_id' => $log->getId(),
-                ))->get(0)
-            );
+            $emailLogUsers = Registry::get('EmailLogUsersDAO')->read(array(
+                'email_log_id' => $log->getId(),
+            ));
+
+            if ($this->isMyObject($emailLogUsers))
+                $log->set(
+                    'email_log_user',
+                    $emailLogUsers->get(0)
+                );
         });
 
         return $emailLogs;

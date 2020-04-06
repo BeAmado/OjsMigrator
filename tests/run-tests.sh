@@ -11,7 +11,9 @@ clear-test-stage()
     rm -rf "$(dirname $0)/_data/ojs2"
     rm -rf "$(dirname $0)/_data/db_sandbox"
     rm -rf "$(dirname $0)/_data/sandbox"
+    rm -rf "$(dirname $0)/_data/data_mapping"
     rm -f "$(dirname $0)/dbdriver"
+    rm -rf "$(dirname $0)/../schema"
 }
 
 phpunit-end()

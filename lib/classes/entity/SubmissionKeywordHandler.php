@@ -117,14 +117,15 @@ class SubmissionKeywordHandler extends EntityHandler
             'object_id' => $objectId,
         ));
 
-        $objKeywords->forEachValue(function($o) {
-            $o->set(
-                'keyword_list',
-                $this->smHr()->getDAO('search_keyword_list')->read(array(
-                    'keyword_id' => $o->getData('keyword_id'),
-                ))->get(0)
-            );
-        });
+        if ($this->isMyObject($objKeywords))
+            $objKeywords->forEachValue(function($o) {
+                $o->set(
+                    'keyword_list',
+                    $this->smHr()->getDAO('search_keyword_list')->read(array(
+                        'keyword_id' => $o->getData('keyword_id'),
+                    ))->get(0)
+                );
+            });
 
         return $objKeywords;
     }
@@ -135,12 +136,13 @@ class SubmissionKeywordHandler extends EntityHandler
             $this->smHr()->formIdField() => $submissionId,
         ));
 
-        $searchObjects->forEachValue(function($o) {
-            $o->set(
-                'search_object_keywords',
-                $this->getSearchObjectKeywords($o->getId())
-            );
-        });
+        if ($this->isMyObject($searchObjects))
+            $searchObjects->forEachValue(function($o) {
+                $o->set(
+                    'search_object_keywords',
+                    $this->getSearchObjectKeywords($o->getId())
+                );
+            });
 
         return $searchObjects;
     }

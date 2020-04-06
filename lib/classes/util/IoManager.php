@@ -144,10 +144,24 @@ class IoManager
      *
      * @param string $content
      * @param boolean $clear
+     * @param integer $linesBefore
+     * @param integer $linesAfter
      * @return boolean
      */
-    public function writeToStdout($content, $clear = false)
-    {
+    public function writeToStdout(
+        $content,
+        $clear = false,
+        $linesBefore = 0,
+        $linesAfter = 0
+    ) {
+        for ($i = 0; $i < \min(10, \max($linesBefore, $linesAfter)); $i++) {
+            if ($i < $linesBefore)
+                $content = PHP_EOL . $content;
+
+            if ($i < $linesAfter)
+                $content .= PHP_EOL;
+        }
+
         if ($clear) {
             $this->clearStdout();
         }

@@ -164,6 +164,14 @@ class Maestro
         Registry::set('OjsDir', $dir);
     }
 
+    public static function getOjsDir()
+    {
+        if (!Registry::hasKey('OjsDir'))
+            self::setOjsDir();
+
+        return Registry::get('OjsDir');
+    }
+
     /**
      * Sets the directory that will store the .json files of the OJS schema.
      *
@@ -176,5 +184,13 @@ class Maestro
             return self::setSchemaDir(self::getDefaultDir('SchemaDir'));
         
         Registry::set('SchemaDir', $dir);
+    }
+
+    public static function getSchemaDir()
+    {
+        if (!Registry::hasKey('SchemaDir'))
+            self::setSchemaDir();
+
+        return Registry::get('SchemaDir');
     }
 }

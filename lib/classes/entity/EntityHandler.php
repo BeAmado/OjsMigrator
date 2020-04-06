@@ -87,6 +87,11 @@ class EntityHandler
     {
         return \is_a($data, \BeAmado\OjsMigrator\Entity\Entity::class);
     }
+
+    public function isMyObject($data)
+    {
+        return \is_a($data, \BeAmado\OjsMigrator\MyObject::class);
+    }
     
     /**
      * Checks if two entities are equal by comparing the attributes that are 

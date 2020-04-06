@@ -572,7 +572,10 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
     protected function copyFilesToEntitiesDir($submission)
     {
-        if (!$submission->hasAttribute('files'))
+        if (
+            !$submission->hasAttribute('files') ||
+            !$submission->hasAttribute('journal_id') // TODO: log the problem
+        )
             return;
 
         Registry::set(

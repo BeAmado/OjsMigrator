@@ -47,20 +47,20 @@ class Application
     protected function showWelcomeMessage()
     {
         Registry::get('IoManager')->writeToStdout(
-            PHP_EOL
-            . '############### OJS journal migration #################' 
-            . PHP_EOL
-            . PHP_EOL
+            '############### OJS journal migration #################',
+            false, // do not clear the stdout
+            1, // one line break before
+            2 // two line breaks after
         );
     }
 
     protected function showEndMessage()
     {
         Registry::get('IoManager')->writeToStdout(
-            PHP_EOL 
-            . PHP_EOL 
-            . '############# End of program #############' 
-            . PHP_EOL
+            '############# End of program #############' ,
+            false, // do not clear the stdout
+            2, // two line breaks before
+            1 // one line break after
         );
     }
 
@@ -165,9 +165,21 @@ class Application
         return $this->listEntityDataDir($tableName);
     }
 
+    protected function reportTableImportation($table)
+    {
+        Registry::get('IoManager')->writeToStdout(
+            implode('', array(
+                'Importing the "', $table, '"...',
+            )),
+            false,
+            2,
+            1
+        );
+    }
+
     protected function importEntity($tableName)
     {
-        echo "\n\n\nImporting the '$tableName'...\n\n\n";
+        $this->reportTableImportation($tableName);
         foreach ($this->getEntityFilesToImport($tableName) as $filename)
         {
             $this->getHandler($tableName)->import(
@@ -230,17 +242,65 @@ class Application
         );
     }
 
+    protected function reportTableExportation($table)
+    {
+        Registry::get('IoManager')->writeToStdout(
+            implode('', array(
+                'Exporting the "', $table, '"...',
+            )),
+            false,
+            1,
+            2
+        );
+    }
+
     protected function runExport()
     {
         // export the entities
         foreach (Registry::get(
             'MigrationManager'
         )->getEntitiesToMigrate()->toArray() as $table) {
-            echo "\n\nExporting the '$table'...\n\n";
+            $this->reportTableExportation($table);
             $this->getHandler($table)->export(
                 Registry::get('MigrationManager')->getChosenJournal()
             );
         }
+    }
+
+    protected function writeErrorToStdout($e)
+    {
+        Registry::get('IoManager')->writeToStdout(
+            \implode(': ', array(
+                'Caught the error',
+                \implode(PHP_EOL, array(
+                    $e->getMessage(),
+                    $e->getTraceAsString(),
+                ))
+            )),
+            false,
+            2,
+            2
+        );
+    }
+
+    protected function writeExceptionToStdout($e)
+    {
+        Registry::get('IoManager')->writeToStdout(
+            \implode(': ', array(
+                'Caught the exception',
+                $e->getMessage(),
+            )),
+            false,
+            2,
+            2
+        );
+    }
+
+    protected function showLastError()
+    {
+        $lastError = \error_get_last();
+        if ($lastError)
+            var_dump($lastError);
     }
 
     public function run($ojsDir = null)
@@ -257,16 +317,11 @@ class Application
             else if (Registry::get('MigrationManager')->choseImport())
                 $this->runImport();
         } catch (\Exception $e) {
-            echo "\n\nCaught the exception:\n'" . $e->getMessage() . "\n\n";
+            $this->writeExceptionToStdout($e);
         } catch (\Error $e) {
-            echo "\n\nCaught the error: \n'" . $e->getMessage() 
-                . "\n" . $e->getTraceAsString() . "\n\n";
-                var_dump($e);
+            $this->writeErrorToStdout($e);
         } finally {
-            $lastError = \error_get_last();
-            if ($lastError)
-                var_dump($lastError);
-
+            $this->showLastError();
             if ($this->isRunning())
                 $this->endFlow();
         }
