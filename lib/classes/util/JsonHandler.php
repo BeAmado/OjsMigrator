@@ -15,10 +15,10 @@ class JsonHandler implements FiletypeHandler
     public function createFromFile($filename)
     {
         return Registry::get('MemoryManager')->create(
-            \json_decode(
+            Registry::get('EncodingHandler')->processForImport(\json_decode(
                 Registry::get('FileHandler')->read($filename),
                 true
-            )
+            ))
         );
     }
 
@@ -33,7 +33,9 @@ class JsonHandler implements FiletypeHandler
     {
         return Registry::get('FileHandler')->write(
             $filename,
-            \json_encode($obj->toArray())
+            \json_encode(Registry::get('EncodingHandler')->processForExport(
+                $obj->toArray()
+            ))
         );
     }
 }

@@ -56,6 +56,12 @@ class RangeHandler
      */
     public function powerOfTenRange($number, $power)
     {
+        if (!\is_numeric($number))
+            throw new \Exception('When forming the power of ten in the range '
+                . 'the number was non numeric: ' 
+                . PHP_EOL . 'type: ' . \gettype($number)
+                . PHP_EOL . 'number: ' . \print_r($number, true));
+
         $m = \pow(10, $power);
 
         if ($power > $number)

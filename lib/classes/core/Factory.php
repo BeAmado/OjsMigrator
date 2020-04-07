@@ -45,6 +45,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Db\DbHandler();
     }
 
+    protected function createEncodingHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\EncodingHandler();
+    }
+
     protected function createEntityHandler()
     {
         return new \BeAmado\OjsMigrator\Entity\EntityHandler();
@@ -274,6 +279,8 @@ class Factory
                 return 'ConfigHandler';
             case \strtolower('DbHandler'):
                 return 'DbHandler';
+            case \strtolower('EncodingHandler'):
+                return 'EncodingHandler';
             case \strtolower('EntityHandler'):
                 return 'EntityHandler';
             case \strtolower('FileHandler'):

@@ -177,9 +177,23 @@ class Application
         );
     }
 
+    protected function importJournal()
+    {
+        return $this->getHandler('journals')->import(
+            Registry::get('JsonHandler')->createFromFile(
+                $this->getHandler('journals')
+                     ->getJournalFilenameInEntitiesDir()
+            )
+        );
+    }
+
     protected function importEntity($tableName)
     {
         $this->reportTableImportation($tableName);
+
+        if ($tableName === 'journals')
+            return $this->importJournal();
+
         foreach ($this->getEntityFilesToImport($tableName) as $filename)
         {
             $this->getHandler($tableName)->import(
@@ -199,20 +213,8 @@ class Application
         }
     }
 
-    protected function mapJournal()
+    protected function mapJournal($journalId)
     {
-        $list = Registry::get('FileSystemManager')->listdir(
-            Registry::get('EntityHandler')->getEntityDataDir('journals')
-        );
-
-        $journalId = \explode(
-            '.', 
-            \array_reverse(\explode(
-                \BeAmado\OjsMigrator\DIR_SEPARATOR,
-                $list[0]
-            ))[0]
-        )[0];
-
         if (!Registry::get('DataMapper')->isMapped(
             'journals',
             $journalId
@@ -233,7 +235,9 @@ class Application
             Registry::get('MigrationManager')->getChosenJournal()
         );
 
-        $this->mapJournal();
+        $this->mapJournal(
+            Registry::get('JournalHandler')->getJournalIdFromEntitiesDir()
+        );
 
         // import the entities
         $this->importEntities(

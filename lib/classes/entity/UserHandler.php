@@ -263,19 +263,22 @@ class UserHandler extends EntityHandler implements ImportExport
                 $this->registerUser($user);
     
             // import the settings
-            foreach ($user->getData('settings') as $setting) {
-                $this->importUserSetting($setting);
-            }
+            if ($user->hasAttribute('settings'))
+                $user->get('settings')->forEachValue(function($setting) {
+                    $this->importUserSetting($setting);
+                });
     
             // import the interests
-            foreach ($user->getData('interests') as $interest) {
-                $this->importUserInterest($interest);
-            }
+            if ($user->hasAttribute('interests'))
+                $user->get('interests')->forEachValue(function($interest) {
+                    $this->importUserInterest($interest);
+                });
     
             // import the roles
-            foreach ($user->getData('roles') as $role) {
-                $this->importUserRole($role);
-            }
+            if ($user->hasAttribute('roles'))
+                $user->get('roles')->forEachValue(function($role) {
+                    $this->importUserRole($role);
+                });
 
         } catch (\Exception $e) {
             // TODO: treat the exception

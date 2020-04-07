@@ -130,14 +130,15 @@ class JournalHandler extends EntityHandler implements ImportExport
             $this->getJournalPlugins($journal->getId())
         );
 
-        $filename = Registry::get('entitiesDir')
-            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'journal.json';
+//        $filename = Registry::get('entitiesDir')
+//            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'journal.json';
+//
+//        $exportedJournal = Registry::get('JsonHandler')->dumpToFile(
+//            $filename,
+//            $journal
+//        );
 
-        $exportedJournal = Registry::get('JsonHandler')->dumpToFile(
-            $filename,
-            $journal
-        );
-
+        return $this->dumpEntity($journal);
         // export the users
         // export the groups
         // export the announcements
@@ -198,5 +199,45 @@ class JournalHandler extends EntityHandler implements ImportExport
             $this->journalFilesDir($journal),
             'issues',
         ));
+    }
+
+    protected function formJsonFilename($journal)
+    {
+        return Registry::get('FileSystemManager')->formPath(array(
+            Registry::get('entitiesDir'),
+            \implode('.', array(
+                \implode('-', array(
+                    'journal',
+                    $journal->getId(),
+                )),
+                'json',
+            )) // journal-{id}.json
+        ));
+    }
+
+    public function getJournalFilenameInEntitiesDir()
+    {
+        return \array_reduce(
+            Registry::get('FileSystemManager')->listdir(
+                Registry::get('entitiesDir')
+            ),
+            function($carry, $item) {
+                if (\strpos($carry, 'journal') !== false)
+                    return $carry;
+
+                if (\strpos(\basename($item), 'journal') !== false)
+                    return $item;
+
+                return $carry;
+            },
+            'j-0.json'
+        );
+    }
+
+    public function getJournalIdFromEntitiesDir()
+    {
+        return \explode('-', 
+            \explode('.', $this->getJournalFilenameInEntitiesDir())[0]
+        )[1];
     }
 }

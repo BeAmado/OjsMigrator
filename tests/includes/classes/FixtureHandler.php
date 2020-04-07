@@ -414,7 +414,7 @@ class FixtureHandler
             return $this->getHandler($entityName)->saveJsonData($entity) &&
                 $this->createFiles($entityName, $entity);
         
-        return $this->getHandler()->dumpEntity($entity);
+        return $this->getHandler($entityName)->dumpEntity($entity);
     }
 
     public function createEntities($data)

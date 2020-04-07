@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\EncodingHandler;
+use BeAmado\OjsMigrator\Registry;
 
 class EncodingHandlerTest extends TestCase
 {
@@ -43,7 +44,7 @@ class EncodingHandlerTest extends TestCase
 
         $this->assertSame(
             $good,
-            (new EncodingHandler())->fixEncoding($bad)
+            Registry::get('EncodingHandler')->fixEncoding($bad)
         );
     }
 
