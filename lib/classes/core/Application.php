@@ -204,6 +204,9 @@ class Application
 
     protected function importEntities($entities)
     {
+        if (!\is_array($entities))
+            return;
+
         if (!\in_array('journals', $entities))
             $entities[] = 'journals';
 

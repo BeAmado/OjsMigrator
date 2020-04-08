@@ -294,6 +294,20 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         );
     }
 
+    protected function hasPublishedData($submission)
+    {
+        return $submission->hasAttribute('published') &&
+            $this->isMyObject($submission->get('published'));
+    }
+
+    protected function publishedIdIsMapped($pubSubmission)
+    {
+        return Registry::get('DataMapper')->isMapped(
+            $this->formTableName('published'),
+            $pubSubmission->get($this->formIdField('published'))->getValue()
+        );
+    }
+
     public function importSubmission($submission)
     {
         if (
@@ -307,13 +321,8 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
         // import the published submission
         if (
-            $submission->hasAttribute('published') &&
-            !Registry::get('DataMapper')->isMapped(
-                $this->formTableName('published'),
-                $submission->get('published')->get(
-                    $this->formIdField('published')
-                )->getValue()
-            )
+            $this->hasPublishedData($submission) &&
+            !$this->publishedIdIsMapped($submission->get('published'))
         )
             $this->importPublished($submission->get('published'));
 
