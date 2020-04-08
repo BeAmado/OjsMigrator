@@ -54,13 +54,17 @@ class ConnectionManager
      *
      * @param array $connData
      */
-    protected function createMySqlConnection($connData = array())
-    {
+    protected function createMySqlConnection(
+        $connData = array(),
+        $charset = 'utf8'
+    ) {
         $host = $connData['host'];
         $db = $this->filterDbName($connData['name']);
         $user = $connData['username'];
         $pass = $connData['password'];
-        return new \PDO("mysql:host=$host;dbname=$db", $user, $pass);
+        return new \PDO("mysql:host=$host;dbname=$db", $user, $pass, array(
+            \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES $charset",
+        ));
     }
     
     /**

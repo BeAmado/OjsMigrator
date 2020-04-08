@@ -36,6 +36,33 @@ class EncodingHandler
         return $str;
     }
 
+    protected function hasToConvert($str)
+    {
+        return \is_string($str) &&
+            !empty($str) &&
+            empty(\htmlentities($str));
+    }
+
+    protected function convertEncoding(
+        $str,
+        $to = 'UTF-8',
+        $from = 'Windows-1252'
+    ) {
+        return \mb_convert_encoding(
+            $str,
+            $to,
+            $from
+        );
+//        return \iconv(
+//            $from,
+//            \implode('//', array(
+//                $to,
+//                'TRANSLIT',
+//            )),
+//            $str
+//        );
+    }
+
     public function fixEncoding($str)
     {
         return \html_entity_decode(
@@ -47,7 +74,12 @@ class EncodingHandler
 
     protected function encode($str)
     {
-        return \htmlentities($str);
+        if (!\is_string($str))
+            return $str;
+
+        return \htmlentities(
+            $this->hasToConvert($str) ? $this->convertEncoding($str) : $str
+        );
     }
 
     protected function decode($str)

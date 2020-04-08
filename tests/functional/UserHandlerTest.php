@@ -466,7 +466,7 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
     /**
      * @depends testCanImportUserGreenLantern
      */
-    public function testCanImportJohnStewartByChangingHisUsernameFromGreenlanternToGreenlantern2()
+    public function testCanImportJohnStewartByChangingHisUsername()
     {
         $johnStewart = $this->createJohnStewart();
 
@@ -533,6 +533,45 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
 
         if ($imported)
             $this->importedUsers++;
+    }
+
+    /**
+     * @depends testCanImportJohnStewartByChangingHisUsername
+     */
+    public function testLoggedTheUsernameChange()
+    {
+        $dir = Registry::get('EntityHandler')
+                       ->getEntityDataDir('changed_users');
+
+        $fsm = Registry::get('FileSystemManager');
+        $filename = $fsm->formPath([
+            $dir,
+            'greenlantern2.json',
+        ]);
+
+        $data = [
+            'username' => 'greenlantern2',
+            'old_username' => 'greenlantern',
+            'first_name' => 'John',
+            'middle_name' => null,
+            'last_name' => 'Stewart',
+            'email' => 'stewart@greenlanterncorp.com',
+        ];
+
+        $this->assertSame(
+            '1-1-1',
+            implode('-', [
+                (int) $fsm->dirExists($dir),
+                (int) Registry::get('ArrayHandler')->equals(
+                    [$filename],
+                    $fsm->listdir($dir)
+                ),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $data,
+                    json_decode(file_get_contents($filename), true)
+                ),
+            ])
+        );
     }
 
     /**

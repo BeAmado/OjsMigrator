@@ -92,30 +92,59 @@ class UserHandler extends EntityHandler implements ImportExport
         return $newUsername;
     }
 
+    public function formChangedUserJsonFilename($username)
+    {
+        return Registry::get('FileSystemManager')->formPath(array(
+            $this->getEntityDataDir('changed_users'),
+            \implode('.', array($username, 'json')),
+        ));
+    }
+
+    public function logChangedUserData($user, $oldUsername)
+    {
+        $changedUser = Registry::get('MemoryManager')->create(array(
+            'old_username' => $oldUsername,
+        ));
+
+        foreach (array(
+            'username',
+            'email',
+            'first_name',
+            'middle_name',
+            'last_name',
+        ) as $attr) {
+            $changedUser->set($attr, $user->getData($attr));
+        }
+
+        return Registry::get('JsonHandler')->dumpToFile(
+            $this->formChangedUserJsonFilename($user->getData('username')),
+            $changedUser
+        );
+    }
+
+    protected function formNewUsernameAndLogTheChange($user)
+    {
+        $oldUsername = $user->getData('username');
+        $user->set(
+            'username',
+            $this->formNewUsername($user->getData('username'))
+        );
+
+        $this->logChangedUserData($user, $oldUsername);
+        unset($oldUsername);
+    }
+
     protected function registerUser($data)
     {
         $user = $this->getValidData('users', $data);
         if ($this->usernameExists($user->getData('username')))
-            $user->set(
-                'username',
-                $this->formNewUsername($user->getData('username'))
-            );
+            $this->formNewUsernameAndLogTheChange($user);
 
         return $this->createInDatabase($user);
     }
 
     protected function importUserSetting($data)
     {
-        /*$setting = $this->getValidData('user_settings', $data);
-        $setting->set(
-            'user_id',
-            Registry::get('DataMapper')->getMapping(
-                'users', 
-                $setting->getData('user_id')
-            )
-        );
-
-        return $this->createOrUpdateInDatabase($setting);*/
         return $this->importEntity(
             $data, 
             'user_settings', 
