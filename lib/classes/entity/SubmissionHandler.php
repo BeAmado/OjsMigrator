@@ -297,7 +297,9 @@ class SubmissionHandler extends EntityHandler implements ImportExport
     protected function hasPublishedData($submission)
     {
         return $submission->hasAttribute('published') &&
-            $this->isMyObject($submission->get('published'));
+            $this->isMyObject($submission->get('published')) &&
+            $submission->get('published')
+                       ->hasAttribute($this->formIdField('published'));
     }
 
     protected function publishedIdIsMapped($pubSubmission)
