@@ -225,6 +225,28 @@ class FixtureHandler
         }($mock);
     }
 
+    protected function importKeywords($submission)
+    {
+        if (\is_string($submission)) {
+            Registry::get('IoManager')->writeToStdout(implode('', array(
+                'Creating (i.e importing) the keywords for the submission',
+                ' "' . $submission . '"...',
+                PHP_EOL,
+                PHP_EOL,
+            )));
+
+            return $this->importKeywords(
+                (new SubmissionMock())->getSubmission($submission)
+            );
+        }
+
+        return Registry::get('SubmissionKeywordHandler')->importKeywords(
+            $submission,
+            false
+        );
+        
+    }
+
     public function createSingle(
         $entityName,
         $entity,
@@ -236,6 +258,9 @@ class FixtureHandler
             !\is_a($entity, \BeAmado\OjsMigrator\MyObject::class)
         )
             return false;
+
+        if ($entityName === 'keywords')
+            return $this->importKeywords($entity);
 
         if (\is_string($entity)) {
             Registry::get('IoManager')->writeToStdout(implode('', array(
@@ -300,7 +325,8 @@ class FixtureHandler
 
     public function createSeveral(
         $data, 
-        $importWholeEntity = false
+        $importWholeEntity = false,
+        $subEntities = array()
     ) {
         foreach ($data as $entityName => $entities) {
             $this->createTablesForEntities([$entityName]);
@@ -309,7 +335,7 @@ class FixtureHandler
                     $entityName,
                     $entity,
                     $importWholeEntity,
-                    false
+                    $subEntities
                 );
             }
         }
@@ -446,10 +472,19 @@ class FixtureHandler
         )
             return;
 
-        if (!$this->getHandler()->isEntity($entity))
+        if (!$this->getHandler()->isEntity($entity)) {
+            Registry::get('IoManager')->writeToStdout(implode('', array(
+                'Creating the keywords for the submission "',
+                $entity,
+                '" in the entities directory...',
+                PHP_EOL,
+                PHP_EOL,
+            )));
+
             return $this->createKeywords(
                 (new SubmissionMock())->getSubmission($entity)
             );
+        }
 
         if (!$entity->hasAttribute('keywords'))
             return;

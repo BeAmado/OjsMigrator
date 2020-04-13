@@ -36,4 +36,9 @@
         'rwc2015',
         'trc2015',
     ),
+    'keywords' => array(
+        'rwc2011',
+        'rwc2015',
+        'trc2015',
+    ),
 ), true);

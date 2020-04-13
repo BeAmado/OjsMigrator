@@ -9,9 +9,12 @@ abstract class FunctionalTest extends TestCase
 {
     public static function setUpBeforeClass($args = array(
         'clearRegistry' => true,
+        'setDataMappingManager' => true,
     )) : void {
         if (!\array_key_exists('clearRegistry', $args))
             $args['clearRegistry'] = true;
+        if (!\array_key_exists('setDataMappingManager', $args))
+            $args['setDataMappingManager'] = true;
 
         if ($args['clearRegistry'])
             Registry::clear();

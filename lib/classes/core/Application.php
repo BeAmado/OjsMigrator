@@ -9,9 +9,69 @@ class Application
      */
     private $status;
 
-    public function __construct()
+    /**
+     * @var \BeAmado\OjsMigrator\MyObject
+     */
+    private $parameters;
+
+    public function __construct($args = array())
     {
+        $this->parameters = Registry::get('MemoryManager')->create(
+            $this->filterParameters($args)
+        );
         $this->status = 'idle';
+    }
+
+    protected function defaultParameters()
+    {
+        return array(
+            'OjsDir' => null,
+            'clearRegistry' => true,
+        );
+    }
+
+    protected function filterParameters($args = array())
+    {
+        if (!\is_array($args) || empty($args))
+            return $this->defaultParameters();
+        
+        $filtered = array();
+        foreach ($this->defaultParameters() as $key => $value) {
+            if (\array_key_exists($key, $args))
+                $filtered[$key] = $args[$key];
+            else
+                $filtered[$key] = $value;
+        }
+
+        if (\array_key_exists('cli', $args))
+            return Registry::get('ArrayHandler')->union(
+                $this->filterCommandLineArgs($args['cli']),
+                $filtered
+            );
+        else
+            return $filtered;
+    }
+
+    protected function filterCommandLineArgs($cliArgs)
+    {
+        if (!\is_array($cliArgs))
+            return array();
+    }
+
+    /**
+     * Gets the parameters, readonly
+     *
+     * @return \BeAmado\OjsMigrator\MyObject
+     */
+    protected function getParameters()
+    {
+        return $this->parameters->cloneInstance();
+    }
+
+    protected function getParameter($name)
+    {
+        if ($this->getParameters()->hasAttribute($name))
+            return $this->getParameters()->get($name)->getValue();
     }
 
     public function isRunning()
@@ -29,10 +89,10 @@ class Application
         $this->status = 'stopped';
     }
 
-    protected function preload($args)
+    protected function preload()
     {
         $this->start();
-        Maestro::setOjsDir($args['OjsDir']);
+        Maestro::setOjsDir($this->getParameter('OjsDir'));
         Maestro::setSchemaDir();
         Registry::get('SchemaHandler')->loadAllSchema();
     }
@@ -40,7 +100,8 @@ class Application
     protected function finish()
     {
         Registry::get('SchemaHandler')->removeSchemaDir();
-        Registry::clear();
+        if ($this->getParameter('clearRegistry'))
+            Registry::clear();
         $this->stop();
     }
 
@@ -77,7 +138,9 @@ class Application
 
         Registry::get('MigrationManager')->chooseJournal();
 
-        Registry::get('MigrationManager')->chooseEntitiesToMigrate();
+        Registry::get('MigrationManager')->chooseEntitiesToMigrate(
+            $this->entitiesOrder()
+        );
     }
 
     protected function getHandler($table)
@@ -90,9 +153,13 @@ class Application
             'review_forms',
             'sections',
             'submissions',
+            $this->submissionsTableName(),
             'users',
         )))
             return;
+
+        if ($table === $this->submissionsTableName())
+            return Registry::get('SubmissionHandler');
 
         return Registry::get(\implode('', array(
             Registry::get('CaseHandler')->transformCaseTo(
@@ -114,7 +181,11 @@ class Application
     {
         $this->finish();
         $this->showEndMessage();
-//        exit($signal);
+    }
+
+    protected function submissionsTableName()
+    {
+        return Registry::get('SubmissionHandler')->formTableName();
     }
 
     protected function entitiesOrder()
@@ -127,7 +198,7 @@ class Application
             5 => 'review_forms',
             6 => 'sections',
             7 => 'issues',
-            8 => 'submissions',
+            8 => $this->submissionsTableName(),
             9 => 'keywords',
         );
     }
@@ -153,7 +224,7 @@ class Application
     protected function getEntityFilesToImport($tableName)
     {
         if ($tableName === 'submissions')
-            $tableName = Registry::get('SubmissionHandler')->formTableName();
+            $tableName = $this->submissionsTableName();
 
         if (in_array($tableName, array(
             'issues',
@@ -191,15 +262,30 @@ class Application
         );
     }
 
+    protected function importKeywords()
+    {
+        foreach(\array_map(
+            function($submissionDir) {
+                return \basename($submissionDir);
+            },
+            $this->listEntityDataDir($this->submissionsTableName()) ?: array()
+        ) as $smId) {
+            Registry::get('SubmissionKeywordHandler')->importKeywords($smId);
+        }
+    }
+
     protected function importEntity($tableName)
     {
         $this->reportTableImportation($tableName);
 
         if ($tableName === 'journals')
             return $this->importJournal();
+        else if ($tableName === 'keywords')
+            return $this->importKeywords();
 
-        foreach ($this->getEntityFilesToImport($tableName) as $filename)
-        {
+        foreach ($this->getEntityFilesToImport(
+            $tableName
+        ) ?: array() as $filename) {
             $this->getHandler($tableName)->import(
                 Registry::get('JsonHandler')->createFromFile($filename)
             );
@@ -270,7 +356,7 @@ class Application
         // export the entities
         foreach (Registry::get(
             'MigrationManager'
-        )->getEntitiesToMigrate()->toArray() as $table) {
+        )->getEntitiesToMigrate()->toArray() ?: array() as $table) {
             if ($table === 'keywords')
                 continue;
 
@@ -317,13 +403,10 @@ class Application
             var_dump($lastError);
     }
 
-    public function run($ojsDir = null)
+    public function run()
     {
         try {
-            $this->preload(array(
-                'OjsDir' => $ojsDir,
-            ));
-
+            $this->preload();
             $this->beginFlow();
 
             if (Registry::get('MigrationManager')->choseExport())
@@ -340,5 +423,4 @@ class Application
                 $this->endFlow();
         }
     }
-
 }

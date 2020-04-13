@@ -12,6 +12,7 @@ class DataMappingHandler
             Registry::get('FileSystemManager')->formPathFromBaseDir(array(
                 'tests',
                 '_data',
+                'sandbox',
                 'data_mapping',
             ))
         );
@@ -44,10 +45,23 @@ class DataMappingHandler
         );
     }
 
-    public function setUpDataMappingStage()
+    public function setUpDataMappingStage($setManager = false)
     {
         $this->setDataMappingDir();
         $this->createDataMappingDir();
+        if (!$setManager)
+            return;
+
+        Registry::set(
+            'DataMappingManager',
+            new class extends \BeAmado\OjsMigrator\DataMappingManager {
+                protected function getDataMappingBaseDir()
+                {
+                    return (new \BeAmado\OjsMigrator\Test\DataMappingHandler())
+                        ->getDataMappingDir();
+                }
+            }
+        );
     }
 
     public function tearDownDataMappingStage()

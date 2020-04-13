@@ -9,15 +9,9 @@ class MigrationManager
      */
     private $validMigrationOptions;
 
-    /**
-     * @var array
-     */
-    private $entities;
-
     public function __construct()
     {
         $this->setValidMigrationOptions();
-        $this->setEntities();
 
         foreach ($this->validMigrationOptions->listKeys() as $option) {
             if (!$this->migrationOptionIsSet($option))
@@ -56,20 +50,6 @@ class MigrationManager
                     'type' => 'MyObject',
                 ),
             )
-        );
-    }
-
-    protected function setEntities()
-    {
-        $this->entities = array(
-            'journals',
-            'users',
-            'review_forms',
-            'sections',
-            'issues',
-            'submissions',
-            'announcements',
-            'groups',
         );
     }
 
@@ -153,7 +133,7 @@ class MigrationManager
         );
     }
 
-    public function chooseEntitiesToMigrate()
+    public function chooseEntitiesToMigrate($possibleEntities)
     {
         Registry::get('IoManager')->writeToStdout(
             PHP_EOL . '--------- Entities to be '
@@ -166,7 +146,7 @@ class MigrationManager
             Registry::get('MemoryManager')->create()
         );
 
-        foreach ($this->entities as $entity) {
+        foreach ($possibleEntities as $entity) {
             if (Registry::get('ChoiceHandler')->binaryChoice(
                 PHP_EOL 
                 . \ucfirst($this->getMigrationOption('action'))
@@ -243,6 +223,9 @@ class MigrationManager
 
     public function choseToMigrate($entity)
     {
-        return \in_array($entity, $this->getEntitiestoMigrate()->toArray());
+        if (!$this->choseImport() && !$this->choseExport())
+            return false;
+
+        return \in_array($entity, $this->getEntitiesToMigrate()->toArray());
     }
 }

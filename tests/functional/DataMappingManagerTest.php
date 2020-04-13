@@ -9,6 +9,18 @@ use BeAmado\OjsMigrator\Test\JournalMock;
 
 class DataMappingManagerTest extends FunctionalTest implements StubInterface
 {
+    public static function setUpBeforeClass($args = [
+        'setDataMappingManager' => false,
+    ]) : void {
+        parent::setUpBeforeClass($args);
+    }
+
+    public function tearDown() : void
+    {
+        if ($this->fsm()->dirExists($this->dataMappingDir()))
+            $this->fsm()->removeDir($this->dataMappingDir());
+    }
+
     public function getStub()
     {
         return new class extends DataMappingManager {
@@ -35,12 +47,6 @@ class DataMappingManagerTest extends FunctionalTest implements StubInterface
                 $this->journal()->getData('path'),
             ])
         ]);
-    }
-
-    public function tearDown() : void
-    {
-        if ($this->fsm()->dirExists($this->dataMappingDir()))
-            $this->fsm()->removeDir($this->dataMappingDir());
     }
 
     public function testTheDataMappingBaseDirectoryIsHiddenInTheAppBaseDir()

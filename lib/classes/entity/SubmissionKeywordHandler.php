@@ -125,8 +125,17 @@ class SubmissionKeywordHandler extends EntityHandler
         ));
     }
 
-    public function importKeywords($submission)
+    public function importKeywords($submission, $importFromFiles = true)
     {
+        if (
+            !$importFromFiles && 
+            $this->isMyObject($submission) && 
+            $submission->hasAttribute('keywords')
+        )
+            return $submission->get('keywords')->forEachValue(function($obj) {
+                return $this->importSubmissionSearchObject($obj);
+            });
+
         return \array_reduce(
             Registry::get('FileSystemManager')->listdir(
                 $this->formSearchObjectsDir($submission)

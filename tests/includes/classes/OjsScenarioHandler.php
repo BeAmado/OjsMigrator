@@ -150,7 +150,11 @@ class OjsScenarioHandler
         if (\array_key_exists('createTables', $args))
             $this->createTables($args['createTables']);
         
-        (new DataMappingHandler())->setUpDataMappingStage();
+        (new DataMappingHandler())->setUpDataMappingStage(
+            \array_key_exists('setDataMappingManager', $args)
+                ? $args['setDataMappingManager']
+                : null
+        );
     }
 
     public function removeSandbox()

@@ -1,5 +1,15 @@
 <?php
 
+\BeAmado\OjsMigrator\Registry::set(
+    'DataMappingManager',
+    new class extends \BeAmado\OjsMigrator\DataMappingManager {
+        protected function getDataMappingBaseDir()
+        {
+            return (new \BeAmado\OjsMigrator\Test\DataMappingHandler())
+                ->getDataMappingDir();
+        }
+    }
+);
 $fh = new \BeAmado\OjsMigrator\Test\FixtureHandler();
 $entities = array(
     'journals' => array(
@@ -27,6 +37,11 @@ $entities = array(
         '2015',
     ),
     'submissions' => array(
+        'rwc2011',
+        'rwc2015',
+        'trc2015',
+    ),
+    'keywords' => array(
         'rwc2011',
         'rwc2015',
         'trc2015',

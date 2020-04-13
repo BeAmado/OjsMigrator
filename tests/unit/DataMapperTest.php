@@ -39,6 +39,7 @@ class DataMapperTest extends TestCase implements StubInterface
             array(
                 'tests',
                 '_data',
+                'sandbox',
                 'data_mapping',
                 'users',
                 '1-100000',
@@ -67,6 +68,7 @@ class DataMapperTest extends TestCase implements StubInterface
             array(
                 'tests',
                 '_data',
+                'sandbox',
                 'data_mapping',
                 'sections',
             )

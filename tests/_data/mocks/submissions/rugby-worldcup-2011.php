@@ -157,7 +157,7 @@ return array(
             'object_id' => 1890,
             '[submission_id]' => 7,
             'type' => 256,
-            'assoc_id' => 456,
+            'assoc_id' => 33,
             'search_object_keywords' => array(
                 array(
                     '__tableName_' => '[search_object_keywords_table]',
