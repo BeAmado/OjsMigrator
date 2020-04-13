@@ -5,6 +5,7 @@ use BeAmado\OjsMigrator\Util\JsonHandler;
 use BeAmado\OjsMigrator\Util\MemoryManager;
 use BeAmado\OjsMigrator\Util\FileSystemManager;
 use BeAmado\OjsMigrator\Util\FileHandler;
+use BeAmado\OjsMigrator\Registry;
 
 // interfaces 
 use BeAmado\OjsMigrator\Test\StubInterface;
@@ -76,5 +77,33 @@ class JsonHandlerTest extends TestCase implements StubInterface
         );
 
         (new FileSystemManager())->removeFile($maidenFile);
+    }
+
+    public function testCanSeeWhetherOrNotAFileHasJsonExtension()
+    {
+        $jh = Registry::get('JsonHandler');
+        $this->assertSame(
+            '1-0-0',
+            implode('-', [
+                (int) $jh->hasJsonExtension('Trump.json'),
+                (int) $jh->hasJsonExtension('Journalist'),
+                (int) $jh->hasJsonExtension('lai'),
+            ])
+        );
+    }
+
+    public function testJsonFileMethodGivesAFileTheJsonExtensionIfItHasNot()
+    {
+        $jh = Registry::get('JsonHandler');
+        $file1 = 'lala.json';
+        $file2 = 'Johnny';
+
+        $this->assertSame(
+            '1-1',
+            implode('-', [
+                (int) ($jh->jsonFile($file1) === 'lala.json'),
+                (int) ($jh->jsonFile($file2) === 'Johnny.json'),
+            ])
+        );
     }
 }

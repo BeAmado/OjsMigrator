@@ -3,6 +3,7 @@
 use BeAmado\OjsMigrator\Test\FunctionalTest;
 use BeAmado\OjsMigrator\Entity\SubmissionKeywordHandler;
 use BeAmado\OjsMigrator\Registry;
+use BeAmado\OjsMigrator\Test\FixtureHandler;
 
 // interfaces
 use BeAmado\OjsMigrator\Test\StubInterface;
@@ -41,30 +42,37 @@ class SubmissionKeywordHandlerTest extends FunctionalTest
         ],
     ]) : void {
         parent::setUpBeforeClass($args);
-    }
-
-    public function testCanRegisterTheRwc2015Submission()
-    {
-        $submission = $this->createRWC2015();
-        $registered = $this->getStub()->createOrUpdateInDatabase($submission);
-
-        $fromDb = $this->handler()->getDAO()->read([
-            $this->handler()
-                 ->formIdField() => Registry::get('DataMapper')->getMapping(
-                 
-                $this->handler()->formTableName(),
-                $submission->getId()
-            )
-        ]);
-
-        $this->assertSame(
-            '1-1',
-            implode('-', [
-                (int) $registered,
-                $fromDb->length(),
-            ])
+        $created = (new FixtureHandler())->createSingle(
+            'submission',
+            'rwc2015',
+            false,
+            ['files']
         );
+        (new FixtureHandler())->createKeywords('rwc2015');
     }
+
+//    public function testCanRegisterTheRwc2015Submission()
+//    {
+//        $submission = $this->createRWC2015();
+//        $registered = $this->getStub()->createOrUpdateInDatabase($submission);
+//
+//        $fromDb = $this->handler()->getDAO()->read([
+//            $this->handler()
+//                 ->formIdField() => Registry::get('DataMapper')->getMapping(
+//                 
+//                $this->handler()->formTableName(),
+//                $submission->getId()
+//            )
+//        ]);
+//
+//        $this->assertSame(
+//            '1-1',
+//            implode('-', [
+//                (int) $registered,
+//                $fromDb->length(),
+//            ])
+//        );
+//    }
 
     public function testCanImportAKeyword()
     {
@@ -108,5 +116,52 @@ class SubmissionKeywordHandlerTest extends FunctionalTest
                 $keywordList->get(0)->getData('keyword_text'),
             ])
         );
+    }
+
+    public function testCanImportTheKeywordsOfTheRwc2015Submission()
+    {
+        $submission = $this->createRWC2015();
+        $submissionId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName(),
+            $this->handler()->getSubmissionId($submission)
+        );
+
+        $searchObjectsBefore = $this->handler()->getDAO('search_objects')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $imported = Registry::get('SubmissionKeywordHandler')->importKeywords(
+            $submission
+        );
+
+        $searchObjects = $this->handler()->getDAO('search_objects')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $this->assertSame(
+            '1-1-3',
+            implode('-', [
+                (int) $searchObjectsBefore->length(),
+                (int) $imported,
+                $searchObjects->length(),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanImportTheKeywordsOfTheRwc2015Submission
+     */
+    public function testCanExportTheKeywordsOfTheRwc2015Submission()
+    {
+        $submission = $this->createRWC2015();
+        $submissionId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName(),
+            $this->handler()->getSubmissionId($submission)
+        );
+
+        $this->getStub()->exportSearchObjects($submissionId);
+        $fsm = Registry::get('FileSystemManager');
+
+        $this->assertFalse(true);
     }
 }

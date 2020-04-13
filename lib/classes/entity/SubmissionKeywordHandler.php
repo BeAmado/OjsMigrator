@@ -10,6 +10,23 @@ class SubmissionKeywordHandler extends EntityHandler
         return Registry::get('SubmissionHandler');
     }
 
+    protected function searchTypes()
+    {
+        return array(
+            'author'      => 0x001,
+            'title'       => 0x002,
+            'abstract'    => 0x004,
+            'discipline'  => 0x008,
+            'subject'     => 0x010,
+            'type'        => 0x020,
+            'coverage'    => 0x040,
+            'galley_file' => 0x080,
+            'index_terms' => 0x078,
+            'supplementary_file'          => 0x100,
+            'supplementary_file_metadata' => 0x300,
+        );
+    }
+
     protected function tableName($name = null)
     {
         return $this->smHr()->formTableName($name);
@@ -100,14 +117,27 @@ class SubmissionKeywordHandler extends EntityHandler
         ) && $this->importSearchObjectKeywords($data);
     }
 
+    protected function formSearchObjectsDir($submission)
+    {
+        return Registry::get('FileSystemManager')->formPath(array(
+            $this->smHr()->formSubmissionEntityDataDir($submission),
+            'search_objects',
+        ));
+    }
+
     public function importKeywords($submission)
     {
-        if (!$submission->hasAttribute('keywords'))
-            return false;
-        
-        return $submission->get('keywords')->forEachValue(function($o) {
-            return $this->importSubmissionSearchObject($o);
-        });
+        return \array_reduce(
+            Registry::get('FileSystemManager')->listdir(
+                $this->formSearchObjectsDir($submission)
+            ) ?: array(),
+            function($carry, $filename) {
+                return $carry && $this->importSubmissionSearchObject(
+                    Registry::get('JsonHandler')->createFromFile($filename)
+                );
+            },
+            true
+        );
     }
 
     protected function getSearchObjectKeywords($objectId)
@@ -145,5 +175,46 @@ class SubmissionKeywordHandler extends EntityHandler
             });
 
         return $searchObjects;
+    }
+
+    protected function getObjectId($searchObject)
+    {
+        if (
+            $this->isMyObject($searchObject) &&
+            $searchObject->hasAttribute('object_id')
+        )
+            return $searchObject->get('object_id')->getValue();
+    }
+
+    public function formSearchObjectFilename($searchObject)
+    {
+        return Registry::get('JsonHandler')->jsonFile(array(
+            $this->smHr()->formSubmissionEntityDataDir(
+                $this->smHr()->getSubmissionId($searchObject)
+            ),
+            'search_objects',
+            $this->getObjectId($searchObject),
+        ));
+    }
+
+    protected function dumpSearchObject($searchObject)
+    {
+        return Registry::get('JsonHandler')->dumpToFile(
+            $this->formSearchObjectFilename($searchObject),
+            $searchObject
+        );
+    }
+
+    public function exportSearchObjects($submissionId)
+    {
+        $searchObjects = $this->getSubmissionKeywords($submissionId);
+
+        if (
+            $this->isMyObject($searchObjects) && 
+            $searchObjects->length() > 0
+        )
+            return $searchObjects->forEachValue(function($obj) {
+                return $this->dumpSearchObject($obj);
+            });
     }
 }

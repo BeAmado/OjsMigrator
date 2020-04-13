@@ -240,4 +240,9 @@ class MigrationManager
     {
         return \strtolower($this->getMigrationOption('action')) === 'export';
     }
+
+    public function choseToMigrate($entity)
+    {
+        return \in_array($entity, $this->getEntitiestoMigrate()->toArray());
+    }
 }

@@ -128,12 +128,16 @@ class Application
             6 => 'sections',
             7 => 'issues',
             8 => 'submissions',
+            9 => 'keywords',
         );
     }
 
     protected function exportEntities($entities, $journal)
     {
         foreach($this->entitiesOrder() as $tableName) {
+            if ($tableName === 'keywords')
+                continue;
+
             if (\in_array($tableName, $entities))
                 $this->getHandler($tableName)->export($journal);
         }
@@ -267,6 +271,9 @@ class Application
         foreach (Registry::get(
             'MigrationManager'
         )->getEntitiesToMigrate()->toArray() as $table) {
+            if ($table === 'keywords')
+                continue;
+
             $this->reportTableExportation($table);
             $this->getHandler($table)->export(
                 Registry::get('MigrationManager')->getChosenJournal()

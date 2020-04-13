@@ -223,7 +223,7 @@ return array(
             'object_id' => 183,
             '[submission_id]' => 7384,
             'type' => 256,
-            'assoc_id' => 338,
+            'assoc_id' => 339,
             'search_object_keywords' => array(
                 array(
                     '__tableName_' => '[search_object_keywords_table]',

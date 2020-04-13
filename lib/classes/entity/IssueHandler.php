@@ -2,10 +2,13 @@
 
 namespace BeAmado\OjsMigrator\Entity;
 use \BeAmado\OjsMigrator\Registry;
-use \BeAmado\OjsMigrator\ImportExport;
+use \BeAmado\OjsMigrator\ImportExport; // interface
+use \BeAmado\OjsMigrator\EntityDirById; // trait
 
 class IssueHandler extends EntityHandler implements ImportExport
 {
+    use EntityDirById;
+
     public function create($data, $extra = null)
     {
         return new Entity($data, 'issues');
@@ -129,14 +132,6 @@ class IssueHandler extends EntityHandler implements ImportExport
      */
     protected function copyIssueFile($issueFile)
     {
-//        $oldFilename = $issueFile->get('file_name')->getValue();
-//
-//        $fileFullpath = Registry::get('FileSystemManager')->formPath(array(
-//            $this->getEntityDataDir('issues'),
-//            \explode('-', $oldFilename)[0], // issue_id
-//            $oldFilename,
-//        ));
-
         $fileFullpath = Registry::get('IssueFileHandler')
         ->formFilePathInEntitiesDir($issueFile->get('file_name')->getValue());
 
@@ -414,6 +409,11 @@ class IssueHandler extends EntityHandler implements ImportExport
         Registry::remove('__copyIssueFiles_journalId__');
     }
 
+    public function formIssueEntityDataDir($issueId)
+    {
+        return $this->formEntityDirById($issueId, 'issues');
+    }
+
     public function saveJsonData($issue)
     {
         if (
@@ -425,9 +425,10 @@ class IssueHandler extends EntityHandler implements ImportExport
 
         return Registry::get('JsonHandler')->dumpToFile(
             Registry::get('FileSystemManager')->formPath(array(
-                $this->getEntityDataDir('issues'),
+                $this->formIssueEntityDataDir(
+                    $issue->get('issue_id')->getValue()
+                ),
                 $issue->get('issue_id')->getValue(),
-                $issue->get('issue_id')->getValue() . '.json',
             )),
             $issue
         );
@@ -465,13 +466,6 @@ class IssueHandler extends EntityHandler implements ImportExport
         if ($issue->get('files')->length() > 0)
             $this->copyIssueFiles($issue, 'export');
 
-//        return Registry::get('JsonHandler')->dumpToFile(
-//            Registry::get('FileSystemManager')->formPath(array(
-//                \dirname($filename),
-//                $issue->get('issue_id')->getValue(),
-//                $issue->get('issue_id')->getValue() . '.json',
-//            )),
-//            $issue
         return $this->saveJsonData($issue) 
             && Registry::get('FileSystemManager')->removeFile($filename);
     }

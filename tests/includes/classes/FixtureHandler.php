@@ -229,7 +229,7 @@ class FixtureHandler
         $entityName,
         $entity,
         $importWholeEntity = false,
-        $createTables = true
+        $subEntities = array()
     ) {
         if (
             !\is_string($entity) && 
@@ -237,7 +237,7 @@ class FixtureHandler
         )
             return false;
 
-        if (\is_string($entity))
+        if (\is_string($entity)) {
             Registry::get('IoManager')->writeToStdout(implode('', array(
                 'Creating (i.e importing) the ',
                 Registry::get('GrammarHandler')->getSingle($entityName),
@@ -246,27 +246,41 @@ class FixtureHandler
                 PHP_EOL,
             )));
 
+            return $this->createSingle(
+                $entityName,
+                $this->getMock($entityName, $entity),
+                $importWholeEntity,
+                $subEntities
+            );
+        }
+
         if ($importWholeEntity && \in_array($entityName, array(
             'submissions', 'submission',
             'issues', 'issue',
         )))
             $this->createFiles($entityName, $entity);
 
-        if ($createTables)
-            $this->createTablesForEntities([$entityName]);
+        $this->createTablesForEntities([$entityName]);
 
         if ($importWholeEntity)
-            return $this->getHandler($entityName)->import(
-                \is_string($entity) 
-                    ? $this->getMock($entityName, $entity) 
-                    : $entity
-            );
+            return $this->getHandler($entityName)->import($entity);
         
-        return Registry::get('EntityHandler')->createOrUpdateInDatabase(
-            \is_string($entity)
-                ? $this->getMock($entityName, $entity)
-                : $entity
-        );
+        if (!$this->getHandler()->createOrUpdateInDatabase($entity))
+            return false;
+
+        foreach ($subEntities as $subEntity) {
+            if (!$entity->hasAttribute($subEntity))
+                continue;
+
+            $entity->get($subEntity)->forEachValue(function($e) {
+                $this->getHandler()->createOrUpdateInDatabase(
+                    $this->getHandler()->getValidData(
+                        $e->get('__tableName_')->getValue(),
+                        $e
+                    )
+                );
+            });
+        }
     }
 
     protected function listEntitiesDir()
@@ -417,11 +431,46 @@ class FixtureHandler
         return $this->getHandler($entityName)->dumpEntity($entity);
     }
 
+    public function createKeywords($entity, $allowArray = true)
+    {
+        if (\is_array($entity) && !$allowArray)
+            return;
+        else if (\is_array($entity))
+            return \array_reduce($entity, function($carry, $e) {
+                return $this->createKeywords($e, false);
+            }, false);
+
+        if (
+            !\is_string($entity) &&
+            !$this->getHandler()->isEntity($entity)
+        )
+            return;
+
+        if (!$this->getHandler()->isEntity($entity))
+            return $this->createKeywords(
+                (new SubmissionMock())->getSubmission($entity)
+            );
+
+        if (!$entity->hasAttribute('keywords'))
+            return;
+
+        $entity->get('keywords')->forEachValue(function($obj) {
+            Registry::get('JsonHandler')->dumpToFile(
+                Registry::get('SubmissionKeywordHandler')
+                        ->formSearchObjectFilename($obj),
+                $obj
+            );
+        });
+    }
+
     public function createEntities($data)
     {
         foreach ($data as $entityName => $entities) {
             foreach ($entities as $entity) {
-                $this->createEntity($entityName, $entity);
+                if ($entityName === 'keywords')
+                    $this->createKeywords($entity);
+                else
+                    $this->createEntity($entityName, $entity);
             }
         }
     }

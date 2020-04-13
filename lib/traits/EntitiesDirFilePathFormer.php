@@ -22,8 +22,6 @@ trait EntitiesDirFilePathFormer
         ));
     }
 
-
-
     public function formFilePathInEntitiesDir($file)
     {
         if (

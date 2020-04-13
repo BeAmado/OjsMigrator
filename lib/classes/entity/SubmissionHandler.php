@@ -2,10 +2,13 @@
 
 namespace BeAmado\OjsMigrator\Entity;
 use \BeAmado\OjsMigrator\Registry;
-use \BeAmado\OjsMigrator\ImportExport;
+use \BeAmado\OjsMigrator\ImportExport; // interface
+use \BeAmado\OjsMigrator\EntityDirById; // trait
 
 class SubmissionHandler extends EntityHandler implements ImportExport
 {
+    use EntityDirById;
+
     /**
      * @var string
      */
@@ -376,8 +379,8 @@ class SubmissionHandler extends EntityHandler implements ImportExport
             });
 
         // import the keywords
-        if ($submission->hasAttribute('keywords'))
-            $this->importSubmissionKeywords($submission);
+//        if ($submission->hasAttribute('keywords'))
+//            $this->importSubmissionKeywords($submission);
 
         // import the submission history
         if ($submission->hasAttribute('history'))
@@ -398,7 +401,7 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         return true;
     }
 
-    protected function getSubmissionId($submission)
+    public function getSubmissionId($submission)
     {
         if (\is_numeric($submission))
             return (int) $submission;
@@ -603,6 +606,14 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         });
     }
 
+    public function formSubmissionEntityDataDir($submission)
+    {
+        return $this->formEntityDirById(
+            $this->getSubmissionId($submission),
+            $this->formTableName()
+        );
+    }
+
     public function saveJsonData($submission)
     {
         if (
@@ -614,9 +625,10 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
         return Registry::get('JsonHandler')->dumpToFile(
             Registry::get('FileSystemManager')->formPath(array(
-                $this->getEntityDataDir($this->formTableName()),
-                $submission->get($this->formIdField())->getValue(),
-                $submission->get($this->formIdField())->getValue() . '.json',
+                $this->formSubmissionEntityDataDir(
+                    $this->getSubmissionId($submission)
+                ),
+                $this->getSubmissionId($submission),
             )),
             $submission
         );
@@ -651,7 +663,7 @@ class SubmissionHandler extends EntityHandler implements ImportExport
             );
             $sm->set('galleys', $this->getSubmissionGalleys($sm));
             $sm->set('comments', $this->getSubmissionComments($sm));
-            $sm->set('keywords', $this->getSubmissionKeywords($sm));
+//            $sm->set('keywords', $this->getSubmissionKeywords($sm));
             $sm->set('authors', $this->getSubmissionAuthors($sm));
             $sm->set('edit_assignments', $this->getEditAssignments($sm));
             $sm->set('edit_decisions', $this->getEditDecisions($sm));
@@ -664,6 +676,11 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
             $this->saveJsonData($sm);
             Registry::get('FileSystemManager')->removeFile($filename);
+
+            if (Registry::get('MigrationManager')->choseToMigrate('keywords'))
+                Registry::get('SubmissionKeywordHandler')->exportSearchObjects(
+                    $this->getSubmissionId($sm)
+                );
         }
     }
 
