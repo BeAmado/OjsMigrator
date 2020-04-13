@@ -148,6 +148,22 @@ class SubmissionKeywordHandlerTest extends FunctionalTest
         );
     }
 
+    protected function getKeywordsAndPositions($searchObjectsArr)
+    {
+        $data = [
+            'keywords' => [],
+            'positions' => [],
+        ];
+        foreach ($searchObjectsArr as $objArr) {
+            foreach ($objArr['search_object_keywords'] as $sok) {
+                $data['positions'][] = $sok['pos'];
+                $data['keywords'][] = $sok['keyword_list']['keyword_text'];
+            }
+        }
+
+        return $data;
+    }
+
     /**
      * @depends testCanImportTheKeywordsOfTheRwc2015Submission
      */
@@ -161,7 +177,42 @@ class SubmissionKeywordHandlerTest extends FunctionalTest
 
         $this->getStub()->exportSearchObjects($submissionId);
         $fsm = Registry::get('FileSystemManager');
+        $searchObjectsDir = $fsm->formPath(array(
+            $this->handler()->formSubmissionEntityDataDir($submissionId),
+            'search_objects',
+        ));
 
-        $this->assertFalse(true);
+        $mocked = $this->getKeywordsAndPositions(
+            $submission->get('keywords')->toArray()
+        );
+
+        $exported = $this->getKeywordsAndPositions(array_map(
+            function($filename) {
+                return Registry::get('JsonHandler')->createFromFile($filename)
+                                                   ->toArray();
+            },
+            $fsm->listdir($searchObjectsDir)
+        ));
+
+        $this->assertSame(
+            implode('-', [
+                1,
+                $submission->get('keywords')->length(),
+                1,
+                1,
+            ]),
+            implode('-', [
+                (int) $fsm->dirExists($searchObjectsDir),
+                (int) count($fsm->listdir($searchObjectsDir)),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $mocked['keywords'],
+                    $exported['keywords']
+                ),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $mocked['positions'],
+                    $exported['positions']
+                ),
+            ])
+        );
     }
 }
