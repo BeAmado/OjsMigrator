@@ -540,7 +540,7 @@ class EntityHandler
         foreach ($args as $table => $field) {
             if (
                 !$entity->hasAttribute($field) ||
-                $entity->get($field)->getValue() == null
+                empty($entity->get($field)->getValue())
             )
                 continue;
 

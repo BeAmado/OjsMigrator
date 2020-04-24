@@ -51,29 +51,6 @@ class SubmissionKeywordHandlerTest extends FunctionalTest
         (new FixtureHandler())->createKeywords('rwc2015');
     }
 
-//    public function testCanRegisterTheRwc2015Submission()
-//    {
-//        $submission = $this->createRWC2015();
-//        $registered = $this->getStub()->createOrUpdateInDatabase($submission);
-//
-//        $fromDb = $this->handler()->getDAO()->read([
-//            $this->handler()
-//                 ->formIdField() => Registry::get('DataMapper')->getMapping(
-//                 
-//                $this->handler()->formTableName(),
-//                $submission->getId()
-//            )
-//        ]);
-//
-//        $this->assertSame(
-//            '1-1',
-//            implode('-', [
-//                (int) $registered,
-//                $fromDb->length(),
-//            ])
-//        );
-//    }
-
     public function testCanImportAKeyword()
     {
         $submission = $this->createRWC2015();
@@ -214,5 +191,37 @@ class SubmissionKeywordHandlerTest extends FunctionalTest
                 ),
             ])
         );
+    }
+
+    public function testMapsTheKeywordIdWhenNotMappedAndTextExists()
+    {
+        $keywordList = Registry::get('EntityHandler')->create(
+            $this->handler()->formTableName('search_keyword_list'),
+            [
+                'keyword_id' => 272,
+                'keyword_text' => 'winger',
+            ]
+        );
+        $dao = $this->handler()->getDAO('search_keyword_list');
+        $keywordsBefore = $dao->read();
+
+        $imported = $this->getStub()->callMethod(
+            'importKeywordList',
+            $keywordList
+        );
+
+        $keywordsAfter = $dao->read();
+
+        $this->assertSame(
+            '1-1',
+            implode('-', [
+                (int) $imported,
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $keywordsBefore->toArray(),
+                    $keywordsAfter->toArray()
+                ),
+            ])
+        );
+
     }
 }

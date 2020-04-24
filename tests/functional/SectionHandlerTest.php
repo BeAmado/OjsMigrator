@@ -539,4 +539,28 @@ class SectionHandlerTest extends FunctionalTest implements StubInterface
             ))
         );
     }
+
+    public function testCanImportASectionWithReviewFormId0()
+    {
+        $section = Registry::get('SectionHandler')->create([
+            'section_id' => 1408,
+            'review_form_id' => 0,
+        ]);
+
+        $sectionsBefore = Registry::get('SectionsDAO')->read();
+        $imported = Registry::get('SectionHandler')->import($section);
+
+        $sectionsAfter = Registry::get('SectionsDAO')->read();
+
+        $this->assertSame(
+            '1-1',
+            implode('-', [
+                (int) $imported,
+                (int) $this->areEqual(
+                    $sectionsBefore->length() + 1,
+                    $sectionsAfter->length()
+                ),
+            ])
+        );
+    }
 }

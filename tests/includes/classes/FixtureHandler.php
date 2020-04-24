@@ -149,7 +149,7 @@ class FixtureHandler
 
     public function createTablesForEntities($entities = [])
     {
-        foreach ($entities as $entity) {
+        foreach ((\is_array($entities) ? $entities : [$entities]) as $entity) {
             if (
                 !\is_string($entity) ||
                 !\in_array(\strtolower($entity), [

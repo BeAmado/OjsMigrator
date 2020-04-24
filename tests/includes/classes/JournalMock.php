@@ -12,10 +12,7 @@ class JournalMock extends EntityMock
 
     public function getTestJournal()
     {
-        return Registry::get('JournalHandler')->create(array(
-            'journal_id' => 179,
-            'path' => 'test_journal',
-        ));
+        return $this->getJournal('test');
     }
 
     public function getJournal($journal)
@@ -23,6 +20,6 @@ class JournalMock extends EntityMock
         if (\strpos(\strtolower($journal), 'test_journal') !== false)
             return $this->getTestJournal();
 
-        return parent::get($journal);
+        return Registry::get('JournalHandler')->create(parent::get($journal));
     }
 }
