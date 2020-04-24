@@ -7,24 +7,9 @@ use \BeAmado\OjsMigrator\Maestro;
 class ConfigHandler
 {
     /**
-     * @var string
+     * @var \BeAmado\OjsMigrator\MyObject
      */
-    private $configFile;
-
-    /**
-     * @var array
-     */
-    private $configContent;
-
-    /**
-     * @var array
-     */
-    private $connectionSettings;
-
-    /**
-     * @var string
-     */
-    private $filesDir;
+    private $configurations;
 
     protected function findConfigFile()
     {
@@ -38,32 +23,32 @@ class ConfigHandler
                 Registry::get('OjsDir')
             ) as $filename
         ) {
-            if (\basename($filename) === 'config.inc.php') {
-                $this->setConfigFile($filename);
-                break;
-            }
+            if (\basename($filename) === 'config.inc.php')
+                return $filename;
         }
-
-        unset($filename);
     }
 
     public function __construct($filename = null)
     {
-        if ($filename === null) {
-            $this->findConfigFile();
-        } else {
-            $this->setConfigFile($filename);
-        }
+        $this->configurations = Registry::get('MemoryManager')->create(array(
+            'config_file' => null,
+            'files_dir' => null,
+            'driver' => null,
+            'host' => null,
+            'username' => null,
+            'password' => null,
+            'name' => null,
+        ));
 
-        $this->setFilesDir();
-        $this->setConnectionSettings();
+        $this->setConfigFile($filename ?: $this->findConfigFile());
+        $this->setConfigurations();
     }
 
     /**
      * Sets the location of the config.in.php file
      *
      * @param string $filename
-     * @return boolean
+     * @return void
      */
     public function setConfigFile($filename)
     {
@@ -71,88 +56,7 @@ class ConfigHandler
             throw new \Exception('The configuration file "' . $filename 
                 . '" does not exist');
 
-        $this->configFile = $filename;
-        $this->setContent();
-
-        if (!$this->validateContent())
-            return false;
-
-        $this->setFilesDir();
-        $this->setConnectionSettings();
-        return true;
-
-    }
-
-    /**
-     * Sets the content that is inside the config.inc.php file
-     *
-     * @return boolean
-     */
-    protected function setContent()
-    {
-        if (!Registry::get('FileSystemManager')->fileExists($this->configFile)) {
-            return false;
-            // TODO treat better, maybe raise an Exception
-        }
-
-        $this->configContent = \file($this->configFile);
-
-        return \is_array($this->configContent) && !empty($this->configContent);
-    }
-
-    protected function validateContent()
-    {
-        if (
-            !\is_array($this->configContent) &&
-            !$this->setContent()
-        ) {
-            return false;
-            // TODO treat better, maybe raise an Exception
-        }
-
-        return true;
-    }
-    
-    /**
-     * Tests if the given string is a configuration of the connection setting 
-     * identified by the specified name. If it is, include its value to the 
-     * connectionSettings array.
-     *
-     * @param string $name
-     * @param string $str
-     * @return boolean
-     */
-    protected function testForAndAddConnectionSetting($name, $str)
-    {
-        if (\substr($str, 0, (strlen($name) + 2)) === $name . ' =') {
-            $this->connectionSettings[$name] = \trim(\substr(
-                $str, 
-                strlen($name) + 2
-            ));
-
-            return true;
-        }
-
-        return false;
-    }
-
-    protected function setConnectionSettings()
-    {
-        if(!$this->validateContent()) {
-            return false;
-        }
-
-        $this->connectionSettings = array();
-
-        foreach ($this->configContent as $line) {
-            $this->testForAndAddConnectionSetting('driver', $line) ||
-            $this->testForAndAddConnectionSetting('host', $line) ||
-            $this->testForAndAddConnectionSetting('username', $line) ||
-            $this->testForAndAddConnectionSetting('password', $line) ||
-            $this->testForAndAddConnectionSetting('name', $line); 
-        }
-
-        unset($line);
+        $this->configurations->set('config_file', $filename);
     }
 
     protected function filesDirIsRelative()
@@ -169,44 +73,104 @@ class ConfigHandler
         if (!$this->filesDirIsRelative())
             return;
 
-        $this->filesDir = Registry::get('FileSystemManager')->formPath(array(
-            \BeAmado\OjsMigrator\Maestro::getOjsDir(),
-            $this->filesDir,
-        ));
+        $this->getConfigurations()->set(
+            'files_dir',
+            Registry::get('FileSystemManager')->formPath(array(
+                \BeAmado\OjsMigrator\Maestro::getOjsDir(),
+                $this->getFilesDir(),
+            ))
+        );
     }
 
-    protected function setFilesDir()
+    protected function getConfiguration($name)
     {
-        if(!$this->validateContent()) {
-            return false;
-        }
+        if ($this->getConfigurations()->hasAttribute($name))
+            return $this->getConfigurations()->get($name)->getValue();
+    }
 
-        foreach ($this->configContent as $line) {
-            
-            if (\substr($line, 0, 11) === 'files_dir =') {
-                $this->filesDir = \substr($line, 11); // from the 11th chararacter forth
-            }
-        }
-
-        unset($line);
-
-        if (\substr($this->filesDir, -1) == PHP_EOL) {
-            $this->filesDir = \substr($this->filesDir, 0, -1);
-        }
-
-        $this->filesDir = \trim($this->filesDir);
-
-        if ($this->filesDirIsRelative())
-            $this->setFilesDirWithAbsolutePath();
+    protected function getConfigSettings($fields = array())
+    {
+        return \array_combine(
+            $fields,
+            \array_map(function($field) {
+                return $this->getConfiguration($field);
+            }, $fields)
+        );
     }
 
     public function getConnectionSettings()
     {
-        return $this->connectionSettings;
+        return $this->getConfigSettings(array(
+            'driver',
+            'host',
+            'username',
+            'password',
+            'name',
+        ));
     }
 
     public function getFilesDir()
     {
-        return $this->filesDir;
+        return $this->getConfigurations()
+                    ->get('files_dir')
+                    ->getValue();
+    }
+
+    protected function getConfigFile()
+    {
+        return $this->getConfigurations()
+                    ->get('config_file')
+                    ->getValue();
+    }
+
+    protected function getConfigContents()
+    {
+        return Registry::get('FileSystemManager')->fileExists(
+            $this->getConfigFile()
+        ) ? \file($this->getConfigFile()) : array();
+    }
+
+    protected function getConfigData($str)
+    {
+        return \array_map(function($item) {
+            return \str_replace(array('"', "'"), '', \trim($item));
+        }, \explode('=', $str));
+    }
+
+    protected function setConfigData($configData, $ignoreComments = true)
+    {
+        if (
+            !\is_array($configData) ||
+            \count($configData) < 2 ||
+            !\is_string($configData[0]) ||
+            !\is_string($configData[1]) || 
+            ($ignoreComments && substr($configData[1], 0, 1) === ';')
+        )
+            return;
+
+
+        if ($this->getConfigurations()->hasAttribute($configData[0]))
+            $this->getConfigurations()->set(
+                $configData[0],
+                $configData[1]
+            );
+    }
+
+    protected function getConfigurations()
+    {
+        return $this->configurations;
+    }
+
+    protected function setConfigurations()
+    {
+        foreach ($this->getConfigContents() as $line) {
+            if ($this->getConfigurations()->forEachValue(function($config) {
+                return !\is_null($config->getValue());
+            }))
+                break;
+
+            $this->setConfigData($this->getConfigData($line));
+        }
+        unset($line);
     }
 }

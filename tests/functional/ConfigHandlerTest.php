@@ -58,20 +58,23 @@ class ConfigHandlerTest extends FunctionalTest implements StubInterface
                 $expected['driver'] = 'mysql';
         }
 
-        /*if (array_search('pdo_sqlite', get_loaded_extensions())) {
-            $expected['driver'] = 'sqlite';
-            $expected['name'] = $this->getOjsDir() 
-                . $this->sep() . 'tests_ojs.db';
-        } else if (array_search('pdo_mysql', get_loaded_extensions())) {
-            $expected['driver'] = 'mysql';
-            $expected['name'] = 'tests_ojs';
-        } else {
-            $this->markTestSkipped('Does not have either sqlite or mysql');
-        }*/
-
         $this->assertEquals(
             $expected,
             $connData
+        );
+    }
+
+    public function testCanReadTheConfigurationWithQuotes()
+    {
+        $str = '"batman" = \'bruce wayne\'';
+        $data = $this->getStub()->callMethod(
+            'getConfigData',
+            $str
+        );
+
+        $this->assertSame(
+            'batman:bruce wayne',
+            implode(':', $data)
         );
     }
 }
