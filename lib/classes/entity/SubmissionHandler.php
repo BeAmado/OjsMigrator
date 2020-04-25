@@ -207,14 +207,6 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
     protected function importSubmissionComments($sm)
     {
-//        return $this->importEntity(
-//            $data,
-//            $this->formTableName('comments'),
-//            array(
-//                $this->formTableName() => $this->formIdField(),
-//                'users' => 'author_id',
-//            )
-//        );
         return Registry::get('SubmissionCommentHandler')->importComments($sm);
     }
 

@@ -612,6 +612,51 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         );
     }
 
+    public function testCanImportTheCommentsOfASubmission()
+    {
+        $submission = $this->CreateRWC2011();
+        $registered = $this->getStub()->callMethod(
+            'registerSubmission',
+            $submission
+        );
+
+        $imported = $this->getStub()->callMethod(
+            'importSubmissionComments',
+            $submission
+        );
+
+        $commentId = Registry::get('DataMapper')->getMapping(
+            $this->handler()->formTableName('comments'),
+            $submission->get('comments')->get(0)->get('comment_id')->getValue()
+        );
+
+        $commentFromDb = $this->handler()->getDAO('comments')->read([
+            'comment_id' => $commentId,
+        ]);
+
+        $this->assertSame(
+            '1-1-1-1-1',
+            implode('-', [
+                (int) $imported,
+                (int) $registered,
+                $commentFromDb->length(),
+                (int) $this->areEqual(
+                    Registry::get('DataMapper')->getMapping(
+                        $this->handler()->formTableName(),
+                        $submission->getId()
+                    ),
+                    $commentFromDb->get(0)
+                                  ->getData($this->handler()->formIdField())
+                ),
+                (int) $this->handler()->areEqual(
+                    $commentFromDb->get(0),
+                    $submission->get('comments')->get(0),
+                    ['author_id', $this->handler()->formIdField(), 'assoc_id',]
+                )
+            ])
+        );
+    }
+
     public function testCanImportTheSubmissionHistory()
     {
         $submission = $this->createRWC2015();
@@ -791,7 +836,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         $history = $this->getHistory($submissionId);
 
         $this->assertSame(
-            '1-1-2-4-1-2-1-1-1-3-2-2-2-1-1-1-2-1',
+            '1-1-2-4-1-2-1-2-1-3-2-2-2-1-1-1-2-1',
             implode('-', [
                 (int) $imported,
                 $sm->length(),
@@ -800,7 +845,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                 $suppFiles->length(),
                 $suppFileSettings->length(),
                 $publishedSm->length(),
-                1, //$comments->length(),
+                $comments->length(),
                 $galleys->length(),
                 3, //$keywords->length(),
                 $authors->length(),
@@ -1054,7 +1099,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         ]);
 
         $this->assertSame(
-            '1-1',
+            '2-1',
             implode('-', [
                 $comments->length(),
                 (int) $this->handler()->areEqual(

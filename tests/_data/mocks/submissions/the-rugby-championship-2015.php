@@ -201,6 +201,20 @@ return array(
             'date_modified' => null,
             'viewable' => 1,
         ),
+        array(
+            '__tableName_' => '[comments_table]',
+            'comment_id' => 888,
+            'comment_type' => 1,
+            'role_id' => 256,
+            '[submission_id]' => 39,
+            'assoc_id' => 28729,
+            'author_id' => '[hulk_user_id]',
+            'comment_title' => 'Peer review comment',
+            'comments' => 'Just peer reviewing',
+            'date_posted' => '2015-11-30 12:09:09',
+            'date_modified' => null,
+            'viewable' => 1,
+        ),
     ),
     'keywords' => array(
         array(

@@ -49,21 +49,21 @@ class SubmissionCommentHandler extends EntityHandler
         return $this->types()[$type] == $this->getDataCommentType($data);
     }
 
-    public function commentTypeIsPeerReview($data)
+    public function typeIsPeerReview($data)
     {
         return $this->commentTypeIs('peer_review', $data);
     }
 
     protected function getAssocTable($data)
     {
-        return $this->commentTypeIsPeerReview($data)
+        return $this->typeIsPeerReview($data)
             ? 'review_assignments'
             : $this->smHr()->formTableName();
     }
 
     protected function assocIsSubmission($comment)
     {
-        return !$this->commentTypeIsPeerReview($comment) &&
+        return !$this->typeIsPeerReview($comment) &&
             $comment->getData('assoc_id') == $comment->getData(
                 $this->smHr()->formIdField()
             );
@@ -71,24 +71,20 @@ class SubmissionCommentHandler extends EntityHandler
 
     protected function setMappedComment($comment)
     {
-        if ($this->assocIsSubmission($comment))
-            return $this->setMappedData($comment, array(
-                $this->smHr()->formTableName() => 'assoc_id',
-                'users' => 'author_id',
-            )) && ($comment->set(
-                $this->smHr()->formIdField(),
-                $comment->getData('assoc_id')
-            ) || true);
-        else if ($this->commentTypeIsPeerReview($comment))
+        if (
+            !$this->typeIsPeerReview($comment) &&
+            !$this->assocIsSubmission($comment)
+        )
             return $this->setMappedData($comment, array(
                 $this->smHr()->formTableName() => $this->smHr()->formIdField(),
                 'users' => 'author_id',
-                'review_assignments' => 'assoc_id',
             ));
 
         return $this->setMappedData($comment, array(
-            $this->smHr()->formTableName() => $this->smHr()->formIdField(),
             'users' => 'author_id',
+            $this->smHr()->formTableName() => $this->smHr()->formIdField(),
+        )) && $this->setMappedData($comment, array(
+            $this->getAssocTable($comment) => 'assoc_id',
         ));
     }
 
@@ -101,15 +97,6 @@ class SubmissionCommentHandler extends EntityHandler
             return false;
 
         return $this->createOrUpdateInDatabase($comment);
-//        return $this->importEntity(
-//            $data,
-//            $this->smHr()->formTableName('comments'),
-//            array(
-//                $this->smHr()->formTableName() => $this->smHr()->formIdField(),
-//                'users' => 'author_id',
-//                $this->getAssocTable($data) => 'assoc_id',
-//            )
-//        );
     }
 
     public function importComments($submission)
