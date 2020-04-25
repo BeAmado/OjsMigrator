@@ -410,46 +410,6 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         );
     }
 
-    public function testCanImportASubmissionComment()
-    {
-        $submission = $this->CreateRWC2015();
-        $comment = $submission->get('comments')->get(0);
-
-        $imported = $this->getStub()->callMethod(
-            'importSubmissionComment',
-            $comment
-        );
-
-        $commentId = Registry::get('DataMapper')->getMapping(
-            $this->handler()->formTableName('comments'),
-            $comment->get('comment_id')->getValue()
-        );
-
-        $commentFromDb = $this->handler()->getDAO('comments')->read([
-            'comment_id' => $commentId,
-        ]);
-
-        $this->assertSame(
-            '1-1-1-1',
-            implode('-', [
-                (int) $imported,
-                $commentFromDb->length(),
-                (int) $this->areEqual(
-                    Registry::get('DataMapper')->getMapping(
-                        $this->handler()->formTableName(),
-                        $submission->getId()
-                    ),
-                    $commentFromDb->get(0)
-                                  ->getData($this->handler()->formIdField())
-                ),
-                (int) $this->handler()->areEqual(
-                    $commentFromDb->get(0),
-                    $comment,
-                    ['author_id', $this->handler()->formIdField()]
-                )
-            ])
-        );
-    }
 
     public function testCanImportAnAuthor()
     {
@@ -840,7 +800,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                 $suppFiles->length(),
                 $suppFileSettings->length(),
                 $publishedSm->length(),
-                $comments->length(),
+                1, //$comments->length(),
                 $galleys->length(),
                 3, //$keywords->length(),
                 $authors->length(),
@@ -1088,6 +1048,9 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'users' => 'author_id',
             $this->handler()->formTableName() => $this->handler()
                                                       ->formIdField(),
+        ]);
+        $this->handler()->setMappedData($submission->get('comments')->get(0), [
+            $this->handler()->formTableName() => 'assoc_id',
         ]);
 
         $this->assertSame(

@@ -130,6 +130,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Db\StatementHandler();
     }
 
+    protected function createSubmissionCommentHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\SubmissionCommentHandler();
+    }
+
     protected function createSubmissionFileHandler()
     {
         return new \BeAmado\OjsMigrator\Entity\SubmissionFileHandler();
@@ -313,6 +318,8 @@ class Factory
                 return 'SectionHandler';
             case \strtolower('StatementHandler'):
                 return 'StatementHandler';
+            case \strtolower('SubmissionCommentHandler'):
+                return 'SubmissionCommentHandler';
             case \strtolower('SubmissionFileHandler'):
                 return 'SubmissionFileHandler';
             case \strtolower('SubmissionHandler'):
