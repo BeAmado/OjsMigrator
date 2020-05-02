@@ -401,7 +401,7 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
         $entries = Registry::get('ControlledVocabEntriesDAO')->read();
 
         $this->assertSame(
-            '1-4-3-3-8-6-6-4-4',
+            '1-4-3-3-8-6-6-1-4',
             implode('-', array(
                 $imported,
                 $batmanSettings->length(),
@@ -445,7 +445,7 @@ class UserHandlerTest extends FunctionalTest implements StubInterface
         $entries = Registry::get('ControlledVocabEntriesDAO')->read();
 
         $this->assertSame(
-            '1-3-1-3-11-7-9-4-4',
+            '1-3-1-3-11-7-9-1-4',
             implode('-', array(
                 $imported,
                 $lanternSettings->length(),

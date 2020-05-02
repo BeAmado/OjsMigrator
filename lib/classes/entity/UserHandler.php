@@ -152,8 +152,63 @@ class UserHandler extends EntityHandler implements ImportExport
         );
     }
 
+    protected function controlledVocabIsMapped($data)
+    {
+        return Registry::get('DataMapper')->isMapped(
+            'controlled_vocabs',
+            $data->get('controlled_vocab_id')->getValue()
+        );
+    }
+
+    protected function mapControlledVocabIfExists($data, $id = null)
+    {
+        if (empty($id))
+            return false;
+
+        return Registry::get('DataMapper')->mapData(
+            'controlled_vocabs',
+            array(
+                'old' => $data->get('controlled_vocab_id')->getValue(),
+                'new' => $id,
+            )
+        );
+    }
+
+    protected function controlledVocabExists($data)
+    {
+        $res = Registry::get('ControlledVocabsDAO')->read(array(
+            'symbolic' => $data->get('symbolic')->getValue(),
+            'assoc_id' => $data->get('assoc_id')->getValue(),
+            'assoc_type' => $data->get('assoc_type')->getValue(),
+        ));
+
+        if (empty($res) || !$this->isMyObject($res) || $res->length() < 1)
+            return Registry::get('MemoryManager')->destroy($res);
+
+        return $res->get(0)->getId();
+    }
+
     protected function importControlledVocab($data)
     {
+        if (
+            !$data->hasAttribute('symbolic') ||
+            !$data->hasAttribute('assoc_id') ||
+            !$data->hasAttribute('assoc_type')
+        )
+            return false;
+
+        if (
+            $this->controlledVocabIsMapped($data) ||
+            $this->mapControlledVocabIfExists(
+                $data,
+                $this->controlledVocabExists($data)
+            )
+        )
+            return true;
+
+        if ($this->controlledVocabExists($data))
+            return $this->mapControlledVocab($data);
+
         return $this->createInDatabase(
             $this->getValidData('controlled_vocabs', $data)
         );

@@ -96,6 +96,16 @@ functional-tests()
     fi
 }
 
+extension-tests()
+{
+    if [ -e $filename ]
+    then
+        phpunit-run $filename
+    else
+        phpunit-run $(echo "$(dirname $0)/extension")
+    fi
+}
+
 smoke-test()
 {
     extra_arg=''
@@ -146,6 +156,12 @@ run-tests()
     then
         form-filename integration $2
         integration-tests
+    fi
+
+    if [[ $@ =~ '--extension' ]]
+    then
+        form-filename extension $2
+        extension-tests
     fi
 
     if [[ $@ =~ '--all' ]]

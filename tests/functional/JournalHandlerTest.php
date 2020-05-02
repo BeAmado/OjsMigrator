@@ -84,14 +84,6 @@ class JournalHandlerTest extends FunctionalTest
         );
     }
 
-    protected function journalFilenameFullpath()
-    {
-        return Registry::get('FileSystemManager')->formPath([
-            Registry::get('entitiesDir'),
-            Registry::get('JournalHandler')->getJournalFilenameInEntitiesDir(),
-        ]);
-    }
-
     /**
      * @depends testCanImportTheTestJournal
      */
@@ -103,14 +95,16 @@ class JournalHandlerTest extends FunctionalTest
             $journal->getId()
         );
 
+        $handler = Registry::get('JournalHandler');
+
         $fileExistedBefore = Registry::get('FileSystemManager')->fileExists(
-            $this->journalFilenameFullpath()
+            $handler->getJournalFilenameInEntitiesDir()
         );
 
         Registry::get('JournalHandler')->export($journalId);
         
         $fileExistsAfter = Registry::get('FileSystemManager')->fileExists(
-            $this->journalFilenameFullpath()
+            $handler->getJournalFilenameInEntitiesDir()
         );
 
         $this->assertSame(

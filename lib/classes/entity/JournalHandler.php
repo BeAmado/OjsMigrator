@@ -221,7 +221,7 @@ class JournalHandler extends EntityHandler implements ImportExport
                     \strpos(\basename($item), 'journal') !== false &&
                     \is_file($item)
                 )
-                    return \basename($item);
+                    return $item;
 
                 return $carry;
             },
@@ -232,7 +232,9 @@ class JournalHandler extends EntityHandler implements ImportExport
     public function getJournalIdFromEntitiesDir()
     {
         return \explode('-', 
-            \explode('.', $this->getJournalFilenameInEntitiesDir())[0]
+            \explode('.',
+                \basename($this->getJournalFilenameInEntitiesDir())
+            )[0]
         )[1];
     }
 }
