@@ -55,6 +55,11 @@ class Factory
         return new \BeAmado\OjsMigrator\Entity\EntityHandler();
     }
 
+    protected function createEntitySettingHandler()
+    {
+        return new \BeAmado\OjsMigrator\Entity\EntitySettingHandler();
+    }
+
     protected function createFileHandler()
     {
         return new \BeAmado\OjsMigrator\Util\FileHandler();
@@ -123,6 +128,11 @@ class Factory
     protected function createSectionHandler()
     {
         return new \BeAmado\OjsMigrator\Entity\SectionHandler();
+    }
+
+    protected function createSerialDataHandler()
+    {
+        return new \BeAmado\OjsMigrator\Util\SerialDataHandler();
     }
 
     protected function createStatementHandler()
@@ -288,6 +298,8 @@ class Factory
                 return 'EncodingHandler';
             case \strtolower('EntityHandler'):
                 return 'EntityHandler';
+            case \strtolower('EntitySettingHandler'):
+                return 'EntitySettingHandler';
             case \strtolower('FileHandler'):
                 return 'FileHandler';
             case \strtolower('GrammarHandler'):
@@ -316,6 +328,8 @@ class Factory
                 return 'SchemaHandler';
             case \strtolower('SectionHandler'):
                 return 'SectionHandler';
+            case \strtolower('SerialDataHandler'):
+                return 'SerialDataHandler';
             case \strtolower('StatementHandler'):
                 return 'StatementHandler';
             case \strtolower('SubmissionCommentHandler'):
