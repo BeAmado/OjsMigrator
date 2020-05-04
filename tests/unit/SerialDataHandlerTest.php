@@ -140,7 +140,7 @@ class SerialDataHandlerTest extends TestCase implements StubInterface
     public function testCanSerializeAnArray()
     {
         $this->assertSame(
-            '1-1',
+            '1-1-1',
             implode('-', [
                 (int) $this->areStrictlyEqual(
                     $this->getStub()->callMethod('arrayRepr', [
@@ -158,6 +158,231 @@ class SerialDataHandlerTest extends TestCase implements StubInterface
                         35,
                     ]),
                     'a:3:{i:0;s:4:"name";i:1;s:3:"age";i:2;i:35;}'
+                ),
+                (int) $this->areStrictlyEqual(
+                    $this->handler()->manuallySerialize([
+                        'users' => [
+                            [
+                                'name' => 'John',
+                                'age' => 22,
+                            ],
+                            [
+                                'name' => 'Mary',
+                                'age' => 26,
+                            ],
+                        ]
+                    ]),
+                    'a:1:{'
+                  .     's:5:"users";a:2:{'
+                  .         'i:0;a:2:{'
+                  .             's:4:"name";s:4:"John";'
+                  .             's:3:"age";i:22;'
+                  .         '}'
+                  .         'i:1;a:2:{'
+                  .             's:4:"name";s:4:"Mary";'
+                  .             's:3:"age";i:26;'
+                  .         '}'
+                  .     '}'
+                  . '}'
+                ),
+            ])
+        );
+    }
+
+    public function testCanGetTheSerializedType()
+    {
+        $this->assertSame(
+            '-null-bool-int-double-string-array-',
+            implode('-', array_map(function($str) {
+                return $this->getStub()->callMethod('getSerializedType', $str);
+            }, [
+                12,
+                'N;',
+                'b:1;',
+                'i:-90;',
+                'd:0.8937;',
+                's:6:"Amaral";',
+                'a:2:{s:4:"name";s:6:"Amaral";}',
+                'lkan',
+            ]))
+        );
+    }
+
+    public function testCanUnserializeANullValue()
+    {
+        $this->assertNull($this->handler()->manuallyUnserialize('N;'));
+    }
+
+    public function testCanUnserializeABooleanValue()
+    {
+        $this->assertSame(
+            '1-1',
+            implode('-', [
+                (int) $this->areStrictlyEqual(
+                    true,
+                    $this->handler()->manuallyUnserialize('b:1;')
+                ),
+                (int) $this->areStrictlyEqual(
+                    false,
+                    $this->handler()->manuallyUnserialize('b:0;')
+                ),
+            ])
+        );
+    }
+
+    public function testCanUnserializeAnIntegerValue()
+    {
+        $this->assertSame(
+            '23;-363;11;-89;',
+            implode(';', array_merge(
+                array_map(function($item) {
+                    return $this->getStub()->callMethod(
+                        'unserializeInteger',
+                        $item
+                    );
+                }, [
+                    'i:23;',
+                    'i:-363;',
+                ]),
+                array_map(function($item) {
+                    return $this->handler()->manuallyUnserialize($item);
+                }, [
+                    'i:11;',
+                    'i:-89;',
+                    'afe',
+                ])
+            ))
+        );
+    }
+
+    public function testCanUnserializeADoubleValue()
+    {
+        $this->assertSame(
+            '1;1',
+            implode(';', [
+                (int) $this->areStrictlyEqual(
+                    -89.3,
+                    $this->getStub()->callMethod(
+                        'unserializeDouble',
+                        'd:-89.3;'
+                    )
+                ),
+                (int) $this->areStrictlyEqual(
+                    66.3,
+                    $this->handler()->manuallyUnserialize('d:66.3;')
+                ),
+            ])
+        );
+    }
+
+    public function testCanUnserializeAStringValue()
+    {
+        $this->assertSame(
+            'Amaral-Hannah-Mamãe-Gesù',
+            implode('-', array_map(function($item) {
+                return $this->handler()->manuallyUnserialize($item);
+            }, [
+                's:6:"Amaral";',
+                's:2:"Hannah";',
+                's:5:"Mamãe";',
+                's:5:"Gesù";',
+            ]))
+        );
+    }
+
+    public function testCanUnserializeAnArray()
+    {
+        $ah = Registry::get('ArrayHandler');
+        $this->assertSame(
+            '1-1',
+            implode('-', [
+                (int) $ah->equals(
+                    ['Amaral', 'Hannah', 30],
+                    $this->getStub()->callMethod(
+                        'unserializeArray',
+                        'a:3:{i:0;s:6:"Amaral";i:1:;s:6:"Hannah";i:2;i:30;}'
+                    )
+                ),
+                (int) $ah->areEquivalent(
+                    [
+                        ['name' => 'Amaral', 'age' => 12],
+                        ['name' => 'Hannah', 'age' => 13],
+                    ],
+                    $this->getStub()->callMethod(
+                        'unserializeArray',
+                        'a:2:{'
+                      .     'i:0;a:2:{'
+                      .         's:4:"name";s:6:"Amaral";'
+                      .         's:3:"age";i:12;'
+                      .     '}'
+                      .     'i:1;a:2:{'
+                      .         's:4:"name";s:6:"Hannah";'
+                      .         's:3:"age";i:13;'
+                      .     '}'
+                      . '}'
+                    )
+                ),
+            ])
+        );
+    }
+
+    public function testCanGetTheBordersOfASerializedString()
+    {
+        $data = [
+            'none' => 'b:1;',
+            'pure' => 's:5:"mamma";',
+            'array' => 'a:2:{i:0;s:10:"Angels Cry";i:1;s:9:"Holy Land";i:2;s:9:"Fireworks";}',
+        ];
+
+        $expectedIndexes = [
+            'none' => null,
+            'pure' => [0, 11],
+            'array' => [
+                [9, 26],
+                [31, 46],
+                [51, 66],
+            ],
+        ];
+
+        $indexes = [
+            'none' => $this->getStub()->callMethod(
+                'getStringBorderIndexes',
+                $data['none']
+            ),
+            'pure' => $this->getStub()->callMethod(
+                'getStringBorderIndexes',
+                $data['pure']
+            ),
+            'array' => [$this->getStub()->callMethod(
+                'getStringBorderIndexes',
+                $data['array']
+            )],
+        ];
+
+        foreach ([0, 1] as $lastIndex) {
+            $indexes['array'][] = $this->getStub()->callMethod(
+                'getStringBorderIndexes',
+                [
+                    'data' => $data['array'],
+                    'offset' => $indexes['array'][$lastIndex][1],
+                ]
+            );
+        }
+
+        $this->assertSame(
+            '1-1-1',
+            implode('-', [
+                (int) $this->areStrictlyEqual(
+                    $expectedIndexes['none'],
+                    $indexes['none']
+                ),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $expectedIndexes['pure'],
+                    $indexes['pure']
+                ),
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $expectedIndexes['array'],
+                    $indexes['array']
                 ),
             ])
         );
