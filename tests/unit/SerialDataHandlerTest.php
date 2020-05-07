@@ -387,4 +387,308 @@ class SerialDataHandlerTest extends TestCase implements StubInterface
             ])
         );
     }
+
+    public function testCanGetTheBordersOfEveryStringInTheSerialization()
+    {
+        $data = 'a:2:{'
+            . 'i:0;s:10:"Angels Cry";'
+            . 'i:1;s:9:"Holy Land";'
+            . 'i:2;s:9:"Fireworks";'
+            . '}';
+
+        $expectedIndexes = [
+            [9, 26],
+            [31, 46],
+            [51, 66],
+        ];
+
+        $indexes = $this->getStub()->callMethod(
+            'getStringsBorders',
+            $data
+        );
+
+        $this->assertSame(
+            '1',
+            implode('-', [
+                (int) Registry::get('ArrayHandler')->areEquivalent(
+                    $expectedIndexes,
+                    $indexes
+                ),
+            ])
+        );
+    }
+
+    public function testCanGetTheSerializationPiecesAroundTheStrings()
+    {
+        $data = 'a:2:{'
+            . 'i:0;s:10:"Angels Cry";'
+            . 'i:1;s:9:"Holy Land";'
+            . 'i:2;s:9:"Fireworks";'
+            . '}';
+
+        $borders = [
+            [9, 26],
+            [31, 46],
+            [51, 66],
+        ];
+
+        $pieces = $this->getStub()->callMethod(
+            'getPiecesAroundTheBorders',
+            [
+                'data' => $data,
+                'borders' => $borders,
+            ]
+        );
+
+        $expectedPieces = [
+            'a:2:{i:0;',
+            'i:1;',
+            'i:2;',
+            '}',
+        ];
+
+        $this->assertSame(
+            '1-1-1-1-1',
+            implode('-', [
+                (int) ($pieces[0] === $expectedPieces[0]),
+                (int) ($pieces[1] === $expectedPieces[1]),
+                (int) ($pieces[2] === $expectedPieces[2]),
+                (int) ($pieces[3] === $expectedPieces[3]),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $expectedPieces,
+                    $pieces
+                ),
+            ])
+        );
+    }
+
+    public function testCanGetTheStringsUsingTheBorders()
+    {
+        $data = 'a:2:{'
+            . 'i:0;s:10:"Angels Cry";'
+            . 'i:1;s:9:"Holy Land";'
+            . 'i:2;s:9:"Fireworks";'
+            . '}';
+
+        $borders = [
+            [9, 26],
+            [31, 46],
+            [51, 66],
+        ];
+
+        $expectedStrings = [
+            's:10:"Angels Cry";',
+            's:9:"Holy Land";',
+            's:9:"Fireworks";',
+        ];
+
+        $strings = $this->getStub()->callMethod(
+            'getStringParts',
+            [
+                'data' => $data,
+                'borders' => $borders,
+            ]
+        );
+
+        $this->assertSame(
+            '1-1-1-1',
+            implode('-', [
+                (int) ($strings[0] === $expectedStrings[0]),
+                (int) ($strings[1] === $expectedStrings[1]),
+                (int) ($strings[2] === $expectedStrings[2]),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $expectedStrings,
+                    $strings
+                ),
+            ])
+        );
+    }
+
+    public function testCanFixABrokenSerializedString()
+    {
+        $data = [
+            's:6:"Angels Cry";',
+            's:5:"mamãe";',
+            's:11:"Gesù è luce";',
+            's:14:"Keep the Faith";',
+        ]; 
+
+        $expectedStrings = [
+            's:10:"Angels Cry";',
+            's:6:"mamãe";',
+            's:13:"Gesù è luce";',
+            's:14:"Keep the Faith";',
+        ];
+
+        $result = array_map(function($str) {
+            return $this->getStub()->callMethod(
+                'fixSerializedString',
+                $str
+            );
+        }, $data);
+
+        $this->assertSame(
+            '1-1-1-1-1',
+            implode('-', [
+                (int) ($result[0] === $expectedStrings[0]),
+                (int) ($result[1] === $expectedStrings[1]),
+                (int) ($result[2] === $expectedStrings[2]),
+                (int) ($result[3] === $expectedStrings[3]),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $expectedStrings,
+                    $result
+                ),
+            ])
+        );
+    }
+
+    public function testCanSeparateTheSerializationByTheStrings()
+    {
+        $data = 'a:2:{'
+            . 'i:0;s:10:"Angels Cry";'
+            . 'i:1;s:9:"Holy Land";'
+            . 'i:2;s:9:"Fireworks";'
+            . '}';
+        
+        $expected = [
+            'a:2:{i:0;',
+            's:10:"Angels Cry";',
+            'i:1;',
+            's:9:"Holy Land";',
+            'i:2;',
+            's:9:"Fireworks";',
+            '}',
+        ];
+
+        $equals = array_reduce([0, 1, 2, 3, 4, 5, 6], function($carry, $i) {
+            return [
+                $carry[0],
+                $carry[1],
+                array_merge(
+                    $carry[2],
+                    [$carry[0][$i] === $carry[1][$i]]
+                ),
+            ];
+        }, [
+            $this->getStub()->callMethod(
+                'explodeByStrings',
+                $data
+            ),
+            $expected,
+            []
+        ])[2];
+
+        $this->assertSame(
+            '1-1-1-1-1-1-1',
+            implode('-', $equals)
+        );
+    }
+
+    public function testCanFixAnArraySerialization()
+    {
+        $data = 'a:4:{'
+            .     'i:0;s:6:"Angels Cry";'
+            .     'i:1;s:5:"mamãe";'
+            .     'i:2;s:11:"Gesù è luce";'
+            .     'i:3;s:14:"Keep the Faith";'
+            .   '}';
+
+        $expected = 'a:4:{'
+            .     'i:0;s:10:"Angels Cry";'
+            .     'i:1;s:6:"mamãe";'
+            .     'i:2;s:13:"Gesù è luce";'
+            .     'i:3;s:14:"Keep the Faith";'
+            .   '}';
+
+        $this->assertSame(
+            $expected,
+            $this->getStub()->callMethod(
+                'fixSerializedArray',
+                $data
+            )
+        );
+    }
+
+    public function testTheSerialDataHandlerCanFixSerializedStringsAndArrays()
+    {
+        $data = [
+            's:6:"Angels Cry";',
+            's:5:"mamãe";',
+            's:11:"Gesù è luce";',
+            's:14:"Keep the Faith";',
+            'a:4:{'
+        .     'i:0;s:6:"Angels Cry";'
+        .     'i:1;s:5:"mamãe";'
+        .     'i:2;s:11:"Gesù è luce";'
+        .     'i:3;s:14:"Keep the Faith";'
+        .   '}',
+        ];
+
+        $expected = [
+            's:10:"Angels Cry";',
+            's:6:"mamãe";',
+            's:13:"Gesù è luce";',
+            's:14:"Keep the Faith";',
+            'a:4:{'
+        .     'i:0;s:10:"Angels Cry";'
+        .     'i:1;s:6:"mamãe";'
+        .     'i:2;s:13:"Gesù è luce";'
+        .     'i:3;s:14:"Keep the Faith";'
+        .   '}',
+        ];
+
+        $deserializedBroken = [
+            false,
+            false,
+            false,
+            'Keep the Faith',
+            false,
+        ];
+        $deserializedFixed = [
+            'Angels Cry',
+            'mamãe',
+            'Gesù è luce',
+            'Keep the Faith',
+            [
+                'Angels Cry',
+                'mamãe',
+                'Gesù è luce',
+                'Keep the Faith',
+            ]
+        ];
+
+        $this->assertSame(
+            '1-1-1-1',
+            implode('-', [
+                (int) Registry::get('ArrayHandler')->equals(
+                    $expected,
+                    array_map(function($str) {
+                        return Registry::get(
+                            'SerialDataHandler'
+                        )->fixSerializedData($str);
+                    }, $data)
+                ),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $deserializedBroken,
+                    array_map(function($str) {
+                        return @unserialize($str);
+                    }, $data)
+                ),
+                (int) Registry::get('ArrayHandler')->equals(
+                    array_slice($deserializedFixed, 0, 4),
+                    array_map(function($str) {
+                        return unserialize(Registry::get(
+                            'SerialDataHandler'
+                        )->fixSerializedData($str));
+                    }, array_slice($data, 0, 4))
+                ),
+                (int) Registry::get('ArrayHandler')->equals(
+                    $deserializedFixed[4],
+                    unserialize(Registry::get(
+                        'SerialDataHandler'
+                    )->fixSerializedData($data[4]))
+                ),
+            ])
+        );
+    }
 }

@@ -47,7 +47,8 @@ class SerialDataHandler
 
     protected function stringRepr($data)
     {
-        return 's:' . \strlen($data) . ':"' . $data . '";';
+        if (\is_string($data))
+            return 's:' . \strlen($data) . ':"' . $data . '";';
     }
 
     protected function assoc2index($arr)
@@ -154,7 +155,15 @@ class SerialDataHandler
 
     protected function unserializeString($str)
     {
-        return \trim(\explode(':', \substr($str, 0, -1))[2], '"');
+        if (
+            \strlen($str) < 7 || // the emtpy string s:0:"";
+            !\strpos($str, '"') ||
+            \substr($str, -2) !== '";'
+        )
+            return;
+
+        return \substr($str, \strpos($str, '"') + 1, -2);
+//        return \trim(\explode(':', \substr($str, 0, -1))[2], '"');
     }
 
     protected function getSerializedArraySize($str)
@@ -252,14 +261,118 @@ class SerialDataHandler
         return array($begin, $end + 1);
     }
 
-    public function fixSerializedStrings()
+    protected function getStringsBorders($data)
     {
-        // 1 - extract the serialized strings
+        $max = 100;
+        $count = 0;
 
-        // 2 - slice the original string into pieces without the serialized strings
+        $borders = array();
+        $indexes = $this->getStringBorderIndexes($data);
 
-        // 3 - fix the serialized strings
+        while (
+            (++$count < $max) && 
+            \is_array($indexes)
+        ) {
+            $borders[] = $indexes;
+            $indexes = $this->getStringBorderIndexes($data, $indexes[1]);
+        }
 
-        // 4 - glue bak together intertwining the pieces and the fixed strings
+        return $borders;
+    }
+
+    protected function getPiecesAroundTheBorders($data, $borders)
+    {
+        if (!\is_array($borders) || empty($borders))
+            return array($data);
+
+        $pieces = array(\substr(
+            $data,
+            0,
+            $borders[0][0]
+        ));
+
+        for ($i = 1; $i < \count($borders); $i++) {
+            $pieces[] = \substr(
+                $data,
+                $borders[$i - 1][1] + 1,
+                ($borders[$i][0] - $borders[$i - 1][1] - 1)
+            );
+        }
+
+        if (\count($borders) > 1)
+            $pieces[] = \substr(
+                $data,
+                $borders[\count($borders) - 1][1] + 1
+            );
+
+        return $pieces;
+    }
+
+    protected function getStringParts($data, $borders)
+    {
+        return \array_reduce($borders, function($carry, $border) {
+            return array(
+                $carry[0],
+                \array_merge(
+                    $carry[1],
+                    array(\substr(
+                        $carry[0],
+                        $border[0],
+                        $border[1] - $border[0] + 1
+                    ))
+                ),
+            );
+        }, array($data, array()))[1];
+    }
+
+    protected function fixSerializedString($str, $testTypeBefore = true)
+    {
+        if ($testTypeBefore && $this->getSerializedType($str) !== 'string')
+            return $str;
+
+        return $this->stringRepr($this->unserializeString($str));
+    }
+
+    protected function explodeByStrings($data)
+    {
+        $borders = $this->getStringsBorders($data);
+        $strings = $this->getStringParts($data, $borders);
+        $pieces = $this->getPiecesAroundTheBorders($data, $borders);
+        $exploded = array($pieces[0]);
+        for ($i = 1; $i < \count($pieces); $i++) {
+            $exploded[] = $strings[$i - 1];
+            $exploded[] = $pieces[$i];
+        }
+
+        foreach (array($borders, $strings, $pieces) as $item) {
+            foreach ($item as $key => $value) {
+                unset($item[$key]);
+            }
+        }
+        unset($borders, $strings, $pieces, $key, $value, $item);
+
+        return $exploded;
+    }
+
+    protected function fixSerializedArray($data)
+    {
+        return \implode(\array_map(function($str) {
+            return $this->fixSerializedString($str);
+        }, $this->explodeByStrings($data)));
+    }
+
+    public function fixSerializedData($data)
+    {
+        switch($this->getSerializedType($data)) {
+            case 'string':
+                return $this->fixSerializedString($data, false);
+            case 'array':
+                return $this->fixSerializedArray($data, false);
+            default:
+                return $data;
+//                return $this->manuallySerialize(
+//                    $this->manuallyUnserialize($data)
+//                );
+        }
     }
 }
