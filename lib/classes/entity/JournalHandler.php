@@ -129,10 +129,18 @@ class JournalHandler extends EntityHandler implements ImportExport
             $this->getJournalSettings($journal->getId())
         );
 
+        $journal->get('settings')->forEachValue(function($stg) {
+            Registry::get('EntitySettingHandler')->fixObjectSettingValue($stg);
+        });
+
         $journal->set(
             'plugins', 
             $this->getJournalPlugins($journal->getId())
         );
+
+        $journal->get('plugins')->forEachValue(function($plg) {
+            Registry::get('EntitySettingHandler')->fixObjectSettingValue($plg);
+        });
 
         return $this->dumpEntity($journal);
     }

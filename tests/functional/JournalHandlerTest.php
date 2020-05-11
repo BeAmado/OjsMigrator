@@ -46,7 +46,7 @@ class JournalHandlerTest extends FunctionalTest
         $imported = Registry::get('JournalHandler')->import($journal);
 
         $this->assertSame(
-            '1-1-1-1-2',
+            '1-1-1-1-4',
             implode('-', [
                 (int) $imported,
                 (int) is_null($journalsBefore),
@@ -113,6 +113,56 @@ class JournalHandlerTest extends FunctionalTest
                 (int) $fileExistedBefore,
                 (int) $fileExistsAfter,
             ])
+        );
+    }
+
+    /**
+     * @depends testCanExportTheTestJournal
+     */
+    public function testFixesTheBrokenSettingValueSerializationBeforeExport()
+    {
+        $journal = $this->createTestJournal();
+        $journalId = Registry::get('DataMapper')->getMapping(
+            'journals',
+            $journal->getId()
+        );
+
+        $settings = Registry::get('JournalSettingsDAO')->read([
+            'journal_id' => $journalId
+        ]);
+
+        $broken = [];
+        for ($i = 0; $i < $settings->length(); $i++) {
+            $name = $settings->get($i)->getData('setting_name');
+            if (\in_array($name, ['madre', 'albums',]))
+                $broken[$name] = $settings->get($i)->getData('setting_value');
+        }
+
+        $expSettings = Registry::get('JsonHandler')->createFromFile(
+            Registry::get('JournalHandler')->getJournalFilenameInEntitiesDir()
+        )->get('settings');
+
+        $good = [];
+        for ($i = 0; $i < $expSettings->length(); $i++) {
+            $name = $expSettings->get($i)->get('setting_name')->getValue();
+            if (\in_array($name, ['madre', 'albums',]))
+                $good[$name] = $expSettings->get($i)
+                                           ->get('setting_value')->getValue();
+        }
+
+        $merged = array(
+            $broken['madre'],
+            $broken['albums'],
+            $good['madre'],
+            $good['albums']
+        );
+
+        $this->assertSame(
+            '||1|1',
+            implode('|', array_map(
+                array(Registry::get('SerialDataHandler'), 'serializationIsOk'),
+                $merged
+            ))
         );
     }
 }
