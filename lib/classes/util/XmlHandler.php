@@ -176,6 +176,7 @@ class XmlHandler implements FiletypeHandler
      */
     public function dumpToFile($filename, $obj)
     {
-
+        throw new \Exception('Method dumpToFile not yet implemented '
+            . 'in the XmlHandler');
     }
 }

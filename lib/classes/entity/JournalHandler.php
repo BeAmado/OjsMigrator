@@ -6,6 +6,9 @@ use \BeAmado\OjsMigrator\ImportExport;
 
 class JournalHandler extends EntityHandler implements ImportExport
 {
+    /**
+     * @Override
+     */
     public function create($data, $extra = null)
     {
         return new Entity($data, 'journals');
@@ -118,34 +121,28 @@ class JournalHandler extends EntityHandler implements ImportExport
         )
             return;
 
-        $journal = $res->get(0);
+        $journal = $res->get(0)->cloneInstance();
+        Registry::get('MemoryManager')->destroy($res);
 
         $journal->set(
             'settings', 
             $this->getJournalSettings($journal->getId())
         );
 
+        $journal->get('settings')->forEachValue(function($stg) {
+            Registry::get('EntitySettingHandler')->fixObjectSettingValue($stg);
+        });
+
         $journal->set(
             'plugins', 
             $this->getJournalPlugins($journal->getId())
         );
 
-//        $filename = Registry::get('entitiesDir')
-//            . \BeAmado\OjsMigrator\DIR_SEPARATOR . 'journal.json';
-//
-//        $exportedJournal = Registry::get('JsonHandler')->dumpToFile(
-//            $filename,
-//            $journal
-//        );
+        $journal->get('plugins')->forEachValue(function($plg) {
+            Registry::get('EntitySettingHandler')->fixObjectSettingValue($plg);
+        });
 
         return $this->dumpEntity($journal);
-        // export the users
-        // export the groups
-        // export the announcements
-        // export the review forms
-        // export the sections
-        // export the issues
-        // export articles
     }
 
     public function import($journal)
@@ -201,6 +198,9 @@ class JournalHandler extends EntityHandler implements ImportExport
         ));
     }
 
+    /**
+     * @Override
+     */
     protected function formJsonFilename($journal)
     {
         return Registry::get('FileSystemManager')->formPath(array(
@@ -220,12 +220,15 @@ class JournalHandler extends EntityHandler implements ImportExport
         return \array_reduce(
             Registry::get('FileSystemManager')->listdir(
                 Registry::get('entitiesDir')
-            ),
+            ) ?: array(),
             function($carry, $item) {
                 if (\strpos($carry, 'journal') !== false)
                     return $carry;
 
-                if (\strpos(\basename($item), 'journal') !== false)
+                if (
+                    \strpos(\basename($item), 'journal') !== false &&
+                    \is_file($item)
+                )
                     return $item;
 
                 return $carry;
@@ -237,7 +240,9 @@ class JournalHandler extends EntityHandler implements ImportExport
     public function getJournalIdFromEntitiesDir()
     {
         return \explode('-', 
-            \explode('.', $this->getJournalFilenameInEntitiesDir())[0]
+            \explode('.',
+                \basename($this->getJournalFilenameInEntitiesDir())
+            )[0]
         )[1];
     }
 }

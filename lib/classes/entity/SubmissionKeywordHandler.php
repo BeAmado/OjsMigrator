@@ -32,15 +32,44 @@ class SubmissionKeywordHandler extends EntityHandler
         return $this->smHr()->formTableName($name);
     }
 
+    protected function mapKeyword($oldData, $newData)
+    {
+        return Registry::get('DataMapper')->mapData(
+            $this->tableName('search_keyword_list'),
+            array(
+                'old' => $oldData->get('keyword_id')->getValue(),
+                'new' => $newData->get('keyword_id')->getValue(),
+            )
+        );
+    }
+
+    protected function keywordExists($data)
+    {
+        $res = $this->smHr()->getDAO('search_keyword_list')->read(array(
+            'keyword_text' => $data->get('keyword_text')->getValue(),
+        ));
+
+        if ($this->isMyObject($res) && $res->length() > 0)
+            return $this->mapKeyword($data, $res->get(0)) || true;
+
+        Registry::get('MemoryManager')->destroy($res);
+        return false;
+    }
+
+    protected function keywordIsMapped($data)
+    {
+        return Registry::get('DataMapper')->isMapped(
+            $this->tableName('search_keyword_list'),
+            $data->get('keyword_id')->getValue()
+        );
+    }
+
     protected function importKeywordList($data)
     {
         if (!$data->hasAttribute('keyword_id'))
             return false;
 
-        if (Registry::get('DataMapper')->isMapped(
-            $this->tableName('search_keyword_list'),
-            $data->get('keyword_id')->getValue()
-        ))
+        if ($this->keywordIsMapped($data) || $this->keywordExists($data))
             return true;
 
         return $this->importEntity(

@@ -205,16 +205,9 @@ class SubmissionHandler extends EntityHandler implements ImportExport
             : true);
     }
 
-    protected function importSubmissionComment($data)
+    protected function importSubmissionComments($sm)
     {
-        return $this->importEntity(
-            $data,
-            $this->formTableName('comments'),
-            array(
-                $this->formTableName() => $this->formIdField(),
-                'users' => 'author_id',
-            )
-        );
+        return Registry::get('SubmissionCommentHandler')->importComments($sm);
     }
 
     protected function importSubmissionKeywords($sm)
@@ -354,11 +347,6 @@ class SubmissionHandler extends EntityHandler implements ImportExport
                 return $this->importSubmissionGalley($galley);
             });
 
-        // import the submission comments
-        if ($submission->hasAttribute('comments'))
-            $submission->get('comments')->forEachValue(function($comment) {
-                return $this->importSubmissionComment($comment);
-            });
 
         // import the authors
         if ($submission->hasAttribute('authors'))
@@ -397,6 +385,10 @@ class SubmissionHandler extends EntityHandler implements ImportExport
             $submission->get('review_assignments')->forEachValue(function($ra) {
                 return $this->importReviewAssignment($ra);
             });
+
+        // import the submission comments
+        if ($submission->hasAttribute('comments'))
+            $this->importSubmissionComments($submission);
 
         return true;
     }
@@ -500,11 +492,14 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
     protected function getSubmissionComments($submission)
     {
-        return $this->getEntityDAO(
-            $this->formTableName('comments')
-        )->read(array(
-            $this->formIdField() => $this->getSubmissionId($submission)
-        ));
+        return Registry::get(
+            'SubmissionCommentHandler'
+        )->getSubmissionComments($this->getSubmissionId($submission));
+//        return $this->getEntityDAO(
+//            $this->formTableName('comments')
+//        )->read(array(
+//            $this->formIdField() => $this->getSubmissionId($submission)
+//        ));
     }
 
     protected function getSubmissionKeywords($submission)

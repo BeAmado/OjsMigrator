@@ -445,46 +445,65 @@ class FileSystemManager
         return \rename($old, $new);
     }
 
+    protected function copyContent($old, $new, $overwrite = false, $depth = 0)
+    {
+        if (
+            $depth > 1 ||
+            (!$overwrite && $this->dirExists($old) && $this->fileExists($new))
+        )
+            return false;
+
+        if ($this->dirExists($old) && $this->fileExists($new))
+            $this->removeFile($new);
+
+        if ($this->dirExists($old) && !$this->dirExists($new))
+            return $this->copyDir($old, $new, $overwrite, $depth + 1);
+
+        foreach ($this->listdir($old) as $item) {
+            if (!\is_file($item) && !\is_dir($item))
+                continue;
+
+            $this->{\is_dir($item) ? 'copyDir' : 'copyFile'}(
+                $item,
+                $this->formPath(array($new, \basename($item)))
+            );
+        }
+    }
+
     /**
      * Copies the directory to the new location.
      *
      * @param string $old
      * @param string $new
-     * @param boolean $merge
+     * @param boolean $overwrite
      * @return boolean
      */
-    public function copyDir($old, $new, $merge = true)
+    public function copyDir($old, $new, $overwrite = false, $depth = 0)
     {
+        if ($depth > 1)
+            return false;
+
         if (!$this->dirExists($old))
             return false;
         
         if (\is_dir($old) && $this->dirExists($new))
-            return $this->copyContent($old, $new);
+            return $this->copyContent($old, $new, $overwrite, $depth);
 
-        $result = $this->createDir($new);
+        $res = $this->createDir($new);
 
         foreach ($this->listdir($old) as $item) {
-            if ($result == false)
+            if ($res == false)
                 break;
 
-            if (\is_dir($item))
-                $result = $result && $this->copyDir(
-                    $item, 
-                    $this->formPath(array(
-                        $new,
-                        \basename($item)
-                    ))
-                );
-            else if (\is_file($item))
-                $result = $result && $this->copyFile(
-                    $item,
-                    $this->formPath(array(
-                        $new,
-                        \basename($item)
-                    ))
-                );
+            if (!\is_dir($item) && !\is_file($item))
+                continue;
+
+            $res = $res && $this->{\is_dir($item) ? 'copyDir' : 'copyFile'}(
+                $item, 
+                $this->formPath(array($new, \basename($item)))
+            );
         }
 
-        return $result;
+        return $res;
     }
 }
