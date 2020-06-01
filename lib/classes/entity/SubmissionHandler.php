@@ -390,6 +390,8 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         if ($submission->hasAttribute('comments'))
             $this->importSubmissionComments($submission);
 
+        $this->updateSubmission($submission);
+
         return true;
     }
 
@@ -687,5 +689,25 @@ class SubmissionHandler extends EntityHandler implements ImportExport
     public function export($journal)
     {
         return $this->exportSubmissionsFromJournal($journal);
+    }
+
+    protected function updateSubmission($data)
+    {
+        return $this->importEntity(
+            $data,
+            $this->formTableName(),
+            array(
+                $this->formTableName() => $this->formIdField(),
+                'users' => 'user_id',
+                'sections' => 'section_id',
+                'journals' => 'journal_id',
+                $this->formTableName('files') => array(
+                    'submission_file_id',
+                    'revised_file_id',
+                    'review_file_id',
+                    'editor_file_id',
+                ),
+            )
+        );
     }
 }

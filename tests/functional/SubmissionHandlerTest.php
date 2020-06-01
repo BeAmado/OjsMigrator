@@ -1453,4 +1453,38 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             ])
         );
     }
+
+    /**
+     * @depends testCanImportTheRugbyChampionship2015Submission
+     * @depends testCanImportRugbyWorldCup2015Submission
+     */
+    public function testCanUpdateASubmission()
+    {
+        $sm = $this->createTRC2015();
+        $sm->set('status', 5);
+        $sm->set('submission_progress', 3);
+        $sm->set(
+            'editor_file_id',
+            $sm->get('files')->get(-1)->get('file_id')->getValue()
+        );
+
+        $updated = $this->getStub()->callMethod(
+            'updateSubmission',
+            $sm
+        );
+
+        $rwc = $this->createRWC2015();
+        $updatedRWC = $this->getStub()->callMethod(
+            'updateSubmission',
+            $rwc
+        );
+
+        $this->assertSame(
+            '1-0',
+            implode('-', [
+                (int) $updated,
+                (int) $updatedRWC,
+            ])
+        );
+    }
 }

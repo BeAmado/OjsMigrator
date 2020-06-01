@@ -522,6 +522,30 @@ class EntityHandler
         return $pks;
     }
 
+    protected function mapAttributesUsingTable(
+        $entity,
+        $attributes,
+        $table,
+        $depth
+    ) {
+        if ($depth > 1)
+            return false;
+
+        if (!\is_array($attributes))
+            return false;
+
+        foreach ($attributes as $attr) {
+            if (!$this->setMappedData(
+                $entity,
+                array($table => $attr),
+                $depth + 1
+            ))
+                return false;
+        }
+
+        return true;
+    }
+
     /**
      * Sets the attributes of the given entity with data mapped.
      *
@@ -529,7 +553,7 @@ class EntityHandler
      * @param array $args
      * @return boolean
      */
-    public function setMappedData($entity, $args = array())
+    public function setMappedData($entity, $args = array(), $depth = 0)
     {
         if (!\is_array($args))
             return;
@@ -538,6 +562,18 @@ class EntityHandler
             return;
 
         foreach ($args as $table => $field) {
+            if (\is_array($field)) {
+                if ($this->mapAttributesUsingTable(
+                    $entity, 
+                    $field, 
+                    $table, 
+                    $depth
+                ))
+                    continue;
+                else
+                    return false;
+            }
+
             if (
                 !$entity->hasAttribute($field) ||
                 empty($entity->get($field)->getValue())
