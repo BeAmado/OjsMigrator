@@ -5,42 +5,59 @@ use \BeAmado\OjsMigrator\Registry;
 
 class DataMappingTranslator
 {
-    private $dataMapping;
-    private $fuzzyData;
+    /**
+     * @var \BeAmado\OjsMigrator\Extension\XmlDataMappingProcessor
+     */
+    protected $xmlProcessor;
 
-    public function __construct()
+    /**
+     * Initializes the instance creating an XmlDataMappingProcessor.
+     *
+     * @param string $dataMappingFilename > The xml file where all the data
+     * mappings for a journal was previously stored.
+     * @param string $xmlMappingDir > The directory where the xml mapping files
+     * will be stored.
+     */
+    public function __construct($dataMappingFilename, $xmlMappingDir)
     {
-        $this->dataMapping = Registry::get('MemoryManager')->create();
+        $this->xmlProcessor = new XmlDataMappingProcessor(
+            $dataMappingFilename,
+            $xmlMappingDir
+        );
     }
 
-    protected function getDataMapping($name = null)
+    protected function mappingOk($mapping)
     {
-        if ($name === null)
-            return $this->dataMapping;
-
-        if (\is_string($name) && $this->dataMapping->hasAttribute($name))
-            return $this->dataMapping->get($name);
+        return \is_array($mapping) &&
+            \array_key_exists('old', $mapping) &&
+            \is_numeric($mapping['old']) && $mapping['old'] > 0 &&
+            \array_key_exists('new', $mapping) &&
+            \is_numeric($mapping['new']) && $mapping['new'] > 0;
     }
 
-    protected function readXmlDataMapping($filename)
+    /**
+     * Maps the ids that are in the object which was loaded from an xml 
+     * mapping file.
+     *
+     * @param string $entity
+     * @return boolean
+     */
+    public function mapData($entity)
     {
-        return Registry::get('XmlHandler')->createFromFile($filename);
-    }
+        return \array_reduce(
+            $this->xmlProcessor->getMappingsAsArray($entity),
+            function($c, $mapping) {
+                if (!$this->mappingOk($mapping) || !$c[0])
+                    return array(false, null);
 
-    protected function loadMapping($filename)
-    {
-        $this->fuzzyData = $this->readXmlDataMapping($filename);
-    }
+                $c[0] = Registry::get('DataMapper')->mapData(
+                    $c[1], // the entity name
+                    $mapping
+                );
 
-    protected function setJournalMapping()
-    {
-        if (!isset($this->fuzzyData))
-            return;
-
-        
-    }
-
-    protected function getJournalMapping()
-    {
+                return $c;
+            },
+            array(true, $entity)
+        )[0];
     }
 }

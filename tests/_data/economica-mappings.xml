@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<data_mappings>
+    <data_mapping journal="revistaeconomica" test_journal="">
+        <journal>
+            <path>
+                <old>revistaeconomica</old>
+                <new>revistaeconomica</new>
+            </path>
+            <id>
+                <old>1</old>
+                <new>69</new>
+            </id>
+        </journal>
+        <mappings>
+            <journal_id>
+                <mapping><old>1</old><new>69</new></mapping>
+            </journal_id>
+            <journal_path>
+                <mapping>
+                    <old>revistaeconomica</old><new>revistaeconomica</new>
+                </mapping>
+            </journal_path>
+            <review_form_id>
+                <mapping>
+                    <old>1</old><new>181</new>
+                </mapping>
+            </review_form_id>
+            <review_form_element_id/>
+            <section_id>
+                <mapping><old>1</old><new>630</new></mapping>
+                <mapping><old>2</old><new>633</new></mapping>
+                <mapping><old>3</old><new>631</new></mapping>
+                <mapping><old>4</old><new>632</new></mapping>
+            </section_id>
+            <article_id>
+                <mapping><old>1</old><new>35043</new></mapping>
+                <mapping><old>8</old><new>35044</new></mapping>
+                <mapping><old>21</old><new>35045</new></mapping>
+                <mapping><old>23</old><new>35046</new></mapping>
+                <mapping><old>24</old><new>35047</new></mapping>
+                <mapping><old>25</old><new>35048</new></mapping>
+                <mapping><old>33</old><new>35049</new></mapping>
+            </article_id>
+        </mappings>
+    </data_mapping>
+</data_mappings>
