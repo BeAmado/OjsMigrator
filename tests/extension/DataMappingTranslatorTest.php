@@ -8,12 +8,6 @@ use BeAmado\OjsMigrator\DataMappingManager;
 
 class DataMappingTranslatorTest extends ExtensionTest
 {
-    public static function setUpBeforeClass($args = [
-        'createTables' => ['journals'],
-    ]) : void {
-        parent::setUpBeforeClass($args);
-    }
-
     public function getStub()
     {
         return new class(
@@ -86,8 +80,8 @@ class DataMappingTranslatorTest extends ExtensionTest
     {
         $this->assertSame(
             json_encode([
-                'old' => ['id' => '1', 'path' => 'ancient_wind'],
-                'new' => ['id' => '6', 'path' => 'new_wave'],
+                'old' => ['journal_id' => '1', 'path' => 'ancient_wind'],
+                'new' => ['journal_id' => '6', 'path' => 'new_wave'],
             ]),
             json_encode($this->getStub()->callMethod('getJournalData'))
         );
@@ -99,21 +93,8 @@ class DataMappingTranslatorTest extends ExtensionTest
     public function testCanGetTheJournalToMap()
     {
         $journalData = $this->getStub()->callMethod('getJournalData');
-        Registry::get('JournalsDAO')->create([
-            'journal_id' => $journalData['new']['id'],
-            'path' => $journalData['new']['path'],
-        ]);
 
-        Registry::get('JournalsDAO')->update([
-            'set' => [
-                'journal_id' => $journalData['new']['id'],
-            ],
-            'where' => [
-                'path' => $journalData['new']['path'],
-            ],
-        ]);
-
-        $journal = $this->translator()->getJournal();
+        $journal = $this->getStub()->callMethod('createJournal');
 
         $this->assertSame(
             '1-1-1',
@@ -121,7 +102,7 @@ class DataMappingTranslatorTest extends ExtensionTest
                 (int) Registry::get('EntityHandler')->isEntity($journal),
                 (int) $this->areEqual(
                     $journal->getId(),
-                    $journalData['new']['id']
+                    $journalData['new']['journal_id']
                 ),
                 (int) $this->areEqual(
                     $journal->getData('path'),

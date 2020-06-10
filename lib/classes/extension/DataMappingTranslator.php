@@ -86,8 +86,8 @@ class DataMappingTranslator
      * mappings file using the fields **journal_id** and **journal_path**.
      *
      * @return array ```[
-     *     'old' => ['id' => {old_id}, 'path' => {old_path}],
-     *     'new' => ['id' => {new_id?, 'path' => {new_path}]
+     *     'old' => ['journal_id' => {old_id}, 'path' => {old_path}],
+     *     'new' => ['journal_id' => {new_id}, 'path' => {new_path}]
      * ]```
      */
     protected function getJournalData()
@@ -97,11 +97,11 @@ class DataMappingTranslator
 
         return array(
             'old' => array(
-                'id' => $idMapping['old'],
+                'journal_id' => $idMapping['old'],
                 'path' => $pathMapping['old'],
              ),
             'new' => array(
-                'id' => $idMapping['new'],
+                'journal_id' => $idMapping['new'],
                 'path' => $pathMapping['new'], 
             ),
         );
@@ -117,6 +117,18 @@ class DataMappingTranslator
         return Registry::get('JournalsDAO')->read(array(
             'path' => $this->getJournalData()['new']['path'],
         ))->get(0);
+    }
+
+    /**
+     * Creates a new Journal Entity with the journal new path and id.
+     *
+     * @return \BeAmado\OjsMigrator\Entity\Entity
+     */
+    protected function createJournal()
+    {
+        return Registry::get('JournalHandler')->create(
+            $this->getJournalData()['new']
+        );
     }
 
     protected function entitiesToMap()
@@ -187,7 +199,7 @@ class DataMappingTranslator
     public function translateAllMappings()
     {
         Registry::get('DataMappingManager')->setDataMappingDir(
-            $this->getJournal()
+            $this->createJournal()
         );
 
         return \array_reduce(
