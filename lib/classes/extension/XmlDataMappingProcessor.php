@@ -73,35 +73,63 @@ class XmlDataMappingProcessor
         return \file_get_contents($this->dataMappingFilename);
     }
 
-    protected function entityTag($entity, $close = false)
-    {
+    /**
+     * Forms a tag with the entity id or the specified field
+     *
+     * @param string $entity
+     * @param boolean $close _default_ false
+     * @param string $field _optional_
+     * @return string
+     */
+    protected function entityTag(
+        $entity,
+        $close = false,
+        $field = null
+    ) {
         return \implode(array(
             '<',
             $close ? '/' : '',
-            $this->getIdField($entity),
+            $field ?: $this->getIdField($entity),
             '>',
         ));
     }
 
-    protected function getMappingBorders($entity)
+    /**
+     * Gets the indexes of the borders delimiting the entity mapping in the
+     * xml mappings file.
+     *
+     * @param string $entity
+     * @param string $field _optional_
+     * @return array ```['beginning' => {begin_border}, 'end' => {end_border}]```
+     */
+    protected function getMappingBorders($entity, $field = null)
     {
         $borders = array('beginning' => null, 'end' => null);
         $borders['beginning'] = \strpos(
             $this->getXmlMappingText(),
-            $this->entityTag($entity)
+            $this->entityTag($entity, false, $field)
         );
 
         if ($borders['beginning'] !== false)
             $borders['end'] = \strpos(
                 $this->getXmlMappingText(),
-                $this->entityTag($entity, true),
-                $borders['beginning'] + \strlen($this->entityTag($entity))
+                $this->entityTag($entity, true, $field),
+                $borders['beginning'] + \strlen(
+                    $this->entityTag($entity, false, $field)
+                )
             );
 
         return $borders;
     }
 
-    protected function writeXmlEntityIdMappingFile($entity, $content)
+    /**
+     * Writes the content into a file putting an xml version in the first line.
+     *
+     * @param string $entity
+     * @param string $content
+     * @return boolean
+     */
+    protected function writeXmlEntityMappingFile($entity, $content)
     {
         return \file_put_contents(
             $this->formMappingFilename($entity),
@@ -116,12 +144,12 @@ class XmlDataMappingProcessor
      * Extracts the id mapping into another xml file.
      *
      * @param string $entity
-     * @param srting $idField optional
+     * @param srting $field _optional_
      * @return boolean
      */
-    public function extractXmlMapping($entity, $idField = null)
+    public function extractXmlMapping($entity, $field = null)
     {
-        $borders = $this->getMappingBorders($entity);
+        $borders = $this->getMappingBorders($entity, $field);
         if (
             empty($borders) ||
             !\is_array($borders) ||
@@ -133,18 +161,24 @@ class XmlDataMappingProcessor
         )
             return false;
         
-        return $this->writeXmlEntityIdMappingFile(
+        return $this->writeXmlEntityMappingFile(
             $entity,
             \substr(
                 $this->getXmlMappingText(),
                 $borders['beginning'],
                 $borders['end'] + 
-                    \strlen($this->entityTag($entity, true)) - 
+                    \strlen($this->entityTag($entity, true, $field)) - 
                     $borders['beginning']
             )
         );
     }
 
+    /**
+     * Reads the mappings xml file previously created for the entity
+     *
+     * @param string $entity
+     * @return \BeAmado\OjsMigrator\MyObject
+     */
     protected function readXmlMappingForEntity($entity)
     {
         return Registry::get('XmlHandler')->createFromFile(
@@ -156,15 +190,16 @@ class XmlDataMappingProcessor
      * Gets the object representing the xml mapping and turns it into an array
      *
      * @param string $entity
+     * @param string $field _optional_
      * @return array
      */
-    public function getMappingsAsArray($entity)
+    public function getMappingsAsArray($entity, $field = null)
     {
         try {
             if (!Registry::get('FileSystemManager')->fileExists(
                 $this->formMappingFilename($entity)
             ))
-                $this->extractXmlMapping($entity);
+                $this->extractXmlMapping($entity, $field);
     
             return \array_map(function($mappingNode) {
                 $mapping = array();

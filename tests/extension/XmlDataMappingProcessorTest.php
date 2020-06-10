@@ -48,39 +48,6 @@ class XmlDataMappingProcessorTest extends ExtensionTest
     /**
      * @depends testCanExtractTheSectionMappingInXml
      */
-//    public function testCanReadTheXmlIntoAnObject()
-//    {
-//        $filename = $this->getStub()->callMethod(
-//            'formMappingFilename',
-//            'sections'
-//        );
-//
-//        $obj = Registry::get('XmlHandler')->createFromFile($filename);
-//
-//        $this->assertSame(
-//            '4-1:101,2:102,3:103,4:104',
-//            implode('-', [
-//                $obj->get('children')->length(),
-//                implode(',', array_map(function($mapping) {
-//                    $old = null;
-//                    $new = null;
-//                    foreach ($mapping['children'] as $item) {
-//                        if ($item['name'] === 'old')
-//                            $old = $item['text'];
-//                        else if ($item['name'] === 'new')
-//                            $new = $item['text'];
-//                    }
-//
-//                    return implode(':', [$old, $new]);
-//
-//                }, $obj->get('children')->toArray()))
-//            ])
-//        );
-//    }
-//
-    /**
-     * @depends testCanExtractTheSectionMappingInXml
-     */
     public function testCanGetTheMappingsAsAnArray()
     {
         $this->assertTrue(Registry::get('ArrayHandler')->areEquivalent(
@@ -92,5 +59,21 @@ class XmlDataMappingProcessorTest extends ExtensionTest
             ],
             $this->processor()->getMappingsAsArray('sections')
         ));
+    }
+
+    public function testCanGetTheMappingsForASpecifiedField()
+    {
+        $this->assertSame(
+            'Tamandua:Mirim,Ovo:Jacare',
+            implode(',', array_map(function($mapping) {
+                return implode(':', [
+                    $mapping['old'],
+                    $mapping['new'],
+                ]);
+            }, $this->getStub()->callMethod('getMappingsAsArray', [
+                'entity' => 'animal',
+                'field' => 'generic',
+            ])))
+        );
     }
 }

@@ -38,6 +38,12 @@ abstract class XmlDataMappingExtensionTest extends FunctionalTest
         );
     }
 
+    protected static function setUpMappingSandbox()
+    {
+        self::createMappingSandboxIfNotExists();
+        self::copyXmlMappingsToTheMappingSandbox();
+    }
+
     protected static function removeMappingSandbox()
     {
         self::fsm()->removeWholeDir(self::mappingSandbox());
@@ -45,9 +51,8 @@ abstract class XmlDataMappingExtensionTest extends FunctionalTest
 
     public static function setUpBeforeClass($args = []) : void
     {
-        parent::setUpBeforeClass();
-        self::createMappingSandboxIfNotExists();
-        self::copyXmlMappingsToTheMappingSandbox();
+        parent::setUpBeforeClass($args);
+        self::setUpMappingSandbox();
     }
 
     public static function tearDownAfterClass($args = []) : void

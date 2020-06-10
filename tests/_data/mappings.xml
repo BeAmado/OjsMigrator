@@ -20,12 +20,62 @@
                     <old>ancient_wind</old><new>new_wave</new>
                 </mapping>
             </journal_path>
+            <generic>
+                <mapping>
+                    <old>Tamandua</old>
+                    <new>Mirim</new>
+                </mapping>
+                <mapping>
+                    <old>Ovo</old>
+                    <new>Jacare</new>
+                </mapping>
+            </generic>
             <review_form_id>
                 <mapping>
-                    <old>1</old><new>18</new>
+                    <old>1</old><new>11</new>
+                </mapping>
+                <mapping>
+                    <old>2</old><new>12</new>
+                </mapping>
+                <mapping>
+                    <old>3</old><new>13</new>
+                </mapping>
+                <mapping>
+                    <old>4</old><new>14</new>
+                </mapping>
+                <mapping>
+                    <old>5</old><new>15</new>
+                </mapping>
+                <mapping>
+                    <old>6</old><new>16</new>
+                </mapping>
+                <mapping>
+                    <old>7</old><new>17</new>
                 </mapping>
             </review_form_id>
             <review_form_element_id/>
+            <user_id>
+                <mapping>
+                    <old>1</old>
+                    <new>2021</new>
+                </mapping>
+                <mapping>
+                    <old>2</old>
+                    <new>2022</new>
+                </mapping>
+                <mapping>
+                    <old>3</old>
+                    <new>2023</new>
+                </mapping>
+                <mapping>
+                    <old>4</old>
+                    <new>2024</new>
+                </mapping>
+                <mapping>
+                    <old>5</old>
+                    <new>2025</new>
+                </mapping>
+            </user_id>
             <section_id>
                 <mapping><old>1</old><new>101</new></mapping>
                 <mapping><old>2</old><new>102</new></mapping>
