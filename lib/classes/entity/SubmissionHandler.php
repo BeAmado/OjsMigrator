@@ -697,7 +697,6 @@ class SubmissionHandler extends EntityHandler implements ImportExport
             $data,
             $this->formTableName(),
             array(
-                $this->formTableName() => $this->formIdField(),
                 'users' => 'user_id',
                 'sections' => 'section_id',
                 'journals' => 'journal_id',

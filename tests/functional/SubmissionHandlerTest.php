@@ -1458,32 +1458,73 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
      * @depends testCanImportTheRugbyChampionship2015Submission
      * @depends testCanImportRugbyWorldCup2015Submission
      */
-    public function testCanUpdateASubmission()
+    public function testCanUpdateASubmissionThatHasSomeDataChanged()
     {
         $sm = $this->createTRC2015();
-        $sm->set('status', 5);
-        $sm->set('submission_progress', 3);
-        $sm->set(
-            'editor_file_id',
-            $sm->get('files')->get(-1)->get('file_id')->getValue()
+        $id = $this->dataMapper()->getMapping(
+            $this->handler()->formTableName(),
+            $sm->getId()
         );
+
+        $smBefore = $this->handler()->getDao()->read([
+            $this->handler()->formIdField() => $id
+        ])->get(0);
+
+        $data = [
+            'status' => $smBefore->getData('status') + 1,
+            'submission_progress' => $smBefore->getData('submission_progress') + 1,
+            'editor_file_id' => $sm->get('files')->get(-1)
+                                   ->get('file_id')->getValue(),
+        ];
+        $sm->set('status', $data['status']);
+        $sm->set('submission_progress', $data['submission_progress']);
+        $sm->set('editor_file_id', $data['editor_file_id']);
 
         $updated = $this->getStub()->callMethod(
             'updateSubmission',
             $sm
         );
 
-        $rwc = $this->createRWC2015();
-        $updatedRWC = $this->getStub()->callMethod(
-            'updateSubmission',
-            $rwc
-        );
+        $smAfter = $this->handler()->getDao()->read([
+            $this->handler()->formIdField() => $id
+        ])->get(0);
 
         $this->assertSame(
-            '1-0',
+            '1-1-0-0-0-1-1-1',
             implode('-', [
                 (int) $updated,
-                (int) $updatedRWC,
+                (int) $this->handler()->areEqual($smBefore, $smAfter, [
+                    'status',
+                    'submission_progress',
+                    'editor_file_id',
+                ], true),
+                (int) $this->areEqual(
+                    $smBefore->getData('status'),
+                    $smAfter->getData('status')
+                ),
+                (int) $this->areEqual(
+                    $smBefore->getData('submission_progress'),
+                    $smAfter->getData('submission_progress')
+                ),
+                (int) $this->areEqual(
+                    $smBefore->getData('editor_file_id'),
+                    $smAfter->getData('editor_file_id')
+                ),
+                (int) $this->areEqual(
+                    $smAfter->getData('status'),
+                    $data['status']
+                ),
+                (int) $this->areEqual(
+                    $smAfter->getData('submission_progress'),
+                    $data['submission_progress']
+                ),
+                (int) $this->areEqual(
+                    $smAfter->getData('editor_file_id'),
+                    $this->dataMapper()->getMapping(
+                        $this->handler()->formTableName('files'),
+                        $data['editor_file_id']
+                    )
+                ),
             ])
         );
     }

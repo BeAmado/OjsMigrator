@@ -404,10 +404,10 @@ class EntityHandler
      */
     protected function updateInDatabase($entity)
     {
-        if ($this->getEntityDAO($entity)->update($entity))
+        if ($this->getEntityDAO($entity)->update($entity) == 1)
             return true;
 
-       return false;
+        return false;
     }
 
     /**
