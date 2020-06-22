@@ -1490,7 +1490,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         ])->get(0);
 
         $this->assertSame(
-            '1-1-0-0-0-1-1-1',
+            '1-1-0-0-0-0-1-1-1',
             implode('-', [
                 (int) $updated,
                 (int) $this->handler()->areEqual($smBefore, $smAfter, [
@@ -1498,6 +1498,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                     'submission_progress',
                     'editor_file_id',
                 ], true),
+                (int) $this->handler()->areEqual($smBefore, $smAfter),
                 (int) $this->areEqual(
                     $smBefore->getData('status'),
                     $smAfter->getData('status')
@@ -1525,6 +1526,40 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                         $data['editor_file_id']
                     )
                 ),
+            ])
+        );
+    }
+
+    /**
+     * @depends testCanUpdateASubmissionThatHasSomeDataChanged
+     * @depends testCanImportRugbyWorldCup2011Submission
+     */
+    public function testDoesNotUpdateASubmissionIfItsDataHasNotChanged()
+    {
+        $sm = $this->createRWC2011();
+        $id = $this->dataMapper()->getMapping(
+            $this->handler()->formTableName(),
+            $sm->getId()
+        );
+
+        $smBefore = $this->handler()->getDao()->read([
+            $this->handler()->formIdField() => $id
+        ])->get(0);
+
+        $updated = $this->getStub()->callMethod(
+            'updateSubmission',
+            $sm
+        );
+
+        $smAfter = $this->handler()->getDao()->read([
+            $this->handler()->formIdField() => $id
+        ])->get(0);
+
+        $this->assertSame(
+            '0-1',
+            implode('-', [
+                (int) $updated,
+                (int) $this->handler()->areEqual($smBefore, $smAfter),
             ])
         );
     }
