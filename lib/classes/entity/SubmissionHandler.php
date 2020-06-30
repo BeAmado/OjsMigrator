@@ -268,26 +268,14 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
     protected function importReviewRound($data)
     {
-        return $this->importEntity(
-            $data,
-            'review_rounds',
-            array($this->formTableName() => 'submission_id')
-        );
+        return Registry::get('SubmissionReviewHandler')
+            ->importReviewRound($data);
     }
 
     protected function importReviewAssignment($data)
     {
-        return $this->importEntity(
-            $data,
-            'review_assignments',
-            array(
-                $this->formTableName() => 'submission_id',
-                'users' => 'reviewer_id',
-                $this->formTableName('files') => 'reviewer_file_id',
-                'review_forms' => 'review_form_id',
-                'review_rounds' => 'review_round_id',
-            )
-        );
+        return Registry::get('SubmissionReviewHandler')
+            ->importReviewAssignment($data);
     }
 
     protected function hasPublishedData($submission)
@@ -497,11 +485,6 @@ class SubmissionHandler extends EntityHandler implements ImportExport
         return Registry::get(
             'SubmissionCommentHandler'
         )->getSubmissionComments($this->getSubmissionId($submission));
-//        return $this->getEntityDAO(
-//            $this->formTableName('comments')
-//        )->read(array(
-//            $this->formIdField() => $this->getSubmissionId($submission)
-//        ));
     }
 
     protected function getSubmissionKeywords($submission)
@@ -555,16 +538,16 @@ class SubmissionHandler extends EntityHandler implements ImportExport
 
     protected function getReviewRounds($submission)
     {
-        return Registry::get('ReviewRoundsDAO')->read(array(
-            'submission_id' => $this->getSubmissionId($submission),
-        ));
+        return Registry::get('SubmissionReviewHandler')->getReviewRounds(
+            $submission
+        );
     }
 
     protected function getReviewAssignments($submission)
     {
-        return Registry::get('ReviewAssignmentsDAO')->read(array(
-            'submission_id' => $this->getSubmissionId($submission),
-        ));
+        return Registry::get('SubmissionReviewHandler')->getReviewAssignments(
+            $submission
+        );
     }
 
     protected function getJournalId($journal)

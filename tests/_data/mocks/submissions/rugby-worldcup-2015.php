@@ -474,8 +474,17 @@ return array(
             'review_method' => 1,
             'round' => 1,
             'step' => 1,
-            'review_form_id' => null,
+            'review_form_id' => 6120,
             'review_round_id' => 9999,
+            'responses' => array(
+                array(
+                    '__tableName_' => 'review_form_responses',
+                    'review_id' => 222,
+                    'review_form_element_id' => 28,
+                    'response_type' => 'string',
+                    'response_value' => 'What a wonderful team',
+                ),
+            ),
         ),
         /*
          * other review assignments

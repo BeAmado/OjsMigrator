@@ -15,6 +15,7 @@ use BeAmado\OjsMigrator\Test\TestStub;
 // mocks
 use BeAmado\OjsMigrator\Test\SubmissionMock;
 use BeAmado\OjsMigrator\Test\JournalMock;
+use BeAmado\OjsMigrator\Test\ReviewFormMock;
 
 class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 {
@@ -35,6 +36,11 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
             'edit_decisions',
             'review_rounds',
             'review_assignments',
+            'review_forms',
+            'review_form_settings',
+            'review_form_elements',
+            'review_form_element_settings',
+            'review_form_responses',
             'submission_search_objects',
             'submission_search_object_keywords',
             'submission_search_keyword_list',
@@ -72,6 +78,10 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
         ] as $name) {
             (new FixtureHandler())->createFiles('submission', $name);
         }
+
+        Registry::get('ReviewFormHandler')->importReviewForm(
+            (new ReviewFormMock())->getFirstReviewForm()
+        );
     }
 
     public function getStub()
@@ -602,7 +612,7 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
                 (int) $this->handler()->areEqual(
                     $fromDb->get(0),
                     $assign,
-                    ['submission_id','reviewer_id','review_round_id']
+                    ['submission_id','reviewer_id','review_round_id', 'review_form_id',]
                 ),
                 (int) $this->areEqual(
                     $fromDb->get(0)->getData('review_round_id'),
