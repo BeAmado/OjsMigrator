@@ -9,20 +9,62 @@ class EncodingHandler
         return array(
             '&Atilde;&iexcl;'  => '&aacute;', // á
             '&Atilde;&pound;'  => '&atilde;', // ã
+            '&Atilde;&cent;'   => '&acirc;',  // â
+            '&Atilde;&nbsp;'   => '&agrave;', // à
             '&Atilde;&euro;'   => '&Agrave;', // À
             '&Atilde;&fnof;'   => '&Atilde;', // Ã
+            '&Atilde;&sbquo;'  => '&Acirc;',  // Â
             '&Atilde;&copy;'   => '&eacute;', // é
+            '&Atilde;&uml;'    => '&egrave;', // è
             '&Atilde;&ordf;'   => '&ecirc;',  // ê
+            '&Atilde;&permil;' => '&Eacute;', // É
+            '&Atilde;&Scaron;' => '&Ecirc;',  // Ê
             '&Atilde;&shy;'    => '&iacute;', // í
             '&Atilde;&sup3;'   => '&oacute;', // ó
             '&Atilde;&micro;'  => '&otilde;', // õ
+            '&Atilde;&acute;'  => '&ocirc;',  // ô
+            '&Atilde;&ldquo;'  => '&Oacute;', // Ó
             '&Atilde;&ordm;'   => '&uacute;', // ú
             '&Atilde;&scaron;' => '&Uacute;', // Ú
             '&Atilde;&sect;'   => '&ccedil;', // ç
             '&Atilde;&Dagger;' => '&Ccedil;', // Ç
-            '&Acirc;&nbsp;'    => '&ndash;',  // -
-
+            '&Acirc;&nbsp;'    => '&nbsp;',
+            '&Acirc;&ordf;'    => '&ordf;',
+            '&Acirc;&ordm;'    => '&ordm;',
+            '&acirc;&euro;&oelig;' => '&lsquo;',
+            '&acirc;&euro;&trade;' => '&rsquo;',
+            '&acirc;&euro;&tilde;' => '&ldquo;',
+            '&acirc;&euro;&ldquo;' => '&ndash;',
         );
+    }
+
+    protected function hasToFixJson($json)
+    {
+        return \strpos($json, '\\u009d') ||
+               \strpos($json, '\\u0081') ||
+               \strpos($json, '\\u008d');
+    }
+
+    protected function fixJsonHtmlEntities($json)
+    {
+        return \str_replace(
+            array(
+                '&acirc;&euro;\\u009d',
+                '&Atilde;\\u0081',
+                '&Atilde;\\u008d',
+            ),
+            array(
+                '&rdquo;',
+                '&Aacute;', // Á
+                '&Iacute;', // Í
+            ),
+            $json
+        );
+    }
+
+    public function fixJson($json)
+    {
+        return $this->hasToFixJson($json) ? $this->fixJsonHtmlEntities($json) : $json;
     }
 
     public function fixHtmlEntityEncoding($str)
@@ -77,9 +119,9 @@ class EncodingHandler
         if (!\is_string($str))
             return $str;
 
-        return \htmlentities(
+        return $this->fixHtmlEntityEncoding(\htmlentities(
             $this->hasToConvert($str) ? $this->convertEncoding($str) : $str
-        );
+        ));
     }
 
     protected function decode($str)
