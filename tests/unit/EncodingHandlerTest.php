@@ -3,9 +3,18 @@
 use PHPUnit\Framework\TestCase;
 use BeAmado\OjsMigrator\Util\EncodingHandler;
 use BeAmado\OjsMigrator\Registry;
+use BeAmado\OjsMigrator\Test\TestStub;
+use BeAmado\OjsMigrator\Test\StubInterface;
 
-class EncodingHandlerTest extends TestCase
+class EncodingHandlerTest extends TestCase implements StubInterface
 {
+    public function getStub()
+    {
+        return new class extends EncodingHandler {
+            use TestStub;
+        };
+    }
+
     public function setUp() : void
     {
         $this->badChars = array(
@@ -16,6 +25,33 @@ class EncodingHandlerTest extends TestCase
         $this->goodChars = array(
             'Formulário de Avaliação',
             'teórico-crítico',
+        );
+    }
+
+    public function testTheBrokenCharsArrayMatchesTheFixedOnes()
+    {
+        $broken = $this->getStub()->callMethod('getBrokenChars');
+        $fixed = $this->getStub()->callMethod('getFixedChars');
+        $charMapping = $this->getStub()->callMethod('getCharMapping');
+
+        $this->assertSame(
+            '1-1',
+            implode('-', [
+                (int) (
+                    (count($broken) === count($charMapping)) &&
+                    (count($fixed) === count($charMapping))
+                ),
+                (int) array_reduce(
+                    range(0, count($charMapping) - 1),
+                    function($carry, $i) use ($broken, $fixed, $charMapping) {
+                        return $carry && (
+                            ($broken[$i] === $charMapping[$i]['broken']) &&
+                            ($fixed[$i] === $charMapping[$i]['fixed'])
+                        );
+                    },
+                    true
+                ),
+            ])
         );
     }
 

@@ -7,34 +7,118 @@ class EncodingHandler
     protected function getCharMapping()
     {
         return array(
-            '&Atilde;&iexcl;'  => '&aacute;', // á
-            '&Atilde;&pound;'  => '&atilde;', // ã
-            '&Atilde;&cent;'   => '&acirc;',  // â
-            '&Atilde;&nbsp;'   => '&agrave;', // à
-            '&Atilde;&euro;'   => '&Agrave;', // À
-            '&Atilde;&fnof;'   => '&Atilde;', // Ã
-            '&Atilde;&sbquo;'  => '&Acirc;',  // Â
-            '&Atilde;&copy;'   => '&eacute;', // é
-            '&Atilde;&uml;'    => '&egrave;', // è
-            '&Atilde;&ordf;'   => '&ecirc;',  // ê
-            '&Atilde;&permil;' => '&Eacute;', // É
-            '&Atilde;&Scaron;' => '&Ecirc;',  // Ê
-            '&Atilde;&shy;'    => '&iacute;', // í
-            '&Atilde;&sup3;'   => '&oacute;', // ó
-            '&Atilde;&micro;'  => '&otilde;', // õ
-            '&Atilde;&acute;'  => '&ocirc;',  // ô
-            '&Atilde;&ldquo;'  => '&Oacute;', // Ó
-            '&Atilde;&ordm;'   => '&uacute;', // ú
-            '&Atilde;&scaron;' => '&Uacute;', // Ú
-            '&Atilde;&sect;'   => '&ccedil;', // ç
-            '&Atilde;&Dagger;' => '&Ccedil;', // Ç
-            '&Acirc;&nbsp;'    => '&nbsp;',
-            '&Acirc;&ordf;'    => '&ordf;',
-            '&Acirc;&ordm;'    => '&ordm;',
-            '&acirc;&euro;&oelig;' => '&lsquo;',
-            '&acirc;&euro;&trade;' => '&rsquo;',
-            '&acirc;&euro;&tilde;' => '&ldquo;',
-            '&acirc;&euro;&ldquo;' => '&ndash;',
+            array(
+                'broken' => '&Atilde;&iexcl;',
+                'fixed'  => '&aacute;'
+            ), // á
+            array(
+                'broken' => '&Atilde;&pound;',
+                'fixed'  => '&atilde;'
+            ), // ã
+            array(
+                'broken' => '&Atilde;&cent;',
+                'fixed'  => '&acirc;'
+            ),  // â
+            array(
+                'broken' => '&Atilde;&nbsp;',
+                'fixed'  => '&agrave;'
+            ), // à
+            array(
+                'broken' => '&Atilde;&euro;',
+                'fixed'  => '&Agrave;'
+            ), // À
+            array(
+                'broken' => '&Atilde;&fnof;',
+                'fixed'  => '&Atilde;'
+            ), // Ã
+            array(
+                'broken' => '&Atilde;&sbquo;',
+                'fixed'  => '&Acirc;'
+            ),  // Â
+            array(
+                'broken' => '&Atilde;&copy;',
+                'fixed'  => '&eacute;'
+            ), // é
+            array(
+                'broken' => '&Atilde;&uml;',
+                'fixed'  => '&egrave;'
+            ), // è
+            array(
+                'broken' => '&Atilde;&ordf;',
+                'fixed'  => '&ecirc;'
+            ),  // ê
+            array(
+                'broken' => '&Atilde;&permil;',
+                'fixed'  => '&Eacute;'
+            ), // É
+            array(
+                'broken' => '&Atilde;&Scaron;',
+                'fixed'  => '&Ecirc;'
+            ),  // Ê
+            array(
+                'broken' => '&Atilde;&shy;',
+                'fixed'  => '&iacute;'
+            ), // í
+            array(
+                'broken' => '&Atilde;&sup3;',
+                'fixed'  => '&oacute;'
+            ), // ó
+            array(
+                'broken' => '&Atilde;&micro;',
+                'fixed'  => '&otilde;'
+            ), // õ
+            array(
+                'broken' => '&Atilde;&acute;',
+                'fixed'  => '&ocirc;'
+            ),  // ô
+            array(
+                'broken' => '&Atilde;&ldquo;',
+                'fixed'  => '&Oacute;'
+            ), // Ó
+            array(
+                'broken' => '&Atilde;&ordm;',
+                'fixed'  => '&uacute;'
+            ), // ú
+            array(
+                'broken' => '&Atilde;&scaron;',
+                'fixed'  => '&Uacute;'
+            ), // Ú
+            array(
+                'broken' => '&Atilde;&sect;',
+                'fixed'  => '&ccedil;'
+            ), // ç
+            array(
+                'broken' => '&Atilde;&Dagger;',
+                'fixed'  => '&Ccedil;'
+            ), // Ç
+            array(
+                'broken' => '&Acirc;&nbsp;',
+                'fixed'  => '&nbsp;'
+            ),
+            array(
+                'broken' => '&Acirc;&ordf;',
+                'fixed'  => '&ordf;'
+            ),
+            array(
+                'broken' => '&Acirc;&ordm;',
+                'fixed'  => '&ordm;'
+            ),
+            array(
+                'broken' => '&acirc;&euro;&oelig;',
+                'fixed'  => '&lsquo;'
+            ),
+            array(
+                'broken' => '&acirc;&euro;&trade;',
+                'fixed'  => '&rsquo;'
+            ),
+            array(
+                'broken' => '&acirc;&euro;&tilde;',
+                'fixed'  => '&ldquo;'
+            ),
+            array(
+                'broken' => '&acirc;&euro;&ldquo;',
+                'fixed'  => '&ndash;'
+            ),
         );
     }
 
@@ -67,15 +151,27 @@ class EncodingHandler
         return $this->hasToFixJson($json) ? $this->fixJsonHtmlEntities($json) : $json;
     }
 
+    protected function getBrokenChars()
+    {
+        return \array_map(function($mapping) {
+            return $mapping['broken'];
+        }, $this->getCharMapping());
+    }
+
+    protected function getFixedChars()
+    {
+        return \array_map(function($mapping) {
+            return $mapping['fixed'];
+        }, $this->getCharMapping());
+    }
+
     public function fixHtmlEntityEncoding($str)
     {
-        foreach ($this->getCharMapping() as $bad => $good) {
-            $str = str_replace($bad, $good, $str);
-        }
-
-        unset($bad);
-        unset($good);
-        return $str;
+        return \str_replace(
+            $this->getBrokenChars(),
+            $this->getFixedChars(),
+            $str
+        );
     }
 
     protected function hasToConvert($str)
