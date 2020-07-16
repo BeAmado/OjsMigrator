@@ -66,6 +66,15 @@ class StatementHandler
             );
         }
 
+        if (\strtolower($operation) === 'insert')
+            return Registry::get('QueryHandler')->generateQueryInsert(
+                Registry::get('SchemaHandler')->getTableDefinition($tableName),
+                (
+                    \is_array($args) &&
+                    \array_key_exists('dontAutoIncrement', $args) 
+                ) ? true : false
+            );
+
         return Registry::get('QueryHandler')->{
             'generateQuery' . \ucfirst(\strtolower($operation))
         }(
@@ -114,6 +123,25 @@ class StatementHandler
         );
     }
 
+    protected function generateStatement($name, $args)
+    {
+        $pieces = \explode(
+            '_',
+            Registry::get('CaseHandler')->transformCaseTo('snake', $name)
+        );
+
+        if (\count($pieces) < 2)
+            return; // TODO treat it better
+
+        return $this->create(
+            $this->formQuery(
+                $pieces[0],
+                \implode('_', \array_slice($pieces, 1)),
+                $args
+            )
+        );
+    }
+
     /**
      * Gets the statement specified by the name.
      *
@@ -123,6 +151,9 @@ class StatementHandler
      */
     public function getStatement($name, $args = null)
     {
+        if (\is_array($args) && \array_key_exists('dontAutoIncrement', $args))
+            return $this->generateStatement($name, $args);
+
         if (!Registry::hasKey($name))
             $this->setStatement($name, $args);
 
@@ -176,6 +207,32 @@ class StatementHandler
         );
     }
 
+    protected function smHr()
+    {
+        return Registry::get('SubmissionHandler');
+    }
+
+    protected function smFileHr()
+    {
+        return Registry::get('SubmissionFileHandler');
+    }
+
+    protected function hasToPreventAutoIncrement($data)
+    {
+        if (
+            !$this->smHr()->isEntity($data) ||
+            !\in_array($data->getTableName(), array(
+                $this->smHr()->formTableName('files')
+            ))
+        )
+            return false;
+
+        // returns true if the file is mapped and lets the SubmissionFileHandler
+        // set the mapped id in the object
+        if ($data->getTableName() === $this->smHr()->formTableName('files'))
+            return $this->smFileHr()->setMappedFileId($data);
+    }
+
     /**
      * Gets the statement identified by the name and contrained by the "where"
      * and/or "set" data
@@ -205,6 +262,9 @@ class StatementHandler
         if ($data->hasAttribute('set'))
             $args['set'] = $data->get('set')->toArray();
 
+        if (empty($args) && $this->hasToPreventAutoIncrement($data))
+            $args = array('dontAutoIncrement' => true);
+
         return $this->getStatement($stmtName, $args);
     }
 
@@ -220,6 +280,7 @@ class StatementHandler
      */
     public function execute($stmt, $data = null, $callback = null)
     {
+        $showStmt = $stmt === 'insertArticleFiles' && $data->get('file_id')->getValue() == 32;
         if (\is_array($data))
             $data = Registry::get('MemoryManager')->create($data);
 

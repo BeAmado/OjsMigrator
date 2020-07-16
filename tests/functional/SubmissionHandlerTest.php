@@ -1428,14 +1428,32 @@ class SubmissionHandlerTest extends FunctionalTest implements StubInterface
 
     public function testCanImportRugbyWorldCup2011Submission()
     {
-        $imported = Registry::get('SubmissionHandler')->import(
-            $this->createRWC2011()
+        $rwc2011 = $this->createRWC2011();
+        $imported = Registry::get('SubmissionHandler')->import($rwc2011);
+
+        $submissionId = $this->dataMapper()->getMapping(
+            $this->handler()->formTableName(),
+            $rwc2011->getId()
         );
 
+        $files = $this->handler()->getDAO('files')->read([
+            $this->handler()->formIdField() => $submissionId,
+        ]);
+
+        $fileId = $this->dataMapper()->getMapping(
+            $this->handler()->formTableName('files'),
+            32
+        );
+        $revisionFiles = $this->handler()->getDAO('files')->read([
+            'file_id' => $fileId,
+        ]);
+
         $this->assertSame(
-            '1',
+            '1-4-2',
             implode('-', [
                 (int) $imported,
+                $files->length(),
+                $revisionFiles->length(),
             ])
         );
     }

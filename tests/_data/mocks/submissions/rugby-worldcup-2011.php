@@ -54,8 +54,7 @@ return array(
         ),
     ),
     'files' => array(
-        // submission_file
-        array(
+        array(// submission_file
             '__tableName_' => '[submission_files_table]',
             'file_id' => 31,
             'revision' => 1,
@@ -73,8 +72,7 @@ return array(
             'round' => 1,
             'assoc_id' => null,
         ),
-        // revised_file
-        array(
+        array(// 1st revision file
             '__tableName_' => '[submission_files_table]',
             'file_id' => 32,
             'revision' => 1,
@@ -89,6 +87,24 @@ return array(
             'viewable' => null,
             'date_uploaded' => '2011-10-12 12:34:56',
             'date_modified' => '2011-10-12 12:34:56',
+            'round' => 1,
+            'assoc_id' => null,
+        ),
+        array( // 2nd revision file
+            '__tableName_' => '[submission_files_table]',
+            'file_id' => 32,
+            'revision' => 2,
+            'source_file_id' => 31,
+            'source_revision' => 1,
+            '[submission_id]' => 7,
+            'file_name' => '7-32-2-RV.docx',
+            'file_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'file_size' => 12310,
+            'original_file_name' => 'rwc2011-rev-2',
+            'file_stage' => 2,
+            'viewable' => null,
+            'date_uploaded' => '2011-10-12 12:54:56',
+            'date_modified' => '2011-10-12 12:54:56',
             'round' => 1,
             'assoc_id' => null,
         ),

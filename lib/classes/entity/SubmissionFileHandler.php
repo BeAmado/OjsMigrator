@@ -310,15 +310,106 @@ class SubmissionFileHandler extends EntityHandler
         );
     }
 
-    public function importSubmissionFile($file, $journal)
+    protected function getFileId($file)
     {
+        if (\is_numeric($file))
+            return $file;
+
+        if (
+            !\is_array($file) &&
+            (
+                !$this->isMyObject($file) ||
+                !$file->hasAttribute('file_id')
+            )
+        )
+            return;
+
+        return \is_array($file)
+            ? $file['file_id']
+            : $file->get('file_id')->getValue();
+    }
+
+    public function fileIsMapped($file)
+    {
+        return Registry::get('DataMapper')->isMapped(
+            $this->formTableName(),
+            $this->getFileId($file)
+        );
+    }
+
+    public function setMappedFileId($file)
+    {
+        if (!$this->isMyObject($file) || !$this->fileIsMapped($file))
+            return false;
+
+        $file->set(
+            'file_id',
+            Registry::get('DataMapper')->getMapping(
+                $this->formTableName(),
+                $this->getFileId($file)
+            )
+        );
+
+        return true;
+    }
+
+    protected function fileWasAlreadyImported($file)
+    {
+        $data = $this->getDAO()->read(array(
+            'file_id' => Registry::get('DataMapper')->getMapping(
+                $this->formTableName(),
+                $this->getFileId($file)
+            ),
+            'revision' => $file->get('revision')->getValue(),
+        ));
+
+        if ($this->isMyObject($data) && $data->length() == 1)
+            return $data->get(0);
+
+        return false;
+    }
+
+    protected function updateSubmissionFile($file, $journal, $data)
+    {
+        if ($data->getData('date_modified') === $file->get('date_modified')->getValue())
+            return true;
+
+        $file->set('file_name', $data->getData('file_name'));
         return $this->importEntity(
             $file,
-            $this->entityTableName($file),
+            $this->formTableName(),
+            array(
+                $this->formTableName() => array(
+                    'file_id',
+                    'source_file_id',
+                ),
+                $this->smHr()->formTableName() => $this->smHr()->formIdField(),
+            ),
+            'update'
+        ) &&
+        $this->copyFileToJournalSubmissionsDir(
+            $file->get('file_name')->getValue(),
+            $journal
+        );
+    }
+
+    public function importSubmissionFile($file, $journal)
+    {
+        $data = $this->fileWasAlreadyImported($file);
+        if ($this->isEntity($data))
+            return $this->updateSubmissionFile($file, $journal, $data);
+
+        Registry::get('MemoryManager')->destroy($data);
+        unset($data);
+
+        return $this->importEntity(
+            $file,
+            $this->formTableName(),
             array(
                 $this->formTableName() => 'source_file_id',
                 $this->smHr()->formTableName() => $this->smHr()->formIdField(),
-            )
+            ),
+            'create' // force create in the database
         ) &&
         $this->updateFileNameInDatabase($this->getMappedFileName(
             $file->get('file_name')->getValue()

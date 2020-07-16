@@ -144,17 +144,21 @@ class QueryHandler
      * Generate the parameters for the insert query
      *
      * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
+     * @param boolean $dontAutoIncrement
      * @return array
      */
-    protected function generateParametersInsert($td)
+    protected function generateParametersInsert($td, $dontAutoIncrement = false)
     {
-        if ($this->hasToGetModifiedParametersForSqlite($td))
+        if (
+            $this->hasToGetModifiedParametersForSqlite($td) /*&&
+            !$dontAutoIncrement*/
+        )
             return $this->modifiedParametersInsertForSqlite($td);
 
         $columns = array();
 
         foreach($td->getColumnNames() as $column) {
-            if (!$td->getColumn($column)->isAutoIncrement())
+            if ($dontAutoIncrement || !$td->getColumn($column)->isAutoIncrement())
                 $columns[] = $column;
         }
         unset($column);
@@ -197,11 +201,15 @@ class QueryHandler
      * Generates a query string for a insert statement of the specified table.
      *
      * @param \BeAmado\OjsMigrator\Db\TableDefinition $td
+     * @param boolean $dontAutoIncrement
      * @return string
      */
-    public function generateQueryInsert($td)
+    public function generateQueryInsert($td, $dontAutoIncrement = false)
     {
-        $parameters = $this->generateParametersInsert($td);
+        $parameters = $this->generateParametersInsert(
+            $td,
+            $dontAutoIncrement
+        );
 
         return 'INSERT INTO ' . $td->getTableName()
             . ' (' 

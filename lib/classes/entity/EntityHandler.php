@@ -604,14 +604,14 @@ class EntityHandler
      * @param \BeAmado\OjsMigrator\MyObject $data
      * @param string $table
      * @param array $mappings
-     * @param boolean $forceCreate
+     * @param mixed $force
      * @return boolean
      */
     protected function importEntity(
         $data, 
         $table, 
         $mappings = array(), 
-        $forceCreate = false
+        $force = false
     ) {
         $entity = $this->getValidData($table, $data);
 
@@ -621,7 +621,10 @@ class EntityHandler
         )
             return;
 
-        if ($forceCreate)
+        if (\strtolower($force) === 'update')
+            return $this->updateInDatabase($entity);
+
+        if ($force)
             return $this->createInDatabase($entity);
 
         return $this->createOrUpdateInDatabase($entity);
