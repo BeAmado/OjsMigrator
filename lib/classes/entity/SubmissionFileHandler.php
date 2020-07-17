@@ -402,6 +402,9 @@ class SubmissionFileHandler extends EntityHandler
         Registry::get('MemoryManager')->destroy($data);
         unset($data);
 
+        if ($this->fileIsMapped($file))
+            $this->setPreventAutoIncrementIfSqlite();
+
         return $this->importEntity(
             $file,
             $this->formTableName(),
@@ -418,7 +421,8 @@ class SubmissionFileHandler extends EntityHandler
             $file->get('file_name')->getValue(),
             $journal,
             true // map the file_name
-        );
+        ) &&
+        ($this->unsetPreventAutoIncrementIfSqlite() || true);
     }
 
     public function copyFileFromJournalIntoEntitiesDir($filename, $journal)
@@ -427,5 +431,17 @@ class SubmissionFileHandler extends EntityHandler
             $this->formPathByFileName($filename, $journal),
             $this->formFilePathInEntitiesDir($filename)
         );
+    }
+
+    protected function setPreventAutoIncrementIfSqlite()
+    {
+        if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+            Registry::set('__prevent_auto_increment__', true);
+    }
+
+    protected function unsetPreventAutoIncrementIfSqlite()
+    {
+        if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+            Registry::remove('__prevent_auto_increment__');
     }
 }
