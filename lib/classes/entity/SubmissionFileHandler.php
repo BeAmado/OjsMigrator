@@ -402,7 +402,7 @@ class SubmissionFileHandler extends EntityHandler
         Registry::get('MemoryManager')->destroy($data);
         unset($data);
 
-        if ($this->fileIsMapped($file))
+        if ($this->dbDriverIsSqlite() && $this->fileIsMapped($file))
             $this->setPreventAutoIncrementIfSqlite();
 
         return $this->importEntity(
@@ -433,15 +433,20 @@ class SubmissionFileHandler extends EntityHandler
         );
     }
 
+    protected function dbDriverIsSqlite()
+    {
+        return Registry::get('ConnectionManager')->getDbDriver() === 'sqlite';
+    }
+
     protected function setPreventAutoIncrementIfSqlite()
     {
-        if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+        if ($this->dbDriverIsSqlite())
             Registry::set('__prevent_auto_increment__', true);
     }
 
     protected function unsetPreventAutoIncrementIfSqlite()
     {
-        if (Registry::get('ConnectionManager')->getDbDriver() === 'sqlite')
+        if ($this->dbDriverIsSqlite())
             Registry::remove('__prevent_auto_increment__');
     }
 }
