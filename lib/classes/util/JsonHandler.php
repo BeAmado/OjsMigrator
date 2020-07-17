@@ -63,8 +63,10 @@ class JsonHandler implements FiletypeHandler
 
         return Registry::get('FileHandler')->write(
             $filename,
-            \json_encode(Registry::get('EncodingHandler')->processForExport(
-                $obj->toArray()
+            Registry::get('EncodingHandler')->fixJson(\json_encode(
+                Registry::get('EncodingHandler')->processForExport(
+                     $obj->toArray()
+                )
             ))
         );
     }

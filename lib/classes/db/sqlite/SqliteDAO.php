@@ -156,6 +156,12 @@ class SqliteDAO extends DAO
         return $entity;
     }
 
+    protected function preventAutoIncrement()
+    {
+        return Registry::hasKey('__prevent_auto_increment__') &&
+            Registry::get('__prevent_auto_increment__');
+    }
+
     /**
      * Inserts the entity's data into the corresponding database table.
      *
@@ -172,7 +178,7 @@ class SqliteDAO extends DAO
         )
     ) {
         return parent::create(
-            $this->hasToManuallyIncrement() 
+            ($this->hasToManuallyIncrement() && !$this->preventAutoIncrement())
                 ? $this->manuallyIncrementId($entity)
                 : $entity, 
             $options
