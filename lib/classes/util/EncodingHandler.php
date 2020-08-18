@@ -24,6 +24,10 @@ class EncodingHandler
                 'fixed'  => '&agrave;'
             ), // à
             array(
+                'broken' => '&Atilde;&curren;',
+                'fixed'  => '&auml;'
+            ), // ä
+            array(
                 'broken' => '&Atilde;&euro;',
                 'fixed'  => '&Agrave;'
             ), // À
@@ -75,6 +79,10 @@ class EncodingHandler
                 'broken' => '&Atilde;&ldquo;',
                 'fixed'  => '&Oacute;'
             ), // Ó
+            array(
+                'broken' => '&Atilde;&bull;',
+                'fixed'  => '&Otilde;'
+            ), // Õ
             array(
                 'broken' => '&Atilde;&ordm;',
                 'fixed'  => '&uacute;'
