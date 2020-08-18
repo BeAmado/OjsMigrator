@@ -31,6 +31,7 @@ $dbDriver = $fsm->fileExists($dbDriverFile)
     'createTables' => array(
         'journals',
     ),
+    'setDataMappingManager' => true,
 ));
 
 if (isset($argv[1]))
