@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+
+require_once('bootstrap');
+$fsm = BeAmado\OjsMigrator\Registry::get('FileSystemManager')
+$filename = $fsm->formPathFromBaseDir('economicaDataMappings.xml');
+if (!$fsm->fileExists($filename))
+    exit(PHP_EOL . 'Could not find the file "' . $filename . '"' . PHP_EOL);
+
+(new BeAmado\OjsMigrator\Extension\EconomicaFixer)->translateXmlMappings(
+    $filename
+);
